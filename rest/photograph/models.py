@@ -20,7 +20,6 @@ class Photograph(labeledModel, descriptionModel):
         null=True,
         on_delete=models.CASCADE,
         related_name="photographs_taken",
-        limit_choices_to="is_photographer",
     )
     depicts = models.ManyToManyField(vocabulary_models.Person)
     collection = models.ForeignKey(
