@@ -1,0 +1,9 @@
+django
+coverage>=4.5.4
+psycopg2-binary
+gunicorn
+tblib
+djangorestframework
+django-cors-headers
+django-filter
+tqdm

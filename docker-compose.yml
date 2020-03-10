@@ -1,0 +1,49 @@
+version: "3"
+services:
+  rest:
+    build: rest
+    restart: always
+    command: "python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./rest:/vol/app:z
+      - argusdjango:/vol/static_files:z
+      - ${REAL_IMAGE_DIR}:/vol/images
+    expose:
+      - 8000
+    links:
+      - "postgres:postgres"
+    env_file: .env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:12.2
+    volumes:
+      - ../argus_db:/var/lib/postgresql/data:z
+    expose:
+      - 5432
+    env_file: .env
+
+  nginx:
+    image: nginx
+    links:
+      - "rest:rest"
+      - "iiif:iiif"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - argusdjango:/vol/static_files
+    ports:
+      - "80:80"
+    env_file: .env
+
+  iiif:
+    build: iiif
+    restart: always
+    volumes:
+        - ${REAL_IMAGE_DIR}:/gpc
+    expose:
+      - 9000
+    env_file: .env
+
+volumes:
+  argusdjango:
