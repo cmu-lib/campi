@@ -27,9 +27,6 @@ export default {
   },
   mounted() {
     OpenSeadragon(this.options);
-  },
-  updated() {
-    OpenSeadragon(this.options);
   }
 };
 </script>

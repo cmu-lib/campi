@@ -1,5 +1,5 @@
 <template>
-  <IIIF :info_url="info_url" />
+  <IIIF v-if="!!info_url" :info_url="info_url" />
 </template>
 
 <script>
@@ -10,7 +10,9 @@ export default {
   components: {
     IIIF
   },
-  props: ["id"],
+  props: {
+    id: Number
+  },
   data() {
     return {};
   },

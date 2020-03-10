@@ -26,5 +26,6 @@ WORKDIR /
 ENV URI_MAP="iiif=>IIIF"
 RUN mkdir /var/log/iipsrv
 ENV LOGFILE="/var/log/iipsrv/iipsrv.log"
+ENV MAX_IMAGE_CACHE_SIZE=512
 
 CMD /iipsrv-1.1/src/iipsrv.fcgi --bind 0.0.0.0:9000
