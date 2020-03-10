@@ -6,7 +6,7 @@ RUN apt-get install -y -q --no-install-recommends wget
 
 RUN wget --no-check-certificate 'https://github.com/uclouvain/openjpeg/archive/v2.3.1.tar.gz'
 RUN tar xvf v2.3.1.tar.gz
-WORKDIR openjpeg-2.3.1
+WORKDIR /openjpeg-2.3.1
 RUN mkdir bin
 RUN cmake .
 RUN make
@@ -18,7 +18,7 @@ RUN printf "include /etc/ld.so.conf.d/*.conf\ninclude /usr/local/lib\n" > /etc/l
 WORKDIR /
 RUN wget --no-check-certificate 'https://sourceforge.net/projects/iipimage/files/IIP%20Server/iipsrv-1.1/iipsrv-1.1.tar.bz2'
 RUN tar xvf iipsrv-1.1.tar.bz2
-WORKDIR iipsrv-1.1
+WORKDIR /iipsrv-1.1
 RUN ./configure --with-openjpeg=/openjpeg-2.3.1
 RUN make
 WORKDIR /
