@@ -42,7 +42,11 @@ class Photograph(labeledModel, descriptionModel):
 
     @property
     def thumbnail_image(self):
-        return f"{self.iiif_base}/full/200,/0/default.jpg"
+        return f"{self.iiif_base}/full/400,/0/default.jpg"
+
+    @property
+    def square_thumbnail_image(self):
+        return f"{self.iiif_base}/square/100,/0/default.jpg"
 
     @property
     def image(self):
@@ -51,6 +55,7 @@ class Photograph(labeledModel, descriptionModel):
             "info": self.iiif_info,
             "full": self.full_image,
             "thumbnail": self.thumbnail_image,
+            "square": self.square_thumbnail_image,
         }
 
 

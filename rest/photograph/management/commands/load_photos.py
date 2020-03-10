@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         assigned_year = int(options["year"])
-        photograph_models.Photograph.objects.all().delete()
+        photograph_models.Photographobjects.all().delete()
         folder_path = "0000_62_General_Photograph_Collection/Negatives/1963"
         full_path = "/vol/images/" + folder_path
         print(full_path)

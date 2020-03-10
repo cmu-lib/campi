@@ -6,6 +6,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Photograph
         fields = [
+            "id",
             "url",
             "label",
             "image",
@@ -22,6 +23,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Photograph
         fields = [
+            "id",
             "url",
             "label",
             "image",
