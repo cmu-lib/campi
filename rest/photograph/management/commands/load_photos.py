@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
-from photograph import models
-from metadata.models import Collection
+from photograph import models as photograph_models
+from collection import models as collection_models
 from tqdm import tqdm
 from glob import glob
 import datetime
@@ -12,32 +12,34 @@ class Command(BaseCommand):
     help = "Load photos into the database"
 
     def add_arguments(self, parser):
-        parser.add_argument("folder", nargs="+", type=str)
         parser.add_argument(
             "--wipe", action="store_true", help="Wipe all boxes before loading"
         )
         parser.add_argument(
-            "--year",
-            action="store_true",
-            help="Year to assign to photographs",
-            type=int,
+            "--year", help="Year to assign to photographs", action="store_true"
         )
+        parser.add_argument("folder", nargs="+", type=str)
 
     def handle(self, *args, **options):
-        assigned_year = options["year"]
-        if options["wipe"]:
-            models.Photographs.objects.filter(date_early__).delete()
-        box_path = options["box_path"][0]
-        collection = Collection.objects.get_or_create(label=box_path)[0]
+        assigned_year = int(options["year"])
+        photograph_models.Photograph.objects.all().delete()
+        folder_path = "0000_62_General_Photograph_Collection/Negatives/1963"
+        full_path = "/vol/images/" + folder_path
+        print(full_path)
+        collection = collection_models.Collection.objects.get_or_create(
+            label=folder_path
+        )[0]
 
-        imagefiles = glob(box_path + "*.jp2")
+        imagefiles = glob(full_path + "/*.jp2")
+        print(imagefiles)
 
         for image_path in imagefiles:
-            print(image_path)
-            newimage = models.Photograph.objects.create(
-                image_path=image_path,
-                date_early=datetime.date(options["year"], 1, 1),
-                date_late = datetime.date(options["year"], 12, 31),
-                digitzed_date = datetime.date.now()
-                collection = collection
+            base_image_path = image_path.replace("/vol/images/", "")
+            print(base_image_path)
+            newimage = photograph_models.Photograph.objects.create(
+                image_path=base_image_path,
+                date_early=datetime.date(assigned_year, 1, 1),
+                date_late=datetime.date(assigned_year, 12, 31),
+                digitized_date=datetime.date.today(),
+                collection=collection,
             )
