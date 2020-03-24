@@ -1,5 +1,10 @@
 <template>
-  <IIIF v-if="!!info_url" :info_url="info_url" />
+  <div v-if="!!image_data">
+    <p>
+      <a :href="image_data.image.full">Full image</a>
+    </p>
+    <IIIF :info_url="image_data.image.info" />
+  </div>
 </template>
 
 <script>
@@ -17,10 +22,10 @@ export default {
     return {};
   },
   asyncComputed: {
-    info_url() {
+    image_data() {
       return HTTP.get("/photograph/" + this.id + "/").then(
         results => {
-          return results.data.image.info;
+          return results.data;
         },
         error => {
           console.log(error);
