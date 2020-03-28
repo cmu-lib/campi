@@ -7,7 +7,6 @@ services:
     volumes:
       - ./rest:/vol/app:z
       - argusdjango:/vol/static_files:z
-      - ${REAL_IMAGE_DIR}:/vol/images
     expose:
       - 8000
     links:
@@ -28,21 +27,11 @@ services:
     image: nginx
     links:
       - "rest:rest"
-      - "iiif:iiif"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - argusdjango:/vol/static_files
     ports:
       - "80:80"
-    env_file: .env
-
-  iiif:
-    build: iiif
-    restart: always
-    volumes:
-        - ${REAL_IMAGE_DIR}:/gpc
-    expose:
-      - 9000
     env_file: .env
 
 volumes:
