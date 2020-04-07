@@ -6,6 +6,8 @@ services:
     command: "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./rest:/vol/app:z
+      - ./data/cv/matrices:/vol/cv/matrices:z
+      - ./data/cv/indices:/vol/cv/indices:z
       - argusdjango:/vol/static_files:z
     expose:
       - 8000

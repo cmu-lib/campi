@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "photograph.apps.photographConfig",
     "collection.apps.collectionConfig",
     "vocabulary.apps.vocabularyConfig",
+    "cv.apps.cvConfig",
     "rest_framework",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -134,3 +135,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = "/vol/static_files"
 IMAGE_BASEURL = os.environ["IMAGE_BASEURL"]
+
+DIST_MATRICES_PATH = os.environ["DIST_MATRICES_PATH"]
+DIST_INDICES_PATH = os.environ["DIST_INDICES_PATH"]

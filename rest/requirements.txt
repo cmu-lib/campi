@@ -8,3 +8,9 @@ django-cors-headers
 django-filter
 tqdm
 djangorestframework-recursive
+torch
+pillow
+torchvision
+annoy
+requests
+scipy
