@@ -21,7 +21,11 @@ export default {
       return {
         id: this.id,
         prefixUrl: "/osd/",
-        tileSources: this.info_url
+        tileSources: this.info_url,
+        showRotationControl: true,
+        gestureSettingsTouch: {
+          pinchRotate: true
+        }
       };
     }
   },

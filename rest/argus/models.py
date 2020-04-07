@@ -6,13 +6,20 @@ Abstract models
 
 
 class labeledModel(models.Model):
-    label = models.CharField(null=True, blank=False, max_length=1000, default="")
+    label = models.CharField(null=False, blank=True, max_length=1000, default="")
 
     class Meta:
         abstract = True
 
     def __str__(self):
         return self.label
+
+
+class uniqueLabledModel(labeledModel):
+    label = models.CharField(null=False, blank=False, max_length=1000, unique=True)
+
+    class Meta:
+        abstract = True
 
 
 class descriptionModel(models.Model):

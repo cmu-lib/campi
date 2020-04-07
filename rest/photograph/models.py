@@ -28,6 +28,15 @@ class Photograph(labeledModel, descriptionModel):
         on_delete=models.CASCADE,
     )
 
+    def validate_collections(self):
+        """
+        If photograph belongs to a collection, ensure that it belongs to all parents of that collection too.
+        """
+        all_parents = set(
+            [c.get_all_parent_collections() for c in self.collections.all()]
+        )
+        self.collections.add(all_parents)
+
     @property
     def iiif_base(self):
         return settings.IMAGE_BASEURL + self.image_path

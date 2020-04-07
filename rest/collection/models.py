@@ -1,7 +1,12 @@
 from django.db import models
 from django.conf import settings
 from photograph import models as photograph_models
-from argus.models import labeledModel, descriptionModel, sequentialModel
+from argus.models import (
+    labeledModel,
+    uniqueLabledModel,
+    descriptionModel,
+    sequentialModel,
+)
 
 """
 Abstract models
@@ -13,8 +18,11 @@ Materialized models
 """
 
 
-class Collection(labeledModel):
+class Collection(uniqueLabledModel):
     # Optional parent collection model
     parent_collection = models.ForeignKey(
-        "Collection", null=True, on_delete=models.CASCADE
+        "Collection",
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="child_collections",
     )

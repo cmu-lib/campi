@@ -7,3 +7,4 @@ djangorestframework
 django-cors-headers
 django-filter
 tqdm
+djangorestframework-recursive

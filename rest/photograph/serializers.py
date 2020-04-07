@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from photograph import models
+from collection import serializers as collection_serializers
 
 
-class PhotographDetailSerializer(serializers.ModelSerializer):
+class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
+    collection = collection_serializers.CollectionDetailSerializer()
+
     class Meta:
         model = models.Photograph
         fields = [
@@ -19,7 +22,9 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
         ]
 
 
-class PhotographListSerializer(serializers.ModelSerializer):
+class PhotographListSerializer(serializers.HyperlinkedModelSerializer):
+    collection = collection_serializers.CollectionListSerializer()
+
     class Meta:
         model = models.Photograph
         fields = [
