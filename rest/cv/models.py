@@ -6,15 +6,15 @@ import annoy
 import pickle
 import torch
 import requests
-import tempfile
 from PIL import Image
 from torchvision import transforms
 from io import BytesIO
-import tqdm
+from tqdm import tqdm
+import numpy as np
 
 
-class DistanceMatrix(descriptionModel):
-    pickled_file = models.FilePathField(path=settings.DIST_MATRICES_PATH, null=True)
+class Embeddings(descriptionModel):
+    embeddings_file = models.FilePathField(path=settings.EMBEDDINGS_PATH, null=True)
     index_file = models.FilePathField(path=settings.DIST_INDICES_PATH, null=True)
     photographs = models.ManyToManyField(
         photograph_models.Photograph, related_name="cv_models"
@@ -34,15 +34,15 @@ class DistanceMatrix(descriptionModel):
     def generate_index(self, overwrite=False):
         if self.index_file is None:
             Exception(
-                "This model has not been calculated yet. Run build_distance_matrix() first"
+                "This model has not been calculated yet. Run build_embeddings_matrix() first"
             )
         if self.index_file is not None and not overwrite:
             Exception(
-                f"Distance matrix {self.pickled_file} already has a built index at {self.index_file}. To overwrite, call generate_index(overwrite=True)"
+                f"Distance matrix {self.embeddings_file} already has a built index at {self.index_file}. To overwrite, call generate_index(overwrite=True)"
             )
 
-        # Load distance matrix
-        mat = pickle.load(self.pickled_file)
+        # Load embeddings matrix
+        mat = pickle.load(self.embeddings_file)
 
         # Generate matrix
         disk_path = settings.DIST_INDICES_PATH + self.id + ".pl"
@@ -69,7 +69,7 @@ class DistanceMatrix(descriptionModel):
         # get returns
         return photograph_models.Photograph.objects.filter(id__in=nn_indices).all()
 
-    def build_distance_matrix(self):
+    def build_embeddings_matrix(self):
         """
         Take a queryset of photographs and build a distance matrix
 
@@ -78,7 +78,9 @@ class DistanceMatrix(descriptionModel):
         https://pytorch.org/hub/pytorch_vision_inception_v3/
         """
 
-        if self.photographs.count() == 0:
+        n_photos = self.photographs.count()
+
+        if n_photos == 0:
             Exception("Associate photographs with the current model first")
 
         print("Loading inception v3 model")
@@ -86,7 +88,8 @@ class DistanceMatrix(descriptionModel):
         print("Model downloaded. Begin eval")
         model.eval()
         print("Eval finished")
-        embeddings_mat = []
+        embeddings_model = torch.nn.Sequential(*list(model.children())[:-1])
+        embeddings_mat = np.zeros(shape=(n_photos, 512))
 
         preprocess = transforms.Compose(
             [
@@ -97,31 +100,32 @@ class DistanceMatrix(descriptionModel):
             ]
         )
 
-        newmodel = torch.nn.Conv2d(*(list(model.children())[:-1]))
+        for i, pic in tqdm(enumerate(list(self.photographs.all()))):
+            try:
+                squared_small_path = f"{pic.iiif_base}/full/299,299/0/default.jpg"
+                requests
 
-        for pic in tqdm(self.photographs.all()):
-            dl_path = tempfile.TemporaryFile(mode="wb")
-            squared_small_path = f"{pic.iiif_base}/full/299,299/0/default.jpg"
-            requests
+                res = requests.get(squared_small_path)
+                img = Image.open(BytesIO(res.content))
 
-            res = requests.get(squared_small_path)
-            img = Image.open(BytesIO(res.content))
+                img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
+                # Convert to a false rgb image
+                rgb_img = Image.fromarray(img_array)
 
-            img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
-            # Convert to a false rgb image
-            rgb_img = Image.fromarray(img_array)
+                input_tensor = preprocess(rgb_img)
+                input_batch = input_tensor.unsqueeze(0)
 
-            input_tensor = preprocess(rgb_img)
-            input_batch = input_tensor.unsqueeze(0)
+                with torch.no_grad():
 
-            with torch.no_grad():
-                output = np.array(model(input_batch).flatten())
-                print(output)
-                # embeddings_mat.append(output)
+                    output = np.array(embeddings_model(input_batch).flatten())
+                    embeddings_mat[i] = output
+            except:
+                print(f"Error processing {pic.full_image}")
+                continue
 
-        # final_path = settings.DIST_MATRICES_PATH + "/" + self.id + ".pl"
-        # with open(file_path, "wb") as fl:
-        #     pickle.dump(embeddings_mat, file=fl)
+        final_path = f"{settings.EMBEDDINGS_PATH}/{self.id}.pl"
+        with open(final_path, "wb") as fl:
+            pickle.dump(embeddings_mat, file=fl)
 
-        # self.pickled_file = final_path
-        # self.save()
+        self.embeddings_file = final_path
+        self.save()

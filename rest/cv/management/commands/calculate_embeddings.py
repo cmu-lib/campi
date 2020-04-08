@@ -21,7 +21,8 @@ class Command(BaseCommand):
     #     # parser.add_argument("manifest", nargs="+", type=str)
 
     def handle(self, *args, **options):
+        cv_models.Embeddings.objects.all().delete()
         # Get 100 photographs
-        pics100 = photograph_models.Photograph.objects.all()[:1]
-        inet = cv_models.DistanceMatrix.create(photograph_queryset=pics100)
-        inet.build_distance_matrix()
+        pics100 = photograph_models.Photograph.objects.all()[:100]
+        inet = cv_models.Embeddings.create(photograph_queryset=pics100)
+        inet.build_embeddings_matrix()

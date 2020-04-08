@@ -33,3 +33,5 @@ dumpusers:
 	docker-compose exec web python manage.py dumpdata --indent 2 auth authtoken -e auth.permission -o users.json
 restoreusers:
 	docker-compose exec web python manage.py loaddata users.json
+backup:
+	docker-compose exec postgres pg_dump -U app -d pp > data/bkp/bk.sql
