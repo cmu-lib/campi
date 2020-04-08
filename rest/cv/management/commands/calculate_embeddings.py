@@ -14,12 +14,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # cv_models.Embeddings.objects.all().delete()
-        # Get 100 photographs
+        # # Get 100 photographs
         # pics100 = photograph_models.Photograph.objects.all()[:100]
-        allpics = photograph_models.Photograph.objects.all()
-        inet = cv_models.Embeddings.create(
-            photograph_queryset=allpics,
-            label="All photographs with resnet",
-            description="All photos using resnetpython ",
-        )
-        inet.build_embeddings_matrix()
+        # allpics = photograph_models.Photograph.objects.all()
+        # inet = cv_models.Embeddings.create(
+        #     photograph_queryset=pics100,
+        #     label="100-resnet",
+        #     description="100 photos using resnetpython ",
+        # )
+        # anet = cv_models.Embeddings.create(
+        #     photograph_queryset=allpics,
+        #     label="all-resnet",
+        #     description="All photos using resnetpython ",
+        # )
+        # cv_models.Embeddings.objects.get(label="100-resnet").build_embeddings_matrix()
+        for e in cv_models.Embeddings.objects.all():
+            if not e.are_embeddings_calculated:
+                print(e)
+                e.build_embeddings_matrix()

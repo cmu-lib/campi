@@ -6,7 +6,6 @@ services:
     command: "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./rest:/vol/app:z
-      - ./data/cv/embeddings:${EMBEDDINGS_PATH}:z
       - ./data/cv/indices:${DIST_INDICES_PATH}:z
       - argusdjango:/vol/static_files:z
     expose:

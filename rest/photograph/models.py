@@ -39,7 +39,7 @@ class Photograph(labeledModel, descriptionModel):
 
     @property
     def iiif_base(self):
-        return settings.IMAGE_BASEURL + self.image_path
+        return settings.IMAGE_BASEURL + self.image_path.replace("#", "%23")
 
     @property
     def iiif_info(self):

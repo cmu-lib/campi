@@ -7,5 +7,5 @@ class Command(BaseCommand):
     help = "Calculate annoy indices"
 
     def handle(self, *args, **options):
-        for embed in cv_models.Embeddings.objects.all():
-            embed.generate_index(overwrite=True)
+        embed = cv_models.Embeddings.objects.get(label="all-resnet")
+        embed.generate_index(overwrite=True)

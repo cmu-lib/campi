@@ -136,5 +136,4 @@ STATIC_URL = "/static/"
 STATIC_ROOT = "/vol/static_files"
 IMAGE_BASEURL = os.environ["IMAGE_BASEURL"]
 
-EMBEDDINGS_PATH = os.environ["EMBEDDINGS_PATH"]
 DIST_INDICES_PATH = os.environ["DIST_INDICES_PATH"]
