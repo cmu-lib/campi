@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from argus.models import labeledModel, descriptionModel, sequentialModel
+from argus.models import uniqueLabledModel, descriptionModel
 from photograph import models as photograph_models
 import annoy
 import pickle
@@ -13,7 +13,7 @@ from tqdm import tqdm
 import numpy as np
 
 
-class Embeddings(descriptionModel):
+class Embeddings(uniqueLabledModel, descriptionModel):
     embeddings_file = models.FilePathField(path=settings.EMBEDDINGS_PATH, null=True)
     index_file = models.FilePathField(path=settings.DIST_INDICES_PATH, null=True)
     photographs = models.ManyToManyField(
@@ -42,14 +42,18 @@ class Embeddings(descriptionModel):
             )
 
         # Load embeddings matrix
-        mat = pickle.load(self.embeddings_file)
+        with open(self.embeddings_file, "rb") as ef:
+            mat = pickle.load(ef)
 
+        print(mat.shape)
         # Generate matrix
-        disk_path = settings.DIST_INDICES_PATH + self.id + ".pl"
-        ix = annoy.AnnoyIndex(f=ncol(mat), metric="angular")
-        a.on_disk_build(disk_path)
-        for row, i in mat.rows().enumerate():
+        disk_path = f"{settings.DIST_INDICES_PATH}/{self.id}.ix"
+        ix = annoy.AnnoyIndex(f=mat.shape[1], metric="angular")
+        ix.on_disk_build(disk_path)
+        for i, row in enumerate(mat):
             ix.add_item(i, row)
+        print("Building index")
+        ix.build(10)
 
         self.index_file = disk_path
         self.save()
@@ -63,9 +67,12 @@ class Embeddings(descriptionModel):
             Exception("Index has not yet been generated")
 
         # load index
-        ix = annoy.AnnoyIndex("angular")
-        nn_indices = []
-
+        ix = annoy.AnnoyIndex(512, "angular")
+        ix.load(self.index_file)
+        print(ix.get_n_items())
+        print(ix.get_n_trees())
+        nn_indices = ix.get_nns_by_item(1, n=n_neighbors)
+        print(nn_indices)
         # get returns
         return photograph_models.Photograph.objects.filter(id__in=nn_indices).all()
 
@@ -108,9 +115,13 @@ class Embeddings(descriptionModel):
                 res = requests.get(squared_small_path)
                 img = Image.open(BytesIO(res.content))
 
-                img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
-                # Convert to a false rgb image
-                rgb_img = Image.fromarray(img_array)
+                # If image is grayscale, convert it to a false RGB
+                if img.mode == "L":
+                    img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
+                    # Convert to a false rgb image
+                    rgb_img = Image.fromarray(img_array)
+                else:
+                    rgb_img = img
 
                 input_tensor = preprocess(rgb_img)
                 input_batch = input_tensor.unsqueeze(0)

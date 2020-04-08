@@ -1,14 +1,6 @@
 from django.core.management.base import BaseCommand
 from photograph import models as photograph_models
 from cv import models as cv_models
-import annoy
-import pickle
-import torch
-import requests
-import tempfile
-from PIL import Image
-from torchvision import transforms
-from io import BytesIO
 
 
 class Command(BaseCommand):
@@ -21,8 +13,13 @@ class Command(BaseCommand):
     #     # parser.add_argument("manifest", nargs="+", type=str)
 
     def handle(self, *args, **options):
-        cv_models.Embeddings.objects.all().delete()
+        # cv_models.Embeddings.objects.all().delete()
         # Get 100 photographs
-        pics100 = photograph_models.Photograph.objects.all()[:100]
-        inet = cv_models.Embeddings.create(photograph_queryset=pics100)
+        # pics100 = photograph_models.Photograph.objects.all()[:100]
+        allpics = photograph_models.Photograph.objects.all()
+        inet = cv_models.Embeddings.create(
+            photograph_queryset=allpics,
+            label="All photographs with resnet",
+            description="All photos using resnetpython ",
+        )
         inet.build_embeddings_matrix()
