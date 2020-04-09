@@ -11,7 +11,7 @@ Materialized models
 
 
 class Photograph(labeledModel, descriptionModel):
-    image_path = models.CharField(null=True, blank=False, max_length=800)
+    image_path = models.CharField(max_length=2000, unique=True)
     date_early = models.DateField(db_index=True)
     date_late = models.DateField(db_index=True)
     digitized_date = models.DateField()
