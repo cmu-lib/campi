@@ -7,7 +7,7 @@ services:
     volumes:
       - ./rest:/vol/app:z
       - ./data/cv/indices:${DIST_INDICES_PATH}:z
-      - argusdjango:/vol/static_files:z
+      - campidjango:/vol/static_files:z
     expose:
       - 8000
     links:
@@ -19,7 +19,7 @@ services:
   postgres:
     image: postgres:12.2
     volumes:
-      - ../argus_db:/var/lib/postgresql/data:z
+      - ../campi_db:/var/lib/postgresql/data:z
     expose:
       - 5432
     env_file: .env
@@ -30,10 +30,10 @@ services:
       - "rest:rest"
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - argusdjango:/vol/static_files
+      - campidjango:/vol/static_files
     ports:
       - "80:80"
     env_file: .env
 
 volumes:
-  argusdjango:
+  campidjango:

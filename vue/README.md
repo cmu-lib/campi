@@ -1,4 +1,4 @@
-# argus
+# campi
 
 ## Project setup
 ```

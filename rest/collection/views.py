@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from collection import serializers, models
 from django_filters import rest_framework as filters
-from argus.views import GetSerializerClassMixin
+from campi.views import GetSerializerClassMixin
 
 
 class CollectionViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):

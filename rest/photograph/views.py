@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from photograph import serializers, models
 from collection import models as collection_models
 from django_filters import rest_framework as filters
-from argus.views import GetSerializerClassMixin
+from campi.views import GetSerializerClassMixin
 
 
 class PhotographFilter(filters.FilterSet):

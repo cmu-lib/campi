@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from argus.models import uniqueLabledModel, descriptionModel
+from campi.models import uniqueLabledModel, descriptionModel
 from photograph import models as photograph_models
 import annoy
 import pickle

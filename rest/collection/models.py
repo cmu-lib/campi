@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from photograph import models as photograph_models
-from argus.models import (
+from campi.models import (
     labeledModel,
     uniqueLabledModel,
     descriptionModel,

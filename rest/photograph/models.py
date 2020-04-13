@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from vocabulary import models as vocabulary_models
 from collection import models as collection_models
-from argus.models import labeledModel, descriptionModel, sequentialModel
+from campi.models import labeledModel, descriptionModel, sequentialModel
 
 """
 Materialized models

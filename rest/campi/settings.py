@@ -43,7 +43,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "argus.urls"
+ROOT_URLCONF = "campi.urls"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = ["http://localhost"]
@@ -69,7 +69,7 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "argus.wsgi.application"
+WSGI_APPLICATION = "campi.wsgi.application"
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
