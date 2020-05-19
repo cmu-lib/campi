@@ -18,6 +18,7 @@ services:
 
   postgres:
     image: postgres:12.2
+    restart: always
     volumes:
       - ../campi_db:/var/lib/postgresql/data:z
     expose:
@@ -26,10 +27,11 @@ services:
 
   nginx:
     image: nginx:1.16.1
+    restart: always
     links:
       - "rest:rest"
     volumes:
-      - ./nginx:/etc/nginx/conf.d
+      - ./nginx:/etc/nginx/conf.d/.
       - ./data/logs:/var/log/nginx
       - static:/vol/static_files
     ports:
