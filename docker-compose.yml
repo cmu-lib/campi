@@ -31,9 +31,9 @@ services:
     links:
       - "rest:rest"
     volumes:
-      - ./nginx:/etc/nginx/conf.d/.
-      - ./data/logs:/var/log/nginx
-      - static:/vol/static_files
+      - ./nginx:/etc/nginx/conf.d/.:z
+      - ./data/logs:/var/log/nginx:z
+      - static:/vol/static_files:z
     ports:
       - "80:80"
       - "443:443"
