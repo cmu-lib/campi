@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "collection.apps.collectionConfig",
     "vocabulary.apps.vocabularyConfig",
     "cv.apps.cvConfig",
+    "tagging.apps.taggingConfig",
     "rest_framework",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "drf_yasg",
     "rest_framework.authtoken",
     "django_filters",
 ]
@@ -96,8 +98,8 @@ DATABASES = {
         "NAME": os.environ["POSTGRES_DB"],
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
-        "HOST": os.environ["POSTGRES_HOST"],
-        "PORT": os.environ["POSTGRES_PORT"],
+        "HOST": "postgres",
+        "PORT": 5432,
     }
 }
 

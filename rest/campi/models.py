@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 """
 Abstract models
@@ -12,7 +13,10 @@ class labeledModel(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.label
+        if self.label is None:
+            return "%(class)s " + self.id
+        else:
+            return self.label
 
 
 class uniqueLabledModel(labeledModel):
@@ -29,12 +33,69 @@ class descriptionModel(models.Model):
         abstract = True
 
 
-class sequentialModel(labeledModel):
+class sequentialModel(models.Model):
     sequence = models.PositiveIntegerField(db_index=True)
 
     class Meta:
         abstract = True
         ordering = ["sequence"]
 
-    def __str__(self):
-        return f"{self.label} - {self.sequence}"
+
+class dateModifiedModel(models.Model):
+    created_on = models.DateTimeField(
+        auto_now_add=True,
+        editable=False,
+        db_index=True,
+        help_text="Date created (automatically recorded)",
+    )
+    last_updated = models.DateField(
+        auto_now=True,
+        editable=False,
+        db_index=True,
+        help_text="Date last modified (automatically recorded)",
+    )
+
+    class Meta:
+        abstract = True
+
+
+class IIIFModel(models.Model):
+    image_path = models.CharField(
+        max_length=2000,
+        unique=True,
+        editable=False,
+        help_text="Base path for the image on the IIIF server",
+    )
+
+    @property
+    def iiif_base(self):
+        return settings.IMAGE_BASEURL + self.image_path.replace("#", "%23")
+
+    @property
+    def iiif_info(self):
+        return f"{self.iiif_base}/info.json"
+
+    @property
+    def full_image(self):
+        return f"{self.iiif_base}/full/full/0/default.jpg"
+
+    @property
+    def thumbnail_image(self):
+        return f"{self.iiif_base}/full/400,/0/default.jpg"
+
+    @property
+    def square_thumbnail_image(self):
+        return f"{self.iiif_base}/square/150,/0/default.jpg"
+
+    @property
+    def image(self):
+        return {
+            "id": self.iiif_base,
+            "info": self.iiif_info,
+            "full": self.full_image,
+            "thumbnail": self.thumbnail_image,
+            "square": self.square_thumbnail_image,
+        }
+
+    class Meta:
+        abstract = True

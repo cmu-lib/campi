@@ -1,88 +1,84 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-from vocabulary import models as vocabulary_models
-from collection import models as collection_models
-from campi.models import labeledModel, descriptionModel, sequentialModel
-
-"""
-Materialized models
-"""
+import campi.models
+import collection.models
 
 
-class Photograph(labeledModel, descriptionModel):
-    image_path = models.CharField(max_length=2000, unique=True)
-    date_early = models.DateField(db_index=True)
-    date_late = models.DateField(db_index=True)
-    digitized_date = models.DateField()
-    taken_by = models.ForeignKey(
-        vocabulary_models.Person,
+class Photograph(
+    campi.models.labeledModel, campi.models.descriptionModel, campi.models.IIIFModel
+):
+    original_server_path = models.CharField(
+        max_length=2000,
+        unique=True,
+        editable=False,
+        help_text="The original path and filename from the archives server",
+    )
+    date_taken_early = models.DateField(
+        db_index=True,
+        help_text="Earliest possible date the original photograph was taken",
+    )
+    date_taken_late = models.DateField(
+        db_index=True,
+        help_text="Latest possible date the original photograph was taken",
+    )
+    digitized_date = models.DateTimeField(
+        db_index=True,
+        help_text="Creation date of the original TIF file on the archives server",
+    )
+    directory = models.ForeignKey(
+        collection.models.Collection,
+        related_name="immediate_photographs",
+        on_delete=models.CASCADE,
+        help_text="Parent directory",
+    )
+    all_directories = models.ManyToManyField(
+        collection.models.Collection,
+        related_name="all_photographs",
+        help_text="All ancestor directories. Provided for faster filtering.",
+    )
+    job = models.ForeignKey(
+        collection.models.Job,
         null=True,
-        on_delete=models.CASCADE,
-        related_name="photographs_taken",
-    )
-    depicts = models.ManyToManyField(vocabulary_models.Person)
-    collection = models.ForeignKey(
-        collection_models.Collection,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="photographs",
-        on_delete=models.CASCADE,
+        help_text="Official CMU photographer job listing where this photograph was taken",
+    )
+    job_sequence = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Sequence in the series of photos taken during the job listing",
     )
 
-    def validate_collections(self):
-        """
-        If photograph belongs to a collection, ensure that it belongs to all parents of that collection too.
-        """
-        all_parents = set(
-            [c.get_all_parent_collections() for c in self.collections.all()]
-        )
-        self.collections.add(all_parents)
+    def push_parent_directory(self, coll_instance):
+        self.all_directories.add(coll_instance)
+        instance_parent = coll_instance.parent_collection
+        if instance_parent is not None:
+            self.push_parent_directory(instance_parent)
+        else:
+            return
 
-    @property
-    def iiif_base(self):
-        return settings.IMAGE_BASEURL + self.image_path.replace("#", "%23")
+    def add_all_parent_directories(self):
+        self.push_parent_directory(self.directory)
 
-    @property
-    def iiif_info(self):
-        return f"{self.iiif_base}/info.json"
-
-    @property
-    def full_image(self):
-        return f"{self.iiif_base}/full/full/0/default.jpg"
-
-    @property
-    def thumbnail_image(self):
-        return f"{self.iiif_base}/full/400,/0/default.jpg"
-
-    @property
-    def square_thumbnail_image(self):
-        return f"{self.iiif_base}/square/150,/0/default.jpg"
-
-    @property
-    def image(self):
-        return {
-            "id": self.iiif_base,
-            "info": self.iiif_info,
-            "full": self.full_image,
-            "thumbnail": self.thumbnail_image,
-            "square": self.square_thumbnail_image,
-        }
+    def save(self, *args, **kwargs):
+        response = super().save(*args, **kwargs)
+        self.add_all_parent_directories()
+        return response
 
 
-class Annotation(models.Model):
+class Annotation(campi.models.dateModifiedModel):
     photograph = models.ForeignKey(
         Photograph, on_delete=models.CASCADE, related_name="annotations"
-    )
-    person_depicted = models.ForeignKey(
-        vocabulary_models.Person, on_delete=models.CASCADE, related_name="annotations"
     )
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="annotations"
     )
-    created_on = models.DateTimeField(auto_now_add=True)
-    x_min = models.IntegerField()
-    x_max = models.IntegerField()
-    y_max = models.IntegerField()
-    y_max = models.IntegerField()
+    x_min = models.PositiveIntegerField()
+    x_max = models.PositiveIntegerField()
+    y_max = models.PositiveIntegerField()
+    y_max = models.PositiveIntegerField()
 
     @property
     def width(self):

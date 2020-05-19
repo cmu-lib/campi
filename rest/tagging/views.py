@@ -10,4 +10,4 @@ class CollectionViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.Collection.objects.all()
     serializer_class = serializers.CollectionDetailSerializer
     serializer_action_classes = {"list": serializers.CollectionListSerializer}
-    queryset_action_classes = {"list": queryset, "detail": None}
+    queryset_action_classes = {"list": self.queryset, "detail": None}

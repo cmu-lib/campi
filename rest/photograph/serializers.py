@@ -4,7 +4,7 @@ from collection import serializers as collection_serializers
 
 
 class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
-    collection = collection_serializers.CollectionDetailSerializer()
+    directory = collection_serializers.CollectionDetailSerializer()
 
     class Meta:
         model = models.Photograph
@@ -13,17 +13,15 @@ class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
             "url",
             "label",
             "image",
-            "date_early",
-            "date_late",
+            "date_taken_early",
+            "date_taken_late",
             "digitized_date",
-            "taken_by",
-            "depicts",
-            "collection",
+            "directory",
         ]
 
 
 class PhotographListSerializer(serializers.HyperlinkedModelSerializer):
-    collection = collection_serializers.CollectionListSerializer()
+    directory = collection_serializers.CollectionListSerializer()
 
     class Meta:
         model = models.Photograph
@@ -32,8 +30,8 @@ class PhotographListSerializer(serializers.HyperlinkedModelSerializer):
             "url",
             "label",
             "image",
-            "date_early",
-            "date_late",
+            "date_taken_early",
+            "date_taken_late",
             "digitized_date",
-            "collection",
+            "directory",
         ]

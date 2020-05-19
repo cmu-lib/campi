@@ -1,11 +1,13 @@
 from django.core.management.base import BaseCommand
-from photograph import models as photograph_models
-from collection import models as collection_models
+import photograph.models
+import collection.models
+import pytz
 from tqdm import tqdm
 from glob import glob
 import datetime
 import json
 import re
+from os.path import basename
 
 
 class Command(BaseCommand):
@@ -18,29 +20,65 @@ class Command(BaseCommand):
         parser.add_argument("manifest", nargs="+", type=str)
 
     def handle(self, *args, **options):
-        photograph_models.Photograph.objects.all().delete()
-        collection_models.Collection.objects.all().delete()
-        manifest = json.load(open(options["manifest"][0], "rb"))
+        manifest = json.load(open(options["manifest"][0], "r"))
         for item in tqdm(manifest):
-            split_path = item.split("/")
+            split_path = item["new"].split("/")
             for i, coll in enumerate(split_path[:-1]):
-                collection_res = collection_models.Collection.objects.get_or_create(
+                collection_res = collection.models.Collection.objects.get_or_create(
                     label=coll
                 )
-                collection = collection_res[0]
+                coll = collection_res[0]
                 if collection_res[1] == True and i != 0:
                     # If a new collection, make sure to assign its parent
-                    collection.parent_collection = collection_models.Collection.objects.get(
+                    coll.parent_collection = collection.models.Collection.objects.get(
                         label=split_path[i - 1]
                     )
-                    collection.save()
+                    coll.save()
 
-            newimage = photograph_models.Photograph.objects.create(
-                image_path=item,
-                date_early=datetime.date(1900, 1, 1),
-                date_late=datetime.date(2000, 12, 31),
-                digitized_date=datetime.date.today(),
-                collection=collection_models.Collection.objects.get(
+            year_match = re.match(r"^.+\D((19|20)\d{2})\D", item["new"])
+            if year_match:
+                start_year = int(year_match.groups()[0])
+                end_year = start_year
+                date_match = re.match(r"^.+\d{4}/(\d{2})(\d{2})(\d{2})_", item["new"])
+                if date_match:
+                    start_month = int(date_match.groups()[1])
+                    start_day = int(date_match.groups()[2])
+                    end_month = start_month
+                    end_day = start_day
+                else:
+                    start_month = 1
+                    start_day = 1
+                    end_month = 12
+                    end_day = 31
+            else:
+                start_year = 1900
+                end_year = 2020
+                start_month = 1
+                start_day = 1
+                end_month = 12
+                end_day = 31
+
+            try:
+                start_date = datetime.date(start_year, start_month, start_day)
+            except:
+                start_date = datetime.date(start_year, 1, 1)
+
+            try:
+                end_date = datetime.date(end_year, end_month, end_day)
+            except:
+                end_date = datetime.date(end_year, 12, 31)
+
+            newimage = photograph.models.Photograph(
+                label=basename(item["new"]),
+                original_server_path=item["original"],
+                image_path=item["new"],
+                date_taken_early=start_date,
+                date_taken_late=end_date,
+                digitized_date=datetime.datetime.fromtimestamp(
+                    item["created_date"], tz=pytz.UTC
+                ),
+                directory=collection.models.Collection.objects.get(
                     label=split_path[-2]
                 ),
             )
+            newimage.save()

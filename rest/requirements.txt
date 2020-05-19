@@ -1,5 +1,5 @@
 django
-coverage>=4.5.4
+coverage
 psycopg2-binary
 gunicorn
 tblib
@@ -14,3 +14,4 @@ torchvision
 annoy
 requests
 scipy
+drf-yasg

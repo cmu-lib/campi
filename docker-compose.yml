@@ -7,7 +7,7 @@ services:
     volumes:
       - ./rest:/vol/app:z
       - ./data/cv/indices:${DIST_INDICES_PATH}:z
-      - campidjango:/vol/static_files:z
+      - static:/vol/static_files:z
     expose:
       - 8000
     links:
@@ -25,15 +25,19 @@ services:
     env_file: .env
 
   nginx:
-    image: nginx
+    image: nginx:1.16.1
     links:
       - "rest:rest"
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - campidjango:/vol/static_files
+      - ./data/logs:/var/log/nginx
+      - static:/vol/static_files
     ports:
       - "80:80"
+      - "443:443"
     env_file: .env
+    depends_on:
+      - rest
 
 volumes:
-  campidjango:
+  static:

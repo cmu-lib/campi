@@ -17,6 +17,7 @@ manifest = [x.strip() for x in manifest]
 concordance = []
 
 for fp in tqdm.tqdm(manifest):
+    file_creation_date = os.path.getmtime(fp)
     init_replace = re.sub(r"[ #\(\)]", "_", fp.encode("ascii", "ignore").decode())
     np_name = "pyramidized/" + re.sub(r"_+", "_", init_replace)
     np_name_standard = np_name.replace(".TIF", ".tif").replace(".TIFF", ".tif")
@@ -38,6 +39,12 @@ for fp in tqdm.tqdm(manifest):
             "512",
         ]
         pyr_res = subprocess.run(call, stdout=subprocess.PIPE)
-    concordance.append({"original": fp, "new": np_name})
+    concordance.append(
+        {
+            "original": fp,
+            "new": np_name_standard.replace("pyramidized/", ""),
+            "created_date": file_creation_date,
+        }
+    )
 
 json.dump(concordance, open("campi_files.json", "w"))

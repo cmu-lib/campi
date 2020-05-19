@@ -2,24 +2,29 @@ from django import forms
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from photograph import serializers, models
-from collection import models as collection_models
+import collection.models
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
 
 
 class PhotographFilter(filters.FilterSet):
-    collection = filters.ModelChoiceFilter(
-        queryset=collection_models.Collection.objects.all(),
-        method="recursive_photo_filter",
+    directory = filters.ModelChoiceFilter(
+        queryset=collection.models.Collection.objects.all()
     )
+    all_directories = filters.ModelChoiceFilter(
+        queryset=collection.models.Collection.objects.all()
+    )
+    date_taken_early = filters.DateFromToRangeFilter()
+    date_taken_late = filters.DateFromToRangeFilter()
 
-    def recursive_photo_filter(self, queryset, name, value):
-        models.Photograph.objects.raw(
-            f"WITH RECURSIVE ch_coll(id) AS ( SELECT id, label, parent_collection_id FROM collection_collection WHERE parent_collection_id = {value.id} UNION SELECT ch.id, ch.label, ch.parent_collection_id FROM collection_collection AS ch, ch_coll AS c WHERE ch.parent_collection_id=c.id ) SELECT DISTINCT photograph_photograph.id, photograph_photograph.image_path, photograph_photograph.date_early, photograph_photograph.date_late, photograph_photograph.digitized_date, photograph_photograph.taken_by_id, photograph_photograph.collection_id collection FROM photograph_photograph INNER JOIN ch_coll ON (photograph_photograph.collection_id = ch_coll.id)"
-        )
+    class Meta:
+        model = models.Photograph
+        fields = ["directory", "all_directories", "date_taken_early", "date_taken_late"]
 
 
 class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.Photograph.objects.all()
+    queryset = models.Photograph.objects.select_related("directory").all()
+    ordering_fields = ["date_taken_early", "date_taken_late", "digitized_date"]
+    filterset_class = PhotographFilter
     serializer_class = serializers.PhotographDetailSerializer
     serializer_action_classes = {"list": serializers.PhotographListSerializer}
