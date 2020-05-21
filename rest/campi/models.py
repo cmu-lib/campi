@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from os.path import basename
 
 """
 Abstract models
@@ -115,6 +116,10 @@ class IIIFModel(models.Model):
         editable=False,
         help_text="Base path for the image on the IIIF server",
     )
+
+    @property
+    def filename(self):
+        return basename(self.image_path)
 
     @property
     def iiif_base(self):

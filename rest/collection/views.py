@@ -1,5 +1,6 @@
 from django import forms
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from rest_framework import viewsets
 from collection import serializers, models
 from django_filters import rest_framework as filters
@@ -12,9 +13,17 @@ class DirectoryFilter(filters.FilterSet):
         lookup_expr="icontains",
     )
 
+    def is_top(self, queryset, name, value):
+        if value == "true":
+            return queryset.filter(parent_directory__isnull=True)
+        else:
+            return queryset
+
 
 class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.Directory.objects.select_related("parent_directory").all()
+    queryset = models.Directory.objects.annotate(
+        n_images=Count("immediate_photographs", distinct=True)
+    ).select_related("parent_directory")
     serializer_class = serializers.DirectoryDetailSerializer
     serializer_action_classes = {"list": serializers.DirectoryListSerializer}
     filterset_class = DirectoryFilter

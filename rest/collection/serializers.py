@@ -6,10 +6,11 @@ from rest_framework_recursive.fields import RecursiveField
 
 class DirectoryListSerializer(serializers.HyperlinkedModelSerializer):
     search_photographs = serializers.URLField(read_only=True)
+    n_images = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = collection_models.Directory
-        fields = ["id", "url", "label", "search_photographs"]
+        fields = ["id", "url", "label", "n_images", "search_photographs"]
 
 
 class DirectoryParentSerializer(serializers.HyperlinkedModelSerializer):

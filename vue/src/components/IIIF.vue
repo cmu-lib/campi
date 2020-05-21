@@ -38,7 +38,7 @@ export default {
 <style>
 .osd:not(:fullscreen) {
   position: relative;
-  height: 800px;
+  height: 700px;
   width: 100%;
   border-top: 1px lightgray solid;
   border-bottom: 1px lightgray solid;
