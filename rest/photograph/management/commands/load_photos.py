@@ -19,22 +19,33 @@ class Command(BaseCommand):
         )
         parser.add_argument("manifest", nargs="+", type=str)
 
+    def get_immediate_directory(self, dir_paths):
+        dir_paths.reverse()
+        topdir_label = dir_paths.pop()
+        topdir = collection.models.Directory.objects.get_or_create(label=topdir_label)[
+            0
+        ]
+
+        if len(dir_paths) > 0:
+            return self.make_next_child(topdir, dir_paths)
+        else:
+            return topdir
+
+    def make_next_child(self, parent_dir, remaining_paths):
+        next_path = remaining_paths.pop()
+        next_dir = collection.models.Directory.objects.get_or_create(
+            label=next_path, parent_directory=parent_dir
+        )[0]
+        if len(remaining_paths) > 0:
+            return self.make_next_child(next_dir, remaining_paths)
+        else:
+            return next_dir
+
     def handle(self, *args, **options):
         manifest = json.load(open(options["manifest"][0], "r"))
         for item in tqdm(manifest):
-            split_path = item["new"].split("/")
-            for i, coll in enumerate(split_path[:-1]):
-                collection_res = collection.models.Collection.objects.get_or_create(
-                    label=coll
-                )
-                coll = collection_res[0]
-                if collection_res[1] == True and i != 0:
-                    # If a new collection, make sure to assign its parent
-                    coll.parent_collection = collection.models.Collection.objects.get(
-                        label=split_path[i - 1]
-                    )
-                    coll.save()
-
+            split_path = item["new"].split("/")[:-1]
+            photo_directory = self.get_immediate_directory(split_path)
             year_match = re.match(r"^.+\D((19|20)\d{2})\D", item["new"])
             if year_match:
                 start_year = int(year_match.groups()[0])
@@ -77,8 +88,6 @@ class Command(BaseCommand):
                 digitized_date=datetime.datetime.fromtimestamp(
                     item["created_date"], tz=pytz.UTC
                 ),
-                directory=collection.models.Collection.objects.get(
-                    label=split_path[-2]
-                ),
+                directory=photo_directory,
             )
             newimage.save()
