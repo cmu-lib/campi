@@ -82,7 +82,7 @@ class Command(BaseCommand):
             newimage = photograph.models.Photograph(
                 label=basename(item["new"]),
                 original_server_path=item["original"],
-                image_path=item["new"],
+                image_path=item["new"].replace("TIF", "tif"),
                 date_taken_early=start_date,
                 date_taken_late=end_date,
                 digitized_date=datetime.datetime.fromtimestamp(
