@@ -50,7 +50,7 @@ class Command(BaseCommand):
             if year_match:
                 start_year = int(year_match.groups()[0])
                 end_year = start_year
-                date_match = re.match(r"^.+\d{4}/(\d{2})(\d{2})(\d{2})_", item["new"])
+                date_match = re.match(r"^.+/(\d{2})(\d{2})(\d{2})_", item["new"])
                 if date_match:
                     start_month = int(date_match.groups()[1])
                     start_day = int(date_match.groups()[2])
