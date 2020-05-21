@@ -1,27 +1,26 @@
 from rest_framework import serializers
-from collection import models as collection_models
-from photograph import models as photograph_models
+import collection.models
 from rest_framework_recursive.fields import RecursiveField
 
 
 class CollectionListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = collection_models.Collection
+        model = collection.models.Collection
         fields = ["id", "url", "label"]
 
 
 class CollectionParentSerializer(serializers.HyperlinkedModelSerializer):
-    parent_collection = RecursiveField()
+    parent_directory = RecursiveField()
 
     class Meta:
-        model = collection_models.Collection
-        fields = ["id", "url", "label", "parent_collection"]
+        model = collection.models.Collection
+        fields = ["id", "url", "label", "parent_directory"]
 
 
 class CollectionDetailSerializer(serializers.HyperlinkedModelSerializer):
-    parent_collection = CollectionParentSerializer()
-    child_collections = CollectionListSerializer(many=True)
+    parent_directory = CollectionParentSerializer()
+    child_directories = CollectionListSerializer(many=True)
 
     class Meta:
         model = collection_models.Collection
-        fields = ["id", "url", "label", "parent_collection", "child_collections"]
+        fields = ["id", "url", "label", "parent_directory", "child_directories"]

@@ -27,13 +27,13 @@ class Photograph(
         help_text="Creation date of the original TIF file on the archives server",
     )
     directory = models.ForeignKey(
-        collection.models.Collection,
+        collection.models.Directory,
         related_name="immediate_photographs",
         on_delete=models.CASCADE,
         help_text="Parent directory",
     )
     all_directories = models.ManyToManyField(
-        collection.models.Collection,
+        collection.models.Directory,
         related_name="all_photographs",
         help_text="All ancestor directories. Provided for faster filtering.",
     )
@@ -53,7 +53,7 @@ class Photograph(
 
     def push_parent_directory(self, coll_instance):
         self.all_directories.add(coll_instance)
-        instance_parent = coll_instance.parent_collection
+        instance_parent = coll_instance.parent_directory
         if instance_parent is not None:
             self.push_parent_directory(instance_parent)
         else:
@@ -68,25 +68,30 @@ class Photograph(
         return response
 
 
-class Annotation(campi.models.dateModifiedModel):
+class Annotation(
+    campi.models.dateModifiedModel,
+    campi.models.userCreatedModel,
+    campi.models.userModifiedModel,
+):
     photograph = models.ForeignKey(
         Photograph, on_delete=models.CASCADE, related_name="annotations"
     )
-    created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="annotations"
+    x = models.PositiveIntegerField(
+        help_text="Number of pixels from the left side of the image"
     )
-    x_min = models.PositiveIntegerField()
-    x_max = models.PositiveIntegerField()
-    y_max = models.PositiveIntegerField()
-    y_max = models.PositiveIntegerField()
+    width = models.PositiveIntegerField(help_text="Width of the region in pixes")
+    y = models.PositiveIntegerField(
+        help_text="Number of pixels from the top side of the image"
+    )
+    height = models.PositiveIntegerField(help_text="Height of the region in pixes")
 
     @property
-    def width(self):
-        return self.x_max - self.x_min
+    def x_max(self):
+        return self.x + self.width
 
     @property
-    def height(self):
-        return self.y_max - self.y_max
+    def y_max(self):
+        return self.y + self.height
 
     def image(self, rendered_width=None, rendered_height=None):
         if rendered_width is None:
@@ -102,6 +107,6 @@ class Annotation(campi.models.dateModifiedModel):
         if rendered_width is None and rendered_height is None:
             render_string = "full"
         else:
-            render_stirng = f"{rw},{rh}"
+            render_string = f"{rw},{rh}"
 
-        return f"{selfphotograph.iiif_base}/{self.x_min},{self.width},{self.y_max},{self.height}/{render_string}/0/default.jpg"
+        return f"{self.photograph.iiif_base}/{self.x_min},{self.width},{self.y_max},{self.height}/{render_string}/0/default.jpg"

@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from photograph import models
-from collection import serializers as collection_serializers
+import collection.serializers
 
 
 class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
-    directory = collection_serializers.CollectionDetailSerializer()
+    directory = collection.serializers.DirectoryDetailSerializer()
 
     class Meta:
         model = models.Photograph
@@ -21,7 +21,7 @@ class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PhotographListSerializer(serializers.HyperlinkedModelSerializer):
-    directory = collection_serializers.CollectionListSerializer()
+    directory = collection.serializers.DirectoryListSerializer()
 
     class Meta:
         model = models.Photograph
