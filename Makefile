@@ -37,3 +37,5 @@ backup:
 	docker-compose exec postgres pg_dump -U app -d campi > data/bkp/bk.sql
 restore: wipe
 	docker-compose exec -T postgres psql -U app -d campi < data/bkp/bk.sql
+resetmigrations:
+	find rest -type f -regex ".*/migrations/[0-9].*" -exec rm {} \;
