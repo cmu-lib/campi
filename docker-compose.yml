@@ -34,6 +34,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d/.
       - ./data/logs:/var/log/nginx
+      - ./vue/dist:/vol/vue
       - static:/vol/static_files
     ports:
       - "80:80"
