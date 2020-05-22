@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import Photo from "../views/Photo.vue"
+import Home from "@/views/Home.vue"
+import Browse from '@/views/Browse.vue'
+import Photo from "@/views/Photo.vue"
 
 Vue.use(VueRouter)
 
@@ -12,7 +13,12 @@ const routes = [
     component: Home
   },
   {
-    path: "/photograph/:id",
+    path: "/browse",
+    name: "Browse",
+    component: Browse
+  },
+  {
+    path: "/browse/photograph/:id",
     name: "Photo",
     component: Photo,
     props: true

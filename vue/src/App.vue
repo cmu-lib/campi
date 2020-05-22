@@ -2,10 +2,43 @@
   <div id="app">
     <b-navbar variant="light">
       <b-navbar-brand>CAMPI</b-navbar-brand>
+      <b-navbar-nav v-if="logged_in">
+        <b-nav-item :to="{name: 'Browse'}">Browse</b-nav-item>
+      </b-navbar-nav>
+      <b-navbar-nav class="ml-auto">
+        <b-nav-item v-if="logged_in" :href="$APIConstants.API_LOGOUT">Logout</b-nav-item>
+        <b-nav-item v-else :href="$APIConstants.API_LOGIN">Login</b-nav-item>
+      </b-navbar-nav>
     </b-navbar>
     <router-view />
   </div>
 </template>
+
+<script>
+import { HTTP } from "./main";
+export default {
+  name: "app",
+  data() {
+    return {
+      logged_in: false
+    };
+  },
+  methods: {},
+  updated: function() {
+    return HTTP.get("/", {}).then(
+      response => {
+        console.log("Logged in");
+        this.logged_in = !!response;
+      },
+      error => {
+        console.log(error);
+        this.logged_in = false;
+      }
+    );
+  }
+};
+</script>
+
 
 <style>
 #app {
