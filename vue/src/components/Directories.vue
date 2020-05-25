@@ -13,7 +13,7 @@
         class="p-1"
         v-for="dir in directories.results"
         :key="dir.id"
-        @click="$emit('input', dir)"
+        @click="select_dir(dir)"
       >{{ dir.label }} ({{ dir.n_images }})</b-list-group-item>
     </b-list-group>
   </b-card>
@@ -49,6 +49,12 @@ export default {
           console.log(error);
         }
       );
+    }
+  },
+  methods: {
+    select_dir(dir) {
+      this.$emit("input", dir);
+      window.scrollTo(0, 0);
     }
   }
 };
