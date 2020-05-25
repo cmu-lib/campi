@@ -17,8 +17,10 @@ class DirectoryFilter(filters.FilterSet):
         field_name="immediate_photographs__digitized_date", distinct=True
     )
 
-    def is_top(self, queryset, name, value):
-        if value == "true":
+    is_top = filters.BooleanFilter(method="filter_is_top")
+
+    def filter_is_top(self, queryset, name, value):
+        if value:
             return queryset.filter(parent_directory__isnull=True)
         else:
             return queryset
@@ -36,3 +38,31 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         "list": queryset,
         "detail": queryset.prefetch_related("child_directories"),
     }
+
+    def get_queryset(self):
+        if "digitized_date_before" in self.request.GET:
+            return models.Directory.objects.annotate(
+                n_images=Count(
+                    "immediate_photographs",
+                    distinct=True,
+                    filter=Q(
+                        immediate_photographs__digitized_date__lt=self.request.GET[
+                            "digitized_date_before"
+                        ]
+                    ),
+                )
+            )
+        elif "digitized_date_after" in self.request.GET:
+            return models.Directory.objects.annotate(
+                n_images=Count(
+                    "immediate_photographs",
+                    distinct=True,
+                    filter=Q(
+                        immediate_photographs__digitized_date__gt=self.request.GET[
+                            "digitized_date_after"
+                        ]
+                    ),
+                )
+            )
+        else:
+            return self.queryset

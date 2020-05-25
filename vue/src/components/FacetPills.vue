@@ -7,7 +7,7 @@
     </b-button>
     <b-button class="mx-1" v-if="show_range" pill variant="secondary" size="sm">
       <BIconCalendarFill />
-      <span class="mx-2">{{ digitized_date_range[0] }}-{{ digitized_date_range[1] }}</span>
+      <span class="mx-2">Digitized: {{ digitized_date_range[0] }}-{{ digitized_date_range[1] }}</span>
       <BIconXCircle @click="$emit('clear_date_range')" />
     </b-button>
   </b-card>

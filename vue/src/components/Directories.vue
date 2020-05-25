@@ -9,12 +9,13 @@
       </b-input-group-append>
     </b-input-group>
     <b-list-group v-if="!!directories">
-      <b-list-group-item
+      <Directory
         class="p-1"
         v-for="dir in directories.results"
         :key="dir.id"
+        :id="dir.id"
         @click="select_dir(dir)"
-      >{{ dir.label }} ({{ dir.n_images }})</b-list-group-item>
+      />
     </b-list-group>
   </b-card>
 </template>
@@ -22,10 +23,22 @@
 <script>
 import { HTTP } from "../main";
 import { BIconXSquare } from "bootstrap-vue";
+import Directory from "@/components/Directory.vue";
 export default {
   name: "Directories",
   components: {
-    BIconXSquare
+    BIconXSquare,
+    Directory
+  },
+  props: {
+    digitized_date_before: {
+      type: Number,
+      default: null
+    },
+    digitized_date_after: {
+      type: Number,
+      default: null
+    }
   },
   data() {
     return {
@@ -35,9 +48,17 @@ export default {
   },
   asyncComputed: {
     directories() {
-      var payload = {};
+      var payload = { is_top: true };
       if (this.dir_label_search != "") {
         payload["label"] = this.dir_label_search;
+      }
+      if (!!this.digitized_date_after) {
+        payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
+      }
+      if (!!this.digitized_date_before) {
+        payload[
+          "digitized_date_before"
+        ] = `${this.digitized_date_before}-01-01`;
       }
       return HTTP.get("/directory/", {
         params: payload

@@ -3,7 +3,11 @@
     <b-row>
       <b-col cols="3">
         <DigitizedDate v-model="digitized_date_range" :directory="directory" />
-        <Directories v-model="directory" />
+        <Directories
+          v-model="directory"
+          :digitized_date_before="dd_before"
+          :digitized_date_after="dd_after"
+        />
       </b-col>
       <b-col cols="9">
         <FacetPills

@@ -123,7 +123,7 @@ class IIIFModel(models.Model):
 
     @property
     def iiif_base(self):
-        return f"{settings.IMAGE_BASEURL}{self.image_path}"
+        return f"{settings.IMAGE_BASEURL}{self.image_path}".replace("&", "%26")
 
     @property
     def iiif_info(self):
