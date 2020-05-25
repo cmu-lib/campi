@@ -1,6 +1,7 @@
 <template>
   <b-container fluid v-if="!!images">
     <b-row align-h="center">
+      <p>{{ images.count }} results</p>
       <b-pagination v-model="current_page" :total-rows="images.count" :per-page="100" />
     </b-row>
     <b-row flex align-h="center">
@@ -24,6 +25,14 @@ export default {
   props: {
     directory: {
       default: null
+    },
+    digitized_date_before: {
+      type: Number,
+      default: null
+    },
+    digitized_date_after: {
+      type: Number,
+      default: null
     }
   },
   data() {
@@ -34,8 +43,16 @@ export default {
   asyncComputed: {
     images() {
       var payload = { offset: this.rest_page, ordering: "-digitized_date" };
-      if (this.directory) {
+      if (!!this.directory) {
         payload["directory"] = this.directory.id;
+      }
+      if (!!this.digitized_date_after) {
+        payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
+      }
+      if (!!this.digitized_date_before) {
+        payload[
+          "digitized_date_before"
+        ] = `${this.digitized_date_before}-01-01`;
       }
       return HTTP.get("/photograph/", {
         params: payload
