@@ -8,14 +8,14 @@ from campi.views import GetSerializerClassMixin
 
 
 class DirectoryFilter(filters.FilterSet):
-    label = filters.CharFilter(
-        help_text="Directories containing this text in their label",
-        lookup_expr="icontains",
-    )
+    # label = filters.CharFilter(
+    #     help_text="Directories containing this text in their label",
+    #     lookup_expr="icontains",
+    # )
 
-    digitized_date = filters.DateFromToRangeFilter(
-        field_name="immediate_photographs__digitized_date", distinct=True
-    )
+    # digitized_date = filters.DateFromToRangeFilter(
+    #     field_name="immediate_photographs__digitized_date", distinct=True
+    # )
 
     is_top = filters.BooleanFilter(method="filter_is_top")
 

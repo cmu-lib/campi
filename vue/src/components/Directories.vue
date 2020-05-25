@@ -9,14 +9,19 @@
       </b-input-group-append>
     </b-input-group>
     <b-list-group v-if="!!directories">
-      <Directory :directory="directories" @click="select_dir($event)" />
+      <Directory
+        v-for="directory in directories"
+        :key="directory.id"
+        :directory="directory"
+        @selected="select_dir($event)"
+      />
     </b-list-group>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "../main";
-import _ from "lodash";
+// import _ from "lodash";
 import { BIconXSquare } from "bootstrap-vue";
 import Directory from "@/components/Directory.vue";
 export default {
@@ -44,9 +49,6 @@ export default {
   asyncComputed: {
     directories() {
       var payload = {};
-      if (this.dir_label_search != "") {
-        payload["label"] = this.dir_label_search;
-      }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
       }
@@ -59,6 +61,11 @@ export default {
         params: payload
       }).then(
         results => {
+          if (this.dir_label_search != "") {
+            results.data.forEach(x => {
+              x["search_match"] = x.label.includes(this.dir_label_search);
+            });
+          }
           return this.nest_directories(results.data);
         },
         error => {
@@ -69,38 +76,31 @@ export default {
   },
   methods: {
     nest_directories(dirlist) {
-      const find_parent = function(tree, dir) {
-        console.log("Checking " + dir.label);
-        if (tree.id == dir.parent_directory) {
-          console.log(dir.label + " child of " + tree.label);
-          // Prepare the directory to gain children
-          dir["children"] = [];
-          tree.children.push(dir);
-          return tree;
-        } else {
-          for (var i = 0; i < tree.children.length; i++) {
-            console.log(
-              "Going down the stack to child " + tree.children[i].label
-            );
-            const res = find_parent(tree.children[i], dir);
-            if (_.isObject(res)) {
-              tree.children[i].children.push(res);
+      const createDataTree = dataset => {
+        let hashTable = Object.create(null);
+        dataset.forEach(
+          aData => (hashTable[aData.id] = { ...aData, children: [] })
+        );
+        let dataTree = [];
+        dataset.forEach(aData => {
+          if (aData.parent_directory) {
+            if (aData.parent_directory in hashTable) {
+              hashTable[aData.parent_directory].children.push(
+                hashTable[aData.id]
+              );
             } else {
-              return tree;
+              dataTree.push(hashTable[aData.id]);
             }
+          } else {
+            dataTree.push(hashTable[aData.id]);
           }
-        }
+        });
+        return dataTree;
       };
 
       // Start with the top directory
-      var dirtree = dirlist[0];
-      dirtree["children"] = [];
-      console.log("Root is " + dirtree.label);
       console.log(dirlist.length + " total directories");
-      for (var a = 1; a < dirlist.length; a++) {
-        console.log("Looping at: " + a);
-        dirtree = find_parent(dirtree, dirlist[a]);
-      }
+      var dirtree = createDataTree(dirlist);
       console.log(dirtree);
       return dirtree;
     },
