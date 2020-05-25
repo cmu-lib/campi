@@ -38,6 +38,7 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         "list": queryset,
         "detail": queryset.prefetch_related("child_directories"),
     }
+    pagination_class = None
 
     def get_queryset(self):
         if "digitized_date_before" in self.request.GET:

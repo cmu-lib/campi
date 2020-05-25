@@ -9,19 +9,14 @@
       </b-input-group-append>
     </b-input-group>
     <b-list-group v-if="!!directories">
-      <Directory
-        class="p-1"
-        v-for="dir in directories.results"
-        :key="dir.id"
-        :id="dir.id"
-        @click="select_dir(dir)"
-      />
+      <Directory :directory="directories" @click="select_dir($event)" />
     </b-list-group>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "../main";
+import _ from "lodash";
 import { BIconXSquare } from "bootstrap-vue";
 import Directory from "@/components/Directory.vue";
 export default {
@@ -48,7 +43,7 @@ export default {
   },
   asyncComputed: {
     directories() {
-      var payload = { is_top: true };
+      var payload = {};
       if (this.dir_label_search != "") {
         payload["label"] = this.dir_label_search;
       }
@@ -64,7 +59,7 @@ export default {
         params: payload
       }).then(
         results => {
-          return results.data;
+          return this.nest_directories(results.data);
         },
         error => {
           console.log(error);
@@ -73,10 +68,49 @@ export default {
     }
   },
   methods: {
+    nest_directories(dirlist) {
+      const find_parent = function(tree, dir) {
+        console.log("Checking " + dir.label);
+        if (tree.id == dir.parent_directory) {
+          console.log(dir.label + " child of " + tree.label);
+          // Prepare the directory to gain children
+          dir["children"] = [];
+          tree.children.push(dir);
+          return tree;
+        } else {
+          for (var i = 0; i < tree.children.length; i++) {
+            console.log(
+              "Going down the stack to child " + tree.children[i].label
+            );
+            const res = find_parent(tree.children[i], dir);
+            if (_.isObject(res)) {
+              tree.children[i].children.push(res);
+            } else {
+              return tree;
+            }
+          }
+        }
+      };
+
+      // Start with the top directory
+      var dirtree = dirlist[0];
+      dirtree["children"] = [];
+      console.log("Root is " + dirtree.label);
+      console.log(dirlist.length + " total directories");
+      for (var a = 1; a < dirlist.length; a++) {
+        console.log("Looping at: " + a);
+        dirtree = find_parent(dirtree, dirlist[a]);
+      }
+      console.log(dirtree);
+      return dirtree;
+    },
     select_dir(dir) {
       this.$emit("input", dir);
       window.scrollTo(0, 0);
     }
+  },
+  mounted() {
+    console.log(this.directories);
   }
 };
 </script>
