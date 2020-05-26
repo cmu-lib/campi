@@ -49,6 +49,9 @@ export default {
   asyncComputed: {
     directories() {
       var payload = {};
+      if (this.dir_label_search != "") {
+        payload["label"] = this.dir_label_search;
+      }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
       }
@@ -107,6 +110,13 @@ export default {
     select_dir(dir) {
       this.$emit("input", dir);
       window.scrollTo(0, 0);
+    }
+  },
+  watch: {
+    dir_label_search() {
+      if (this.dir_label_search != "") {
+        this.show_all = true;
+      }
     }
   },
   mounted() {

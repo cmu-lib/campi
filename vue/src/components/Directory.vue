@@ -1,5 +1,5 @@
 <template>
-  <b-list-group-item v-if="!!directory" :active="directory.text_match" class="my-0 py-1 mr-0 pr-0">
+  <b-list-group-item v-if="!!directory" class="my-0 py-1 mr-0 pr-0">
     <div class="d-flex justify-content-between align-items-center">
       <BIconFolderPlus v-if="(directory.children.length > 0) & !expanded" @click="expanded=true" />
       <BIconFolderMinus

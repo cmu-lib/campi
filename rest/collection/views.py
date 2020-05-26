@@ -1,6 +1,6 @@
 from django import forms
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q
+from django.db.models import Count, Q, BooleanField, ExpressionWrapper
 from rest_framework import viewsets
 from collection import serializers, models
 from django_filters import rest_framework as filters
@@ -8,10 +8,10 @@ from campi.views import GetSerializerClassMixin
 
 
 class DirectoryFilter(filters.FilterSet):
-    # label = filters.CharFilter(
-    #     help_text="Directories containing this text in their label",
-    #     lookup_expr="icontains",
-    # )
+    label = filters.CharFilter(
+        help_text="Directories containing this text in their label",
+        lookup_expr="icontains",
+    )
 
     # digitized_date = filters.DateFromToRangeFilter(
     #     field_name="immediate_photographs__digitized_date", distinct=True
@@ -41,8 +41,9 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
+        qs = self.queryset
         if "digitized_date_before" in self.request.GET:
-            return models.Directory.objects.annotate(
+            qs = qs.annotate(
                 n_images=Count(
                     "immediate_photographs",
                     distinct=True,
@@ -53,8 +54,8 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
                     ),
                 )
             )
-        elif "digitized_date_after" in self.request.GET:
-            return models.Directory.objects.annotate(
+        if "digitized_date_after" in self.request.GET:
+            qs = qs.annotate(
                 n_images=Count(
                     "immediate_photographs",
                     distinct=True,
@@ -65,5 +66,5 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
                     ),
                 )
             )
-        else:
-            return self.queryset
+
+        return qs
