@@ -48,7 +48,7 @@ export default {
   },
   asyncComputed: {
     directories() {
-      var payload = {};
+      var payload = { ordering: "label" };
       if (this.dir_label_search != "") {
         payload["label"] = this.dir_label_search;
       }
