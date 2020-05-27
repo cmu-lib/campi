@@ -68,3 +68,18 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
             )
 
         return qs
+
+
+class JobFilter(filters.FilterSet):
+    label = filters.CharFilter(
+        help_text="Jobs containing this text in their label", lookup_expr="icontains"
+    )
+
+
+class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = models.Job.objects.annotate(n_images=Count("photographs", distinct=True))
+    serializer_class = serializers.JobListSerializer
+    serializer_action_classes = {"list": serializers.JobListSerializer}
+    filterset_class = JobFilter
+    ordering_fields = ["job_code", "label", "date_start", "date_end"]
+    queryset_action_classes = {"list": queryset, "detail": queryset}

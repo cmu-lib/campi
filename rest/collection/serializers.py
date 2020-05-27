@@ -45,3 +45,20 @@ class DirectoryDetailSerializer(serializers.HyperlinkedModelSerializer):
             "parent_directory",
             "child_directories",
         ]
+
+
+class JobListSerializer(serializers.HyperlinkedModelSerializer):
+    n_images = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = collection_models.Job
+        fields = [
+            "id",
+            "url",
+            "label",
+            "description",
+            "job_code",
+            "date_start",
+            "date_end",
+            "n_images",
+        ]

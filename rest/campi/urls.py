@@ -9,6 +9,7 @@ from drf_yasg import openapi
 router = routers.DefaultRouter()
 router.register(r"photograph", photograph.views.PhotographViewSet)
 router.register(r"directory", collection.views.DirectoryViewSet)
+router.register(r"job", collection.views.JobViewSet)
 
 
 schema_view = get_schema_view(

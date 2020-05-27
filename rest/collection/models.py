@@ -28,5 +28,11 @@ class Job(
     campi.models.descriptionModel,
     campi.models.userModifiedModel,
 ):
+    job_code = models.CharField(
+        blank=True,
+        unique=True,
+        max_length=20,
+        help_text="custom code used for this job",
+    )
     date_start = models.DateField()
     date_end = models.DateField()
