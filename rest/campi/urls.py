@@ -10,6 +10,7 @@ router = routers.DefaultRouter()
 router.register(r"photograph", photograph.views.PhotographViewSet)
 router.register(r"directory", collection.views.DirectoryViewSet)
 router.register(r"job", collection.views.JobViewSet)
+router.register(r"job_tag", collection.views.JobTagViewSet)
 
 
 schema_view = get_schema_view(

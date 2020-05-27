@@ -1,7 +1,9 @@
 from django import forms
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from django.db.models import Count, Q, BooleanField, ExpressionWrapper
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from collection import serializers, models
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
@@ -83,3 +85,39 @@ class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     filterset_class = JobFilter
     ordering_fields = ["job_code", "label", "date_start", "date_end"]
     queryset_action_classes = {"list": queryset, "detail": queryset}
+
+
+class JobTagFilter(filters.FilterSet):
+    label = filters.CharFilter(
+        help_text="Job tags contianing this text in their label",
+        lookup_expr="icontains",
+    )
+
+
+class JobTagViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = models.JobTag.objects.annotate(
+        n_jobs=Count("jobs", distinct=True),
+        n_images=Count("jobs__photographs", distinct=True),
+    )
+    serializer_class = serializers.JobTagSerializer
+    serializer_action_classes = {"list": serializers.JobTagSerializer}
+    filterset_class = JobTagFilter
+    ordering_fields = ["label"]
+    queryset_action_classes = {"list": queryset, "detail": queryset}
+
+    @transaction.atomic
+    @action(detail=True, methods=["post"], name="Merge target tags into this one")
+    def merge(self, request):
+        obj = self.get_object()
+        raw_id_list = serializers.JobTagIdList(request.GET)
+        if raw_id_list.is_valid():
+            response_result = []
+            validated_data = raw_id_list.validated_data
+            for job_tag in validated_data["job_tags"]:
+                res = obj.merge(job_tag)
+                response_result.append(
+                    {"deleted_job_tag": job_tag.label, "affected_records": res}
+                )
+            return Response(response_result, status=status.HTTP_200_OK)
+        else:
+            return Response(raw_id_list.errors, status=status.HTTP_400_BAD_REQUEST)

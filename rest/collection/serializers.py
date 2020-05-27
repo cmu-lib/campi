@@ -62,3 +62,18 @@ class JobListSerializer(serializers.HyperlinkedModelSerializer):
             "date_end",
             "n_images",
         ]
+
+
+class JobTagSerializer(serializers.HyperlinkedModelSerializer):
+    n_jobs = serializers.IntegerField(read_only=True)
+    n_images = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = collection_models.JobTag
+        fields = ["id", "url", "label", "description", "n_jobs", "n_images"]
+
+
+class JobTagIdList(serializers.Serializer):
+    job_tags = serializers.PrimaryKeyRelatedField(
+        queryset=collection_models.JobsTags.objects.all(), many=True
+    )
