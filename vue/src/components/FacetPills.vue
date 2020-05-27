@@ -5,6 +5,11 @@
       <span class="mx-2">{{ directory.label }}</span>
       <BIconXCircle @click="$emit('clear_directory')" />
     </b-button>
+    <b-button class="mx-1" v-if="!!job" pill variant="info" size="sm">
+      <BIconCamera />
+      <span class="mx-2">{{ job.label }}</span>
+      <BIconXCircle @click="$emit('clear_job')" />
+    </b-button>
     <b-button class="mx-1" v-if="show_range" pill variant="secondary" size="sm">
       <BIconCalendarFill />
       <span class="mx-2">Digitized: {{ digitized_date_range[0] }}-{{ digitized_date_range[1] }}</span>
@@ -17,7 +22,8 @@
 import {
   BIconXCircle,
   BIconFolderFill,
-  BIconCalendarFill
+  BIconCalendarFill,
+  BIconCamera
 } from "bootstrap-vue";
 
 export default {
@@ -25,10 +31,12 @@ export default {
   components: {
     BIconXCircle,
     BIconFolderFill,
-    BIconCalendarFill
+    BIconCalendarFill,
+    BIconCamera
   },
   props: {
     directory: Object,
+    job: Object,
     digitized_date_range: Array
   },
   computed: {

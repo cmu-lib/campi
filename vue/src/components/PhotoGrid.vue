@@ -2,7 +2,12 @@
   <b-container fluid v-if="!!images">
     <b-row align-h="center">
       <p>{{ images.count }} results</p>
-      <b-pagination v-model="current_page" :total-rows="images.count" :per-page="100" />
+      <b-pagination
+        v-model="current_page"
+        v-if="images.count>per_page"
+        :total-rows="images.count"
+        :per-page="per_page"
+      />
     </b-row>
     <b-row flex align-h="center">
       <router-link
@@ -26,6 +31,9 @@ export default {
     directory: {
       default: null
     },
+    job: {
+      default: null
+    },
     digitized_date_before: {
       type: Number,
       default: null
@@ -33,6 +41,10 @@ export default {
     digitized_date_after: {
       type: Number,
       default: null
+    },
+    per_page: {
+      type: Number,
+      default: 96
     }
   },
   data() {
@@ -45,6 +57,9 @@ export default {
       var payload = { offset: this.rest_page, ordering: "-digitized_date" };
       if (!!this.directory) {
         payload["directory"] = this.directory.id;
+      }
+      if (!!this.job) {
+        payload["job"] = this.job.id;
       }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;

@@ -73,9 +73,18 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
 
 
 class JobFilter(filters.FilterSet):
-    label = filters.CharFilter(
-        help_text="Jobs containing this text in their label", lookup_expr="icontains"
+    text = filters.CharFilter(
+        help_text="Jobs containing this text in their label or job ID number",
+        method="job_text_search",
     )
+
+    def job_text_search(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                Q(label__icontains=value) | Q(job_code__icontains=value)
+            )
+        else:
+            return queryset
 
 
 class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):

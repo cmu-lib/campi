@@ -8,16 +8,20 @@
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />
+        <Jobs v-model="job" :digitized_date_before="dd_before" :digitized_date_after="dd_after" />
       </b-col>
       <b-col cols="9">
         <FacetPills
           :directory="directory"
           :digitized_date_range="digitized_date_range"
+          :job="job"
           @clear_directory="directory=null"
+          @clear_job="job=null"
           @clear_date_range="reset_date()"
         />
         <PhotoGrid
           :directory="directory"
+          :job="job"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />
@@ -32,16 +36,18 @@ import PhotoGrid from "@/components/PhotoGrid.vue";
 import FacetPills from "@/components/FacetPills.vue";
 import Directories from "@/components/Directories.vue";
 import DigitizedDate from "@/components/DigitizedDate.vue";
+import Jobs from "@/components/Jobs.vue";
 export default {
   name: "Browse",
   components: {
     PhotoGrid,
     FacetPills,
     Directories,
-    DigitizedDate
+    DigitizedDate,
+    Jobs
   },
   data() {
-    return { directory: null, digitized_date_range: [2003, 2020] };
+    return { directory: null, job: null, digitized_date_range: [2003, 2020] };
   },
   methods: {
     reset_date() {

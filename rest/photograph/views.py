@@ -22,11 +22,13 @@ class PhotographFilter(filters.FilterSet):
     date_taken_early = filters.DateFromToRangeFilter()
     date_taken_late = filters.DateFromToRangeFilter()
     digitized_date = filters.DateFromToRangeFilter()
+    job = filters.ModelChoiceFilter(queryset=collection.models.Job.objects.all())
 
     class Meta:
         model = models.Photograph
         fields = [
             "directory",
+            "job",
             "all_directories",
             "date_taken_early",
             "date_taken_late",

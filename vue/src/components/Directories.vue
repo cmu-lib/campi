@@ -118,9 +118,6 @@ export default {
         this.show_all = true;
       }
     }
-  },
-  mounted() {
-    console.log(this.directories);
   }
 };
 </script>
