@@ -30,9 +30,9 @@ wipe: blank
 	docker-compose exec postgres psql -U app -d postgres -c 'CREATE DATABASE campi;'
 	$(MAKE) restart
 dumpusers:
-	docker-compose exec web python manage.py dumpdata --indent 2 auth authtoken -e auth.permission -o users.json
+	docker-compose exec rest python manage.py dumpdata --indent 2 auth authtoken -e auth.permission -o /vol/data/users.json
 restoreusers:
-	docker-compose exec web python manage.py loaddata users.json
+	docker-compose exec rest python manage.py loaddata /vol/data/users.json
 backup:
 	docker-compose exec postgres pg_dump -U app -d campi > data/bkp/bk.sql
 restore: wipe
