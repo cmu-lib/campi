@@ -2,7 +2,6 @@
   <b-container fluid>
     <b-row>
       <b-col cols="3">
-        <DigitizedDate v-model="digitized_date_range" :directory="directory" />
         <JobTags
           v-model="job_tag"
           :directory="directory"
@@ -52,7 +51,6 @@
 import PhotoGrid from "@/components/PhotoGrid.vue";
 import FacetPills from "@/components/FacetPills.vue";
 import Directories from "@/components/Directories.vue";
-import DigitizedDate from "@/components/DigitizedDate.vue";
 import Jobs from "@/components/Jobs.vue";
 import JobTags from "@/components/JobTags.vue";
 export default {
@@ -61,7 +59,6 @@ export default {
     PhotoGrid,
     FacetPills,
     Directories,
-    DigitizedDate,
     Jobs,
     JobTags
   },
@@ -70,17 +67,17 @@ export default {
       directory: null,
       job: null,
       job_tag: null,
-      digitized_date_range: [2003, 2020]
+      digitized_date_range: [2016, 2020]
     };
   },
   methods: {
     reset_date() {
-      this.digitized_date_range = [2003, 2020];
+      this.digitized_date_range = [2016, 2020];
     }
   },
   computed: {
     dd_after() {
-      if (this.digitized_date_range[0] != 2003) {
+      if (this.digitized_date_range[0] != 2016) {
         return this.digitized_date_range[0];
       }
       return null;
