@@ -23,8 +23,7 @@ export default {
       logged_in: false
     };
   },
-  methods: {},
-  updated: function() {
+  mounted() {
     return HTTP.get("/", {}).then(
       response => {
         console.log("Logged in");
