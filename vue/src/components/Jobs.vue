@@ -51,6 +51,10 @@ export default {
     job_tag: {
       type: Object,
       default: null
+    },
+    directory: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -84,6 +88,9 @@ export default {
       }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;
+      }
+      if (!!this.directory) {
+        payload["directory"] = this.directory.id;
       }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;

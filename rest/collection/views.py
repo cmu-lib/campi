@@ -80,6 +80,9 @@ class JobFilter(filters.FilterSet):
     job_tag = filters.ModelMultipleChoiceFilter(
         queryset=models.JobTag.objects.all(), field_name="tags"
     )
+    directory = filters.ModelChoiceFilter(
+        queryset=models.Directory.objects.all(), field_name="photographs__directory"
+    )
 
     def job_text_search(self, queryset, name, value):
         if value:
@@ -109,6 +112,10 @@ class JobTagFilter(filters.FilterSet):
     label = filters.CharFilter(
         help_text="Job tags contianing this text in their label",
         lookup_expr="icontains",
+    )
+    directory = filters.ModelChoiceFilter(
+        queryset=models.Directory.objects.all(),
+        field_name="jobs__photographs__directory",
     )
 
 

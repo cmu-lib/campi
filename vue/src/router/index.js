@@ -15,7 +15,8 @@ const routes = [
   {
     path: "/browse",
     name: "Browse",
-    component: Browse
+    component: Browse,
+    props: true
   },
   {
     path: "/browse/photograph/:id",

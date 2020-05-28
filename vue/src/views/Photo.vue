@@ -60,7 +60,7 @@ export default {
   methods: {
     render_dtree: function(d_obj, dtree) {
       const payload = {
-        href: "/api/collection/" + d_obj.id,
+        to: { name: "Browse", props: { directory: d_obj.id } },
         text: d_obj.label
       };
       dtree.push(payload);

@@ -3,10 +3,15 @@
     <b-row>
       <b-col cols="3">
         <DigitizedDate v-model="digitized_date_range" :directory="directory" />
-        <JobTags v-model="job_tag" :digitized_date_range="digitized_date_range" />
+        <JobTags
+          v-model="job_tag"
+          :directory="directory"
+          :digitized_date_range="digitized_date_range"
+        />
         <Jobs
           v-model="job"
           :job_tag="job_tag"
+          :directory="directory"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />

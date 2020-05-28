@@ -40,6 +40,14 @@ export default {
       type: Object,
       default: null
     },
+    directory: {
+      type: Object,
+      default: null
+    },
+    job: {
+      type: Object,
+      default: null
+    },
     digitized_date_before: {
       type: Number,
       default: null
@@ -74,6 +82,12 @@ export default {
       };
       if (this.job_tag_label_search != "") {
         payload["label"] = this.job_tag_label_search;
+      }
+      if (!!this.job) {
+        payload["job"] = this.job.id;
+      }
+      if (!!this.directory) {
+        payload["directory"] = this.directory.id;
       }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
