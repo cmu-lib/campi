@@ -81,7 +81,7 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
 class JobFilter(filters.FilterSet):
     text = filters.CharFilter(
         help_text="Jobs containing this text in their label or job ID number",
-        method="text",
+        method="search_text",
     )
     job_tag = filters.ModelMultipleChoiceFilter(
         queryset=models.JobTag.objects.all(), field_name="tags"
@@ -90,8 +90,8 @@ class JobFilter(filters.FilterSet):
         queryset=models.Directory.objects.all(), field_name="photographs__directory"
     )
 
-    def job_text_search(self, queryset, name, value):
-        if value:
+    def search_text(self, queryset, name, value):
+        if value != "":
             return queryset.filter(
                 Q(label__icontains=value) | Q(job_code__icontains=value)
             )
