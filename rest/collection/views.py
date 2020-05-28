@@ -77,6 +77,9 @@ class JobFilter(filters.FilterSet):
         help_text="Jobs containing this text in their label or job ID number",
         method="job_text_search",
     )
+    tag = filters.ModelMultipleChoiceFilter(
+        queryset=models.JobTag.objects.all(), field_name="tags"
+    )
 
     def job_text_search(self, queryset, name, value):
         if value:
@@ -90,10 +93,16 @@ class JobFilter(filters.FilterSet):
 class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.Job.objects.annotate(n_images=Count("photographs", distinct=True))
     serializer_class = serializers.JobListSerializer
-    serializer_action_classes = {"list": serializers.JobListSerializer}
+    serializer_action_classes = {
+        "list": serializers.JobListSerializer,
+        "detail": serializers.JobDetailSerializer,
+    }
     filterset_class = JobFilter
     ordering_fields = ["job_code", "label", "date_start", "date_end"]
-    queryset_action_classes = {"list": queryset, "detail": queryset}
+    queryset_action_classes = {
+        "list": queryset,
+        "detail": queryset.prefetch_related("tags"),
+    }
 
 
 class JobTagFilter(filters.FilterSet):
@@ -111,7 +120,7 @@ class JobTagViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     serializer_class = serializers.JobTagSerializer
     serializer_action_classes = {"list": serializers.JobTagSerializer}
     filterset_class = JobTagFilter
-    ordering_fields = ["label"]
+    ordering_fields = ["label", "n_jobs", "n_images"]
     queryset_action_classes = {"list": queryset, "detail": queryset}
 
     @transaction.atomic

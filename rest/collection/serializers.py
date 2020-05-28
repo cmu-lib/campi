@@ -64,6 +64,25 @@ class JobListSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
+class JobDetailSerializer(serializers.HyperlinkedModelSerializer):
+    n_images = serializers.IntegerField(read_only=True)
+    tags = serializers.SlugRelatedField(read_only=True, slug_field="label", many=True)
+
+    class Meta:
+        model = collection_models.Job
+        fields = [
+            "id",
+            "url",
+            "label",
+            "description",
+            "job_code",
+            "date_start",
+            "date_end",
+            "n_images",
+            "tags",
+        ]
+
+
 class JobTagSerializer(serializers.HyperlinkedModelSerializer):
     n_jobs = serializers.IntegerField(read_only=True)
     n_images = serializers.IntegerField(read_only=True)

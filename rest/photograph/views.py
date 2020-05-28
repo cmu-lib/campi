@@ -13,7 +13,7 @@ from campi.views import GetSerializerClassMixin
 
 
 class PhotographFilter(filters.FilterSet):
-    directory = filters.ModelChoiceFilter(
+    directory = filters.ModelMultipleChoiceFilter(
         queryset=collection.models.Directory.objects.all()
     )
     all_directories = filters.ModelChoiceFilter(
