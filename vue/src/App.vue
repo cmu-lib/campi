@@ -26,7 +26,6 @@ export default {
   mounted() {
     return HTTP.get("/", {}).then(
       response => {
-        console.log("Logged in");
         this.logged_in = !!response;
       },
       error => {
