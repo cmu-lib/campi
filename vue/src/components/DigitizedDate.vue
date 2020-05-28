@@ -26,7 +26,7 @@ export default {
   data() {
     return {
       digitized_date_range: [],
-      start_date: 2003,
+      start_date: 2016,
       end_date: 2020
     };
   },

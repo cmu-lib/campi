@@ -50,7 +50,7 @@ export default {
   computed: {
     show_range() {
       return !(
-        this.digitized_date_range[0] == 2003 &&
+        this.digitized_date_range[0] == 2016 &&
         this.digitized_date_range[1] == 2020
       );
     }
