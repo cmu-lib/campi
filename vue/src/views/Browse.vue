@@ -1,58 +1,11 @@
 <template>
-  <b-container fluid>
-    <b-row>
-      <b-col cols="3">
-        <JobTags
-          v-model="job_tag"
-          :directory="directory"
-          :job="job"
-          :digitized_date_range="digitized_date_range"
-        />
-        <Jobs
-          v-model="job"
-          :job_tag="job_tag"
-          :directory="directory"
-          :digitized_date_before="dd_before"
-          :digitized_date_after="dd_after"
-        />
-        <Directories
-          v-model="directory"
-          :job_tag="job_tag"
-          :job="job"
-          :digitized_date_before="dd_before"
-          :digitized_date_after="dd_after"
-        />
-      </b-col>
-      <b-col cols="9">
-        <FacetPills
-          :directory="directory"
-          :digitized_date_range="digitized_date_range"
-          :job="job"
-          :job_tag="job_tag"
-          @clear_directory="directory=null"
-          @clear_job="job=null"
-          @clear_job_tag="job_tag=null"
-          @clear_date_range="reset_date()"
-        />
-        <PhotoGrid
-          :directory="directory"
-          :job="job"
-          :job_tag="job_tag"
-          :digitized_date_before="dd_before"
-          :digitized_date_after="dd_after"
-        />
-      </b-col>
-    </b-row>
-  </b-container>
+  <BrowseInterface :directory="directory" :job="job" :job_tag="job_tag" />
 </template>
 
 <script>
 // @ is an alias to /src
-import PhotoGrid from "@/components/PhotoGrid.vue";
-import FacetPills from "@/components/FacetPills.vue";
-import Directories from "@/components/Directories.vue";
-import Jobs from "@/components/Jobs.vue";
-import JobTags from "@/components/JobTags.vue";
+import { HTTP } from "../main";
+import BrowseInterface from "@/components/BrowseInterface.vue";
 export default {
   name: "Browse",
   components: {
@@ -62,31 +15,62 @@ export default {
     Jobs,
     JobTags
   },
-  data() {
-    return {
-      directory: null,
-      job: null,
-      job_tag: null,
-      digitized_date_range: [2016, 2020]
-    };
-  },
-  methods: {
-    reset_date() {
-      this.digitized_date_range = [2016, 2020];
+  props: {
+    directory_id: {
+      type: Number,
+      default: null
+    },
+    job_id: {
+      type: Number,
+      default: null
+    },
+    job_tag_id: {
+      type: Number,
+      default: null
     }
   },
-  computed: {
-    dd_after() {
-      if (this.digitized_date_range[0] != 2016) {
-        return this.digitized_date_range[0];
+  asyncComputed: {
+    directory() {
+      if (!!directory_id) {
+        return HTTP.get("/directory/" + this.directory_id + "/").then(
+          results => {
+            return results.data;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
       }
-      return null;
     },
-    dd_before() {
-      if (this.digitized_date_range[1] != 2020) {
-        return this.digitized_date_range[1];
+    job() {
+      if (!!job_id) {
+        return HTTP.get("/job/" + this.job_id + "/").then(
+          results => {
+            return results.data;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
       }
-      return null;
+    },
+    job_tag() {
+      if (!!job_tag_id) {
+        return HTTP.get("/job_id/" + this.job_tag_id + "/").then(
+          results => {
+            return results.data;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
+      }
     }
   }
 };

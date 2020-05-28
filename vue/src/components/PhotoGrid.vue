@@ -14,8 +14,6 @@
         v-for="image in images.results"
         :key="image.id"
         :to="{name: 'Photo', params: {id: image.id}}"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         <b-img lazy :src="image.image.square" blank-width="150" blank-height="150" />
       </router-link>

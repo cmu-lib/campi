@@ -16,7 +16,11 @@ const routes = [
     path: "/browse",
     name: "Browse",
     component: Browse,
-    props: true
+    props: (route) => ({
+      job: route.query.job,
+      job_id: route.query.job,
+      directory: route.query.directory
+    })
   },
   {
     path: "/browse/photograph/:id",
