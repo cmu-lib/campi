@@ -68,9 +68,6 @@ export default {
           "digitized_date_before"
         ] = `${this.digitized_date_before}-01-01`;
       }
-      if (!!this.job) {
-        payload["job"] = this.job.id;
-      }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;
       }
