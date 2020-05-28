@@ -20,7 +20,8 @@
       <b-list-group-item
         v-if="additional_jobs"
         class="my-0 py-1 mr-0 pr-0"
-        @click="see_more_jobs"
+        @click="show_more"
+        variant="secondary"
       >Show more...</b-list-group-item>
     </b-list-group>
   </b-card>
@@ -117,7 +118,7 @@ export default {
         return job.job_code;
       }
     },
-    see_more_jobs() {
+    show_more() {
       this.show_total += this.page_size;
     },
     select_job(job) {

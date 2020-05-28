@@ -22,6 +22,7 @@
         v-if="additional_job_tags"
         class="my-0 py-1 mr-0 pr-0"
         @click="show_more"
+        variant="secondary"
       >Show more...</b-list-group-item>
     </b-list-group>
   </b-card>
@@ -119,6 +120,7 @@ export default {
     },
     select_job_tag(job_tag) {
       this.$emit("input", job_tag);
+      window.scrollTo(0, 0);
     }
   }
 };
