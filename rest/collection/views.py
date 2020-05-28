@@ -75,9 +75,9 @@ class DirectoryViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
 class JobFilter(filters.FilterSet):
     text = filters.CharFilter(
         help_text="Jobs containing this text in their label or job ID number",
-        method="job_text_search",
+        method="text",
     )
-    tag = filters.ModelMultipleChoiceFilter(
+    job_tag = filters.ModelMultipleChoiceFilter(
         queryset=models.JobTag.objects.all(), field_name="tags"
     )
 
@@ -98,7 +98,7 @@ class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         "detail": serializers.JobDetailSerializer,
     }
     filterset_class = JobFilter
-    ordering_fields = ["job_code", "label", "date_start", "date_end"]
+    ordering_fields = ["job_code", "label", "date_start", "date_end", "n_images"]
     queryset_action_classes = {
         "list": queryset,
         "detail": queryset.prefetch_related("tags"),

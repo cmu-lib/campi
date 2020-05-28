@@ -23,6 +23,9 @@ class PhotographFilter(filters.FilterSet):
     date_taken_late = filters.DateFromToRangeFilter()
     digitized_date = filters.DateFromToRangeFilter()
     job = filters.ModelChoiceFilter(queryset=collection.models.Job.objects.all())
+    job_tag = filters.ModelChoiceFilter(
+        queryset=collection.models.JobTag.objects.all(), field_name="job__tags"
+    )
 
     class Meta:
         model = models.Photograph
@@ -33,6 +36,7 @@ class PhotographFilter(filters.FilterSet):
             "date_taken_early",
             "date_taken_late",
             "digitized_date",
+            "job_tag",
         ]
 
 

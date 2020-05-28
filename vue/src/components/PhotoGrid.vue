@@ -34,6 +34,9 @@ export default {
     job: {
       default: null
     },
+    job_tag: {
+      default: null
+    },
     digitized_date_before: {
       type: Number,
       default: null
@@ -61,6 +64,9 @@ export default {
       if (!!this.job) {
         payload["job"] = this.job.id;
       }
+      if (!!this.job_tag) {
+        payload["job_tag"] = this.job_tag.id;
+      }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
       }
@@ -70,22 +76,6 @@ export default {
         ] = `${this.digitized_date_before}-01-01`;
       }
       return HTTP.get("/photograph/", {
-        params: payload
-      }).then(
-        results => {
-          return results.data;
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    },
-    top_level_directories() {
-      var payload = {};
-      if (this.dir_label_search != "") {
-        payload["label"] = this.dir_label_search;
-      }
-      return HTTP.get("/directory/", {
         params: payload
       }).then(
         results => {
