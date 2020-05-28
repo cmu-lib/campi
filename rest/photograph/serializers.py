@@ -5,6 +5,7 @@ import collection.serializers
 
 class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
+    job = collection.serializers.JobDetailSerializer()
 
     class Meta:
         model = models.Photograph
@@ -18,6 +19,8 @@ class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
             "date_taken_late",
             "digitized_date",
             "directory",
+            "job",
+            "job_sequence",
         ]
 
 

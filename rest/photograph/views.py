@@ -41,7 +41,7 @@ class PhotographFilter(filters.FilterSet):
 
 
 class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.Photograph.objects.select_related("directory").all()
+    queryset = models.Photograph.objects.select_related("directory", "job").all()
     ordering_fields = ["date_taken_early", "date_taken_late", "digitized_date"]
     filterset_class = PhotographFilter
     serializer_class = serializers.PhotographDetailSerializer

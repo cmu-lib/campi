@@ -1,17 +1,14 @@
 <template>
   <div v-if="!!image_data">
     <b-breadcrumb :items="directory_tree" />
+    <b-row v-if="!!image_data.job" flex align-h="between" class="m-3">
+      <b-link :to="{name: 'Browse'}">{{ job_display(image_data.job) }}</b-link>
+      <span>Taken between: {{ image_data.date_taken_early }} - {{ image_data.date_taken_late }}</span>
+      <span>File created: {{ image_data.digitized_date }}</span>
+      <b-button size="sm" variant="primary" :href="image_data.image.full">Download full image</b-button>
+    </b-row>
     <b-row>
-      <b-col cols="9">
-        <IIIF :info_url="image_data.image.info" />
-      </b-col>
-      <b-col cols="3">
-        <b-card :header="image_data.label">
-          <p>Taken between: {{ image_data.date_taken_early }} - {{ image_data.date_taken_late }}</p>
-          <p>File created: {{ image_data.digitized_date }}</p>
-          <b-button size="sm" variant="primary" :href="image_data.image.full">Download full image</b-button>
-        </b-card>
-      </b-col>
+      <IIIF :info_url="image_data.image.info" />
     </b-row>
   </div>
 </template>
@@ -68,6 +65,13 @@ export default {
         return this.render_dtree(d_obj.parent_directory, dtree);
       } else {
         return dtree;
+      }
+    },
+    job_display(job) {
+      if (job.label != job.job_code) {
+        return job.label + " (" + job.job_code + ")";
+      } else {
+        return job.job_code;
       }
     }
   }
