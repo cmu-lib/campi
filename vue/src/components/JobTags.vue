@@ -21,7 +21,7 @@
       <b-list-group-item
         v-if="additional_job_tags"
         class="my-0 py-1 mr-0 pr-0"
-        @click="see_more_job_tags"
+        @click="show_more"
       >Show more...</b-list-group-item>
     </b-list-group>
   </b-card>
@@ -63,22 +63,16 @@ export default {
   },
   data() {
     return {
-      job_tags: [],
-      offset: 0,
+      show_total: 10,
       job_tag_label_search: "",
       additional_job_tags: true
     };
   },
-  methods: {
-    see_more_job_tags() {
-      this.offset += this.page_size;
-      this.get_job_tags(this.offset);
-    },
-    get_job_tags(offset) {
+  computed: {
+    query_payload() {
       var payload = {
         ordering: "-n_images",
-        limit: this.page_size,
-        offset: offset
+        limit: this.page_size
       };
       if (this.job_tag_label_search != "") {
         payload["label"] = this.job_tag_label_search;
@@ -97,8 +91,13 @@ export default {
           "digitized_date_before"
         ] = `${this.digitized_date_before}-01-01`;
       }
+      return payload;
+    }
+  },
+  asyncComputed: {
+    job_tags() {
       return HTTP.get("/job_tag/", {
-        params: payload
+        params: this.query_payload
       }).then(
         results => {
           if (!!results.data.next) {
@@ -106,27 +105,21 @@ export default {
           } else {
             this.additional_job_tags = false;
           }
-          this.job_tags = this.job_tags.concat(results.data.results);
+          return results.data.results;
         },
         error => {
           console.log(error);
         }
       );
+    }
+  },
+  methods: {
+    show_more() {
+      this.show_total += this.page_size;
     },
     select_job_tag(job_tag) {
       this.$emit("input", job_tag);
-      window.scrollTo(0, 0);
     }
-  },
-  watch: {
-    job_tag_label_search() {
-      this.jobs = [];
-      this.offset = 0;
-      this.get_job_tags();
-    }
-  },
-  mounted() {
-    this.get_job_tags();
   }
 };
 </script>
