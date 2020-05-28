@@ -32,4 +32,5 @@ urlpatterns = [
         schema_view.without_ui(cache_timeout=0),
         name="schema-json",
     ),
+    path("api/silk/", include("silk.urls", namespace="silk")),
 ]

@@ -16,3 +16,5 @@ requests
 scipy
 drf-yasg
 lxml
+django-silk
+
