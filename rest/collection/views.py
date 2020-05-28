@@ -14,7 +14,13 @@ class DirectoryFilter(filters.FilterSet):
         help_text="Directories containing this text in their label",
         lookup_expr="icontains",
     )
-
+    job = filters.ModelChoiceFilter(
+        queryset=models.Job.objects.all(), field_name="immediate_photographs__job"
+    )
+    job_tag = filters.ModelChoiceFilter(
+        queryset=models.JobTag.objects.all(),
+        field_name="immediate_photographs__job__tags",
+    )
     # digitized_date = filters.DateFromToRangeFilter(
     #     field_name="immediate_photographs__digitized_date", distinct=True
     # )
@@ -116,6 +122,9 @@ class JobTagFilter(filters.FilterSet):
     directory = filters.ModelChoiceFilter(
         queryset=models.Directory.objects.all(),
         field_name="jobs__photographs__directory",
+    )
+    job = filters.ModelChoiceFilter(
+        queryset=models.Job.objects.all(), field_name="jobs"
     )
 
 

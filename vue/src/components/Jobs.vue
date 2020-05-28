@@ -59,29 +59,16 @@ export default {
   },
   data() {
     return {
-      jobs: [],
-      offset: 0,
+      show_total: 10,
       job_label_search: "",
       additional_jobs: true
     };
   },
-  methods: {
-    job_display(job) {
-      if (job.label != job.job_code) {
-        return job.label + " (" + job.job_code + ")";
-      } else {
-        return job.job_code;
-      }
-    },
-    see_more_jobs() {
-      this.offset += this.page_size;
-      this.get_jobs(this.offset);
-    },
-    get_jobs(offset) {
+  computed: {
+    query_payload() {
       var payload = {
         ordering: "-n_images",
-        limit: this.page_size,
-        offset: offset
+        limit: this.page_size
       };
       if (this.job_label_search != "") {
         payload["text"] = this.job_label_search;
@@ -100,8 +87,13 @@ export default {
           "digitized_date_before"
         ] = `${this.digitized_date_before}-01-01`;
       }
+      return payload;
+    }
+  },
+  asyncComputed: {
+    jobs() {
       return HTTP.get("/job/", {
-        params: payload
+        params: this.query_payload
       }).then(
         results => {
           if (!!results.data.next) {
@@ -109,32 +101,29 @@ export default {
           } else {
             this.additional_jobs = false;
           }
-          this.jobs = this.jobs.concat(results.data.results);
+          return results.data.results;
         },
         error => {
           console.log(error);
         }
       );
+    }
+  },
+  methods: {
+    job_display(job) {
+      if (job.label != job.job_code) {
+        return job.label + " (" + job.job_code + ")";
+      } else {
+        return job.job_code;
+      }
+    },
+    see_more_jobs() {
+      this.show_total += this.page_size;
     },
     select_job(job) {
       this.$emit("input", job);
       window.scrollTo(0, 0);
     }
-  },
-  watch: {
-    job_label_search() {
-      this.jobs = [];
-      this.page = 0;
-      this.get_jobs();
-    },
-    job_tag() {
-      this.jobs = [];
-      this.page = 0;
-      this.get_jobs();
-    }
-  },
-  mounted() {
-    this.get_jobs();
   }
 };
 </script>

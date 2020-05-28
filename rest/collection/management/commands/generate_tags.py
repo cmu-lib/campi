@@ -20,6 +20,6 @@ class Command(BaseCommand):
         for j in tqdm(all_labels):
             multi_tags = [s.lower().strip() for s in re.split(r"[,-/;]", j.label)]
             for t in multi_tags:
-                if t != "":
+                if t != "" and len(t) > 1:
                     tag = collection.models.JobTag.objects.get_or_create(label=t)[0]
                     j.tags.add(tag)

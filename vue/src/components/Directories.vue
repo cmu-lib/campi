@@ -38,6 +38,14 @@ export default {
     digitized_date_after: {
       type: Number,
       default: null
+    },
+    job: {
+      type: Object,
+      default: null
+    },
+    job_tag: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -46,8 +54,8 @@ export default {
       show_all: false
     };
   },
-  asyncComputed: {
-    directories() {
+  computed: {
+    query_payload() {
       var payload = { ordering: "label" };
       if (this.dir_label_search != "") {
         payload["label"] = this.dir_label_search;
@@ -60,8 +68,19 @@ export default {
           "digitized_date_before"
         ] = `${this.digitized_date_before}-01-01`;
       }
+      if (!!this.job) {
+        payload["job"] = this.job.id;
+      }
+      if (!!this.job_tag) {
+        payload["job_tag"] = this.job_tag.id;
+      }
+      return payload;
+    }
+  },
+  asyncComputed: {
+    directories() {
       return HTTP.get("/directory/", {
-        params: payload
+        params: this.query_payload
       }).then(
         results => {
           if (this.dir_label_search != "") {
@@ -102,10 +121,7 @@ export default {
       };
 
       // Start with the top directory
-      console.log(dirlist.length + " total directories");
-      var dirtree = createDataTree(dirlist);
-      console.log(dirtree);
-      return dirtree;
+      return createDataTree(dirlist);
     },
     select_dir(dir) {
       this.$emit("input", dir);
