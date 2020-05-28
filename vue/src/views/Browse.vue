@@ -47,7 +47,7 @@
 </template>
 
 <script>
-// @ is an alias to /src
+import { HTTP } from "../main";
 import PhotoGrid from "@/components/PhotoGrid.vue";
 import FacetPills from "@/components/FacetPills.vue";
 import Directories from "@/components/Directories.vue";
@@ -76,6 +76,19 @@ export default {
     }
   },
   computed: {
+    state_ids() {
+      var ids = {};
+      if (!!this.directory) {
+        ids["directory"] = this.directory.id;
+      }
+      if (!!this.job) {
+        ids["job"] = this.job.id;
+      }
+      if (!!this.job_tag) {
+        ids["job_tag"] = this.job_tag.id;
+      }
+      return ids;
+    },
     dd_after() {
       if (this.digitized_date_range[0] != 2016) {
         return this.digitized_date_range[0];
@@ -87,6 +100,45 @@ export default {
         return this.digitized_date_range[1];
       }
       return null;
+    }
+  },
+  watch: {
+    state_ids() {
+      this.$router.push({ name: "Browse", query: this.state_ids });
+    }
+  },
+  mounted() {
+    if (!!this.$route.query.directory) {
+      return HTTP.get("/directory/" + this.$route.query.directory + "/").then(
+        results => {
+          this.directory = results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
+
+    if (!!this.$route.query.job) {
+      return HTTP.get("/job/" + this.$route.query.job + "/").then(
+        results => {
+          this.job = results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
+
+    if (!!this.$route.query.job_tag) {
+      return HTTP.get("/job_tag/" + this.$route.query.job_tag + "/").then(
+        results => {
+          this.job_tag = results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
     }
   }
 };

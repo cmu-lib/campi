@@ -2,7 +2,9 @@
   <div v-if="!!image_data">
     <b-breadcrumb :items="directory_tree" />
     <b-row v-if="!!image_data.job" flex align-h="between" class="m-3">
-      <b-link :to="{name: 'Browse'}">{{ job_display(image_data.job) }}</b-link>
+      <b-link
+        :to="{name: 'Browse', query: {job: image_data.job.id}}"
+      >{{ job_display(image_data.job) }}</b-link>
       <span>Taken between: {{ image_data.date_taken_early }} - {{ image_data.date_taken_late }}</span>
       <span>File created: {{ image_data.digitized_date }}</span>
       <b-button size="sm" variant="primary" :href="image_data.image.full">Download full image</b-button>
@@ -22,7 +24,7 @@ export default {
     IIIF
   },
   props: {
-    id: Number
+    id: String
   },
   data() {
     return {};
@@ -57,7 +59,7 @@ export default {
   methods: {
     render_dtree: function(d_obj, dtree) {
       const payload = {
-        to: { name: "Browse", props: { directory: d_obj.id } },
+        to: { name: "Browse", query: { directory: d_obj.id } },
         text: d_obj.label
       };
       dtree.push(payload);
@@ -71,7 +73,7 @@ export default {
       if (job.label != job.job_code) {
         return job.label + " (" + job.job_code + ")";
       } else {
-        return job.job_code;
+        return job.job_code + " (no descriptive title)";
       }
     }
   }
