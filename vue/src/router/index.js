@@ -16,13 +16,14 @@ const routes = [
     path: "/browse",
     name: "Browse",
     component: Browse,
-    props: true
   },
   {
     path: "/browse/photograph/:id",
     name: "Photo",
     component: Photo,
-    props: true
+    props: (route) => {
+      return { id: Number(route.params.id) }
+    }
   }
 ]
 

@@ -24,7 +24,7 @@ export default {
     IIIF
   },
   props: {
-    id: String
+    id: Number
   },
   data() {
     return {};
