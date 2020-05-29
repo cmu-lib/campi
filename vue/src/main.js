@@ -21,7 +21,7 @@ axios.defaults.withCredentials = true;
 Vue.prototype.$APIConstants = {
   REST_PAGE_SIZE: 100,
   API_LOGIN: process.env.VUE_APP_API_ENDPOINT + "/auth/login/?next=/",
-  API_LOGOUT: process.env.VUE_APP_API_ENDPOINT + "/api/auth/logout/?next=/",
+  API_LOGOUT: process.env.VUE_APP_API_ENDPOINT + "/auth/logout/?next=/",
 }
 
 export const HTTP = axios.create({
