@@ -62,6 +62,11 @@ class Command(BaseCommand):
                     r"^.+/(?:\w+_)?(\d{2})(\d{2})(\d{2})_([A-Za-z0-9]+)[_\.]",
                     item["new"],
                 )
+                job_sequence_match = re.match(r"(\d+)\.", item["new"])
+                if job_sequence_match is not None:
+                    job_sequence = int(job_sequence_match.groups()[0])
+                else:
+                    job_sequence = None
                 if long_jobcode:
                     start_month = int(long_jobcode.groups()[1])
                     start_day = int(long_jobcode.groups()[2])
@@ -142,5 +147,6 @@ class Command(BaseCommand):
                 ),
                 directory=photo_directory,
                 job=job,
+                job_sequence=job_sequence,
             )
             newimage.save()
