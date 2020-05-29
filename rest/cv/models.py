@@ -31,11 +31,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel):
         https://pytorch.org/hub/pytorch_vision_inception_v3/
         """
 
-        n_photos = self.photographs.count()
-
-        if n_photos == 0:
-            Exception("Associate photographs with the current model first")
-
         print("Loading inception v3 model")
         model = torch.hub.load("pytorch/vision:v0.5.0", "resnet18", pretrained=True)
         print("Model downloaded. Begin eval")
@@ -60,9 +55,7 @@ class PyTorchModel(uniqueLabledModel, descriptionModel):
 
         for pic in tqdm(embeddings_to_be_calculated):
             try:
-                squared_small_path = (
-                    f"{pic.photograph.iiif_base}/full/299,299/0/default.jpg"
-                )
+                squared_small_path = f"{pic.iiif_base}/full/299,299/0/default.jpg"
 
                 res = requests.get(squared_small_path)
                 img = Image.open(BytesIO(res.content))
@@ -85,7 +78,7 @@ class PyTorchModel(uniqueLabledModel, descriptionModel):
                         pytorch_model=self, photograph=pic, array=embedding_list
                     )
             except:
-                print(f"Error processing {pic.photograph.full_image}")
+                print(f"Error processing {pic.full_image}")
                 continue
 
 
