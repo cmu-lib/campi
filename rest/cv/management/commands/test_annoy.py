@@ -1,13 +1,17 @@
 from django.core.management.base import BaseCommand
-from photograph import models as photograph_models
-from cv import models as cv_models
+import photograph
+import cv
 
 
 class Command(BaseCommand):
     help = "Test annoy indices"
 
     def handle(self, *args, **options):
-        e1 = cv_models.Embeddings.objects.first()
-        photoset = e1.get_nn(e1.photographs.first)
-        for pic in photoset:
-            print(pic.full_image)
+        buggypic = photograph.models.Photograph.objects.order_by(
+            "-digitized_date"
+        ).first()
+        e1 = cv.models.AnnoyIdx.objects.first()
+        print("starting to collect")
+        photoset = e1.get_nn(buggypic)
+        print("collected")
+        print(photoset)

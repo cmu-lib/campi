@@ -8,20 +8,19 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--model",
-            action="store_true",
+            "model",
+            nargs="+",
             help="Name of pytorch model whose embeddings have already been run",
-            type=str,
         )
         parser.add_argument(
             "--n_trees",
-            action="store_true",
             help="Nubmer of trees to grow for the model (50 is a good start)",
             type=int,
         )
 
     def handle(self, *args, **options):
-        pytorch_model = cv.models.PyTorchModel.objects.get(label=args["model"])
-        annoy_idx = AnnoyIdx(pytorch_model=pytorch_model, n_trees=args["n_trees"])
-        annoy_idx.save()
+        pytorch_model = cv.models.PyTorchModel.objects.get(label=options["model"][0])
+        annoy_idx = cv.models.AnnoyIdx.objects.get_or_create(
+            pytorch_model=pytorch_model, n_trees=options["n_trees"]
+        )[0]
         annoy_idx.generate_index()

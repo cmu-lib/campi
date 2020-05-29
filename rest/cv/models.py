@@ -2,7 +2,12 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.db import transaction
-from campi.models import uniqueLabledModel, descriptionModel, sequentialModel
+from campi.models import (
+    uniqueLabledModel,
+    descriptionModel,
+    sequentialModel,
+    dateModifiedModel,
+)
 import photograph
 import annoy
 import pickle
@@ -15,7 +20,7 @@ from tqdm import tqdm
 import numpy as np
 
 
-class PyTorchModel(uniqueLabledModel, descriptionModel):
+class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
     n_dimensions = models.PositiveIntegerField()
 
     # @classmethod
@@ -84,26 +89,34 @@ class PyTorchModel(uniqueLabledModel, descriptionModel):
 
 class AnnoyIdx(models.Model):
     pytorch_model = models.ForeignKey(
-        PyTorchModel, on_delete=models.CASCADE, related_name="%(class)s_ann_indices"
+        PyTorchModel, on_delete=models.CASCADE, related_name="pytorch_model_ann_indices"
     )
     n_trees = models.PositiveIntegerField()
     index_file = models.FilePathField(
         path=settings.DIST_INDICES_PATH, unique=True, null=True, blank=True
     )
 
-    @classmethod
-    @transaction.atomic
-    def create(cls, photograph_queryset, *args, **kwargs):
-        """
-        An index is only relevant for a specified corpus, so when creating an index you must specify the set of photogs to be covered by it
-        """
-        dm = cls(*args, **kwargs)
-        dm.save()
-        ordered_photoset = photograph_queryset.order_by("id")
-        for i, pic in enumerate(ordered_photoset):
-            IndexEmbedding.objects.create(annoy_idx=self, photograph=pic, sequence=i)
-        return dm
+    @property
+    def index_built(self):
+        return self.index_file is not None
 
+    class Meta:
+        unique_together = ("pytorch_model", "n_trees")
+
+    # @classmethod
+    # @transaction.atomic
+    # def create(cls, photograph_queryset, *args, **kwargs):
+    #     """
+    #     An index is only relevant for a specified corpus, so when creating an index you must specify the set of photogs to be covered by it
+    #     """
+    #     dm = cls(*args, **kwargs)
+    #     dm.save()
+    #     ordered_photoset = photograph_queryset.order_by("id")
+    #     for i, pic in enumerate(ordered_photoset):
+    #         IndexEmbedding.objects.create(annoy_idx=self, photograph=pic, sequence=i)
+    #     return dm
+
+    @transaction.atomic
     def generate_index(self, overwrite=False):
         if self.index_file is None:
             Exception(
@@ -113,6 +126,11 @@ class AnnoyIdx(models.Model):
             Exception(
                 f"Distance matrix '{self}' already has a built index at {self.index_file}. To overwrite, call generate_index(overwrite=True)"
             )
+
+        print("Registering embedding ordering")
+        ordered_embeddings = self.pytorch_model.embeddings.all().order_by("id")
+        for i, e in enumerate(ordered_embeddings):
+            IndexEmbedding.objects.create(annoy_idx=self, embedding=e, sequence=i)
 
         # Generate matrix
         disk_path = f"{settings.DIST_INDICES_PATH}/{self.id}.ix"
@@ -127,12 +145,12 @@ class AnnoyIdx(models.Model):
             else:
                 ix.add_item(pic.sequence, [0] * embed_dims)
         print("Building index")
-        ix.build(trees)
+        ix.build(n_trees=self.n_trees)
 
         self.index_file = disk_path
         self.save()
 
-    def get_nn(self, photograph, n_neighbors=8):
+    def get_nn(self, photo, n_neighbors=20):
         """
         Get n_neighbors approximate nearest neighbors
         """
@@ -145,10 +163,22 @@ class AnnoyIdx(models.Model):
         ix.load(self.index_file)
         print(ix.get_n_items())
         print(ix.get_n_trees())
-        nn_indices = ix.get_nns_by_item(1, n=n_neighbors)
-        print(nn_indices)
-        # get returns
-        return photograph.models.Photograph.objects.filter(id__in=nn_indices).all()
+        pic_index = (
+            self.indexed_embeddings.filter(embedding__photograph=photo).first().sequence
+        )
+        nn_indices, nn_distances = ix.get_nns_by_item(
+            pic_index, n=n_neighbors, include_distances=True
+        )
+
+        photographs = [
+            photograph.models.Photograph.objects.get(
+                embeddings__indexed_embeddings__annoy_idx=self,
+                embeddings__indexed_embeddings__sequence=i,
+            )
+            for i in nn_indices
+        ]
+
+        return {"photographs": photographs, "distances": nn_distances}
 
 
 class Embedding(models.Model):
@@ -177,3 +207,57 @@ class IndexEmbedding(sequentialModel):
 
     class Meta:
         unique_together = ("annoy_idx", "embedding", "sequence")
+
+
+class SimilarityMatchRun(dateModifiedModel):
+    pytorch_model = models.ForeignKey(
+        PyTorchModel, on_delete=models.CASCADE, related_name="similarity_match_runs"
+    )
+    annoy_idx = models.ForeignKey(
+        AnnoyIdx, on_delete=models.CASCADE, related_name="similarity_match_runs"
+    )
+    max_neighbors = models.PositiveIntegerField(
+        help_text="Number of nearest neighbors to request from the index.", default=20
+    )
+    cutoff_distance = models.FloatField(
+        help_text="Photographs returned from the index query farther away from the photograph will be excluded."
+    )
+
+    class Meta:
+        unique_together = (
+            "pytorch_model",
+            "annoy_idx",
+            "max_neighbors",
+            "cutoff_distance",
+        )
+
+
+class SimilarityMatchSet(dateModifiedModel):
+    similarity_match_run = models.ForeignKey(
+        SimilarityMatchRun,
+        on_delete=models.CASCADE,
+        related_name="similarity_match_sets",
+    )
+    seed_photograph = models.ForeignKey(
+        photograph.models.Photograph,
+        on_delete=models.CASCADE,
+        related_name="seeded_similarity_match_sets",
+    )
+
+    class Meta:
+        unique_together = ("similarity_match_run", "seed_photograph")
+
+
+class SimilarityMatchSetMembership(models.Model):
+    similarity_match_set = models.ForeignKey(
+        SimilarityMatchSet, on_delete=models.CASCADE, related_name="memberships"
+    )
+    photograph = models.ForeignKey(
+        photograph.models.Photograph,
+        on_delete=models.CASCADE,
+        related_name="similarity_match_memberships",
+    )
+    distance = models.FloatField()
+
+    class Meta:
+        unique_together = ("similarity_match_set", "photograph")

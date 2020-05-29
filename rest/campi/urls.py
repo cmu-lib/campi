@@ -3,6 +3,7 @@ from django.urls import include, path, re_path
 from rest_framework import routers
 import photograph.views
 import collection.views
+import cv.views
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -10,7 +11,8 @@ router = routers.DefaultRouter()
 router.register(r"photograph", photograph.views.PhotographViewSet)
 router.register(r"directory", collection.views.DirectoryViewSet)
 router.register(r"job", collection.views.JobViewSet)
-router.register(r"job_tag", collection.views.JobTagViewSet)
+router.register(r"pytorch_model", cv.views.PytorchModelViewset)
+router.register(r"annoy_idx", cv.views.AnnoyIdxViewset)
 
 
 schema_view = get_schema_view(
