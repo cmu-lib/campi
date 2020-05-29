@@ -30,17 +30,24 @@ class PytorchModelViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     ordering_fields = ["label", "date_created", "date_modified"]
 
 
+class AnnoyIdxFilter(filters.FilterSet):
+    pytorch_model = filters.ModelChoiceFilter(
+        queryset=models.PyTorchModel.objects.all(),
+        help_text="Indices built from this model's embeddings",
+    )
+
+
 class AnnoyIdxViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.AnnoyIdx.objects
+    queryset = models.AnnoyIdx.objects.select_related("pytorch_model").annotate(
+        n_images=Count("indexed_embeddings", distinct=True)
+    )
+    filterset_class = AnnoyIdxFilter
     serializer_class = serializers.AnnoyIdxListSerializer
     serializer_action_classes = {
         "list": serializers.AnnoyIdxListSerializer,
         "detail": serializers.AnnoyIdxListSerializer,
     }
-    queryset_action_classes = {
-        "list": queryset.select_related("pytorch_model"),
-        "detail": queryset.select_related("pytorch_model"),
-    }
+    queryset_action_classes = {"list": queryset, "detail": queryset}
 
     @action(
         detail=True, methods=["post"], name="Get nearest neighbors for a given object"

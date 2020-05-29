@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from "@/views/Home.vue"
 import Browse from '@/views/Browse.vue'
 import Photo from "@/views/Photo.vue"
+import Similarity from "@/views/Similarity.vue"
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,11 @@ const routes = [
     props: (route) => {
       return { id: Number(route.params.id) }
     }
+  },
+  {
+    path: "/similiarity",
+    name: "Similarity",
+    component: Similarity,
   }
 ]
 

@@ -4,19 +4,18 @@ import photograph.models
 
 
 class PytorchModelListSerializer(serializers.HyperlinkedModelSerializer):
-    pytorch_model_ann_indices = serializers.PrimaryKeyRelatedField(
-        many=True, read_only=True
-    )
-
     class Meta:
         model = models.PyTorchModel
-        fields = ["id", "url", "label", "n_dimensions", "pytorch_model_ann_indices"]
+        fields = ["id", "url", "label", "n_dimensions"]
 
 
 class AnnoyIdxListSerializer(serializers.HyperlinkedModelSerializer):
+    n_images = serializers.IntegerField(read_only=True)
+    pytorch_model = PytorchModelListSerializer()
+
     class Meta:
         model = models.AnnoyIdx
-        fields = ["id", "url", "pytorch_model", "n_trees", "index_built"]
+        fields = ["id", "url", "pytorch_model", "n_trees", "n_images", "index_built"]
 
 
 class AnnoyIdxGetNNSerializer(serializers.Serializer):
