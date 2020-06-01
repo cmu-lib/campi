@@ -76,7 +76,7 @@ export default {
     return {
       pytorch_model: null,
       annoy_idx: null,
-      n_neighbors: 10,
+      n_neighbors: 20,
       loaded: false
     };
   },
