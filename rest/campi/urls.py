@@ -11,6 +11,7 @@ router = routers.DefaultRouter()
 router.register(r"photograph", photograph.views.PhotographViewSet)
 router.register(r"directory", collection.views.DirectoryViewSet)
 router.register(r"job", collection.views.JobViewSet)
+router.register(r"job_tag", collection.views.JobTagViewSet)
 router.register(r"pytorch_model", cv.views.PytorchModelViewset)
 router.register(r"annoy_idx", cv.views.AnnoyIdxViewset)
 
