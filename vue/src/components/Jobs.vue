@@ -68,8 +68,8 @@ export default {
   computed: {
     query_payload() {
       var payload = {
-        ordering: "-n_images",
-        limit: this.page_size
+        ordering: "-n_images,label",
+        limit: this.show_total
       };
       if (this.job_label_search != "") {
         payload["text"] = this.job_label_search;
