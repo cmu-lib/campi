@@ -28,22 +28,25 @@
       </b-col>
       <b-col cols="9">
         <b-card no-body v-if="!!seed_image" header="Similarity results">
-          <b-list-group flush>
-            <b-list-group-item variant="primary">
-              <h4>Seed image</h4>
-              <PhotographListItem :photograph="seed_image" />
-            </b-list-group-item>
-
-            <b-list-group-item
-              v-for="img in nearest_neighbors"
-              :key="img.id"
-              :variant="pic_variant(img)"
-            >
-              <b-overlay v-if="!!nearest_neighbors" :show="!loaded">
-                <PhotographListItem :photograph="img" />
-              </b-overlay>
-            </b-list-group-item>
-          </b-list-group>
+          <div class="m-3">
+            <h4>Seed image</h4>
+            <PhotographListItem :photograph="seed_image" />
+          </div>
+          <div v-if="!!nearest_neighbors">
+            <hr />
+            <h4 class="ml-3">Nearest Neighbors</h4>
+            <b-list-group>
+              <b-list-group-item
+                v-for="img in nearest_neighbors"
+                :key="img.id"
+                :variant="pic_variant(img)"
+              >
+                <b-overlay v-if="!!nearest_neighbors" :show="!loaded">
+                  <PhotographListItem :photograph="img" />
+                </b-overlay>
+              </b-list-group-item>
+            </b-list-group>
+          </div>
         </b-card>
       </b-col>
     </b-row>
