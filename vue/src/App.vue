@@ -4,7 +4,6 @@
       <b-navbar-brand>CAMPI</b-navbar-brand>
       <b-navbar-nav v-if="logged_in">
         <b-nav-item :to="{name: 'Browse'}">Browse</b-nav-item>
-        <b-nav-item :to="{name: 'Similarity'}">Similarity</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <b-nav-item v-if="logged_in" :href="$APIConstants.API_LOGOUT">Logout</b-nav-item>

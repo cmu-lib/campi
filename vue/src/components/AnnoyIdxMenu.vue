@@ -5,13 +5,13 @@
       description="Which approximate nearest neighbor index should be used in the search?"
       label="Select index"
       label-for="idx-input"
+      :required="true"
     >
       <b-form-select
         id="idx-input"
-        v-if="!!annoy_idx_options"
+        :disabled="!pytorch_model"
         :options="annoy_idx_options"
         @input="$emit('input', $event)"
-        required="true"
       />
     </b-form-group>
   </div>
@@ -25,7 +25,7 @@ export default {
     value: null,
     pytorch_model: {
       type: Object,
-      required: true
+      default: null
     }
   },
   computed: {
@@ -34,7 +34,7 @@ export default {
         return this.annoy_idxs.map(x => {
           const text = x.n_images + " images - " + x.n_trees + " trees";
           return {
-            value: x.id,
+            value: x,
             text: text,
             disabled: !x.index_built
           };
@@ -46,16 +46,20 @@ export default {
   },
   asyncComputed: {
     annoy_idxs() {
-      return HTTP.get("/annoy_idx/", {
-        params: { pytorch_model: this.pytorch_model.id }
-      }).then(
-        results => {
-          return results.data.results;
-        },
-        error => {
-          console.log(error);
-        }
-      );
+      if (!!this.pytorch_model) {
+        return HTTP.get("/annoy_idx/", {
+          params: { pytorch_model: this.pytorch_model.id }
+        }).then(
+          results => {
+            return results.data.results;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
+      }
     }
   }
 };

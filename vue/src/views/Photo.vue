@@ -1,12 +1,18 @@
 <template>
   <div v-if="!!image_data">
     <b-breadcrumb :items="directory_tree" />
-    <b-row v-if="!!image_data.job" flex align-h="between" class="m-3">
+    <b-row flex align-h="between" class="m-3">
       <b-link
+        v-if="!!image_data.job"
         :to="{name: 'Browse', query: {job: image_data.job.id}}"
       >{{ job_display(image_data.job) }}</b-link>
       <span>Taken between: {{ image_data.date_taken_early }} - {{ image_data.date_taken_late }}</span>
       <span>File created: {{ image_data.digitized_date }}</span>
+      <b-button
+        size="sm"
+        variant="success"
+        :to="{name: 'Similarity', query: {photograph: image_data.id}}"
+      >Find similar photos</b-button>
       <b-button size="sm" variant="primary" :href="image_data.image.full">Download full image</b-button>
     </b-row>
     <b-row>

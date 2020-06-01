@@ -27,9 +27,15 @@ const routes = [
     }
   },
   {
-    path: "/similiarity",
+    path: "/similiarity/photograph/:id",
     name: "Similarity",
     component: Similarity,
+    props: (route) => {
+      return { seed_image_id: Number(route.params.id) }
+    },
+    scrollBehavior() {
+      return { x: 0, y: 0 }
+    }
   }
 ]
 

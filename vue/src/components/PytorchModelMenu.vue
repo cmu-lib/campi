@@ -5,13 +5,13 @@
       description="Which computer vision model should be used to determine similarity?"
       label="Select embeddings model"
       label-for="model-input"
+      :required="true"
     >
       <b-form-select
         id="model-help"
         v-if="!!pytorch_model_options"
         :options="pytorch_model_options"
         @input="$emit('input', $event)"
-        required="true"
       />
     </b-form-group>
   </div>
@@ -30,7 +30,7 @@ export default {
         return this.pytorch_models.map(x => {
           const text = x.label + " (" + x.n_dimensions + " dims)";
           return {
-            value: x.id,
+            value: x,
             text: text
           };
         });
