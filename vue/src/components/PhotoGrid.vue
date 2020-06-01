@@ -55,7 +55,11 @@ export default {
   },
   asyncComputed: {
     images() {
-      var payload = { offset: this.rest_page, ordering: "-digitized_date" };
+      var payload = {
+        offset: this.rest_page,
+        ordering: "-digitized_date",
+        limit: this.per_page
+      };
       if (!!this.directory) {
         payload["directory"] = this.directory.id;
       }
@@ -87,7 +91,7 @@ export default {
   },
   computed: {
     rest_page() {
-      return (this.current_page - 1) * 100;
+      return (this.current_page - 1) * this.per_page;
     }
   }
 };
