@@ -35,6 +35,7 @@
           @clear_date_range="reset_date()"
         />
         <PhotoGrid
+          :per_page="42"
           :directory="directory"
           :job="job"
           :job_tag="job_tag"
