@@ -142,3 +142,8 @@ STATIC_ROOT = "/vol/static_files"
 IMAGE_BASEURL = os.environ["IMAGE_BASEURL"]
 
 DIST_INDICES_PATH = os.environ["DIST_INDICES_PATH"]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", None)
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 25)
+DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_ADDRESS", None)
