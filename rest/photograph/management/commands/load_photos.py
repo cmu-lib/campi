@@ -43,15 +43,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         manifest = json.load(open(options["manifest"][0], "r"))
-        negatives = [
-            n
-            for n in manifest
-            if "0000_62_General_Photograph_Collection/Negatives/" in n["new"]
-        ]
+        negatives = [n for n in manifest]
         for item in tqdm(negatives):
             split_path = item["new"].split("/")[:-1]
             photo_directory = self.get_immediate_directory(split_path)
             year_match = re.match(r"^.+/((19|20)\d{2})\D", item["new"])
+            job_sequence = None
             if year_match:
                 start_year = int(year_match.groups()[0])
                 end_year = start_year
@@ -65,8 +62,6 @@ class Command(BaseCommand):
                 job_sequence_match = re.match(r"(\d+)\.", item["new"])
                 if job_sequence_match is not None:
                     job_sequence = int(job_sequence_match.groups()[0])
-                else:
-                    job_sequence = None
                 if long_jobcode:
                     start_month = int(long_jobcode.groups()[1])
                     start_day = int(long_jobcode.groups()[2])
