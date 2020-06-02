@@ -119,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-LOGIN_URL = "/api/auth/login/?next=/api/"
+LOGIN_URL = "/api/auth/login/?next=/"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
