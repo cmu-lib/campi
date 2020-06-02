@@ -29,6 +29,14 @@
         {{ photograph.directory.label }}
       </b-badge>
     </b-row>
+    <b-row>
+      <b-button
+        variant="info"
+        class="m-2"
+        size="sm"
+        :to="{name: 'Photo', params: {id: photograph.id}}"
+      >Go to detail</b-button>
+    </b-row>
   </b-media>
 </template>
 
