@@ -1,12 +1,13 @@
 <template>
   <b-container fluid v-if="!!images">
-    <b-row align-h="center">
-      <p>{{ images.count }} results</p>
+    <b-row align-h="center" align-v="center">
+      <p class="mr-auto">{{ images.count }} results</p>
       <b-pagination
         v-model="current_page"
         v-if="images.count>per_page"
         :total-rows="images.count"
         :per-page="per_page"
+        class="mr-auto"
       />
     </b-row>
     <b-row flex align-h="center">
@@ -17,6 +18,14 @@
       >
         <b-img lazy :src="image.image.square" blank-width="150" blank-height="150" />
       </router-link>
+    </b-row>
+    <b-row flex align-h="center" class="mt-3">
+      <b-pagination
+        v-model="current_page"
+        v-if="images.count>per_page"
+        :total-rows="images.count"
+        :per-page="per_page"
+      />
     </b-row>
   </b-container>
 </template>
