@@ -11,7 +11,7 @@
       <b-button
         size="sm"
         variant="success"
-        :to="{name: 'Similarity', query: {photograph: image_data.id}}"
+        :to="{name: 'Similarity', params: {id: image_data.id}}"
       >Find similar photos</b-button>
       <b-button size="sm" variant="primary" :href="image_data.image.full">Download full image</b-button>
     </b-row>
