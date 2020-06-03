@@ -81,6 +81,17 @@ export default {
     };
   },
   computed: {
+    state_ids() {
+      var ids = {};
+      if (!!this.pytorch_model) {
+        ids["pytorch_model"] = this.pytorch_model.id;
+      }
+      if (!!this.annoy_idx) {
+        ids["anoy_idx"] = this.annoy_idx.id;
+      }
+      ids["n_neighbors"] = this.n_neighbors;
+      return ids;
+    },
     jobs() {
       if (!!this.nearest_neighbors) {
         var all_jobs = this.nearest_neighbors
@@ -143,6 +154,11 @@ export default {
       } else {
         return null;
       }
+    }
+  },
+  watch: {
+    state_ids() {
+      this.$router.push({ name: "Similarity", query: this.state_ids });
     }
   }
 };
