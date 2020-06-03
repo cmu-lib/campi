@@ -5,11 +5,12 @@
       description="Which computer vision model should be used to determine similarity?"
       label="Select embeddings model"
       label-for="model-input"
-      :required="true"
+      required
     >
       <b-form-select
         id="model-help"
         v-if="!!pytorch_model_options"
+        :value="pytorch_model_options[0].value"
         :options="pytorch_model_options"
         @input="$emit('input', $event)"
       />
@@ -30,7 +31,7 @@ export default {
         return this.pytorch_models.map(x => {
           const text = x.label + " (" + x.n_dimensions + " dims)";
           return {
-            value: x,
+            value: x.id,
             text: text
           };
         });
@@ -49,6 +50,11 @@ export default {
           console.log(error);
         }
       );
+    }
+  },
+  watch: {
+    pytorch_model_options() {
+      this.$emit("input", this.pytorch_model_options[0].value);
     }
   }
 };
