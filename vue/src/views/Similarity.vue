@@ -22,7 +22,7 @@
       <b-col cols="3">
         <b-card header="Jobs" no-body>
           <b-list-group flush v-if="!!jobs">
-            <b-list-group-item v-for="job in jobs" :key="job.id">{{ job.label }}</b-list-group-item>
+            <b-list-group-item class="p-2" v-for="job in jobs" :key="job.id">{{ job.label }}</b-list-group-item>
           </b-list-group>
         </b-card>
       </b-col>
