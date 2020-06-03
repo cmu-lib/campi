@@ -14,7 +14,7 @@ class Command(BaseCommand):
         ead = etree.parse(options["ead"][0])
         ns = {"ead": "urn:isbn:1-931666-22-9"}
         negative_files = ead.xpath(
-            ".//ead:c[@id='aspace_ref3133']//ead:c[@level='file']", namespaces=ns
+            ".//ead:archdesc[ead:did/ead:unitid=0000.0197]//ead:c[@level='file']", namespaces=ns
         )
         print(f"{len(negative_files)} negative files")
         for c in tqdm(negative_files):
