@@ -3,6 +3,7 @@ from django.urls import include, path, re_path
 from rest_framework import routers
 import photograph.views
 import collection.views
+import campi.views
 import cv.views
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -14,7 +15,6 @@ router.register(r"job", collection.views.JobViewSet)
 router.register(r"job_tag", collection.views.JobTagViewSet)
 router.register(r"pytorch_model", cv.views.PytorchModelViewset)
 router.register(r"annoy_idx", cv.views.AnnoyIdxViewset)
-
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -29,6 +29,9 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("api/", include(router.urls)),
+    path(
+        "api/current_user/", campi.views.CurrentUserView.as_view(), name="current_user"
+    ),
     path("api/auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("api/admin/", admin.site.urls),
     path("api/accounts/", include("django.contrib.auth.urls")),

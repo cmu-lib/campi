@@ -1,13 +1,18 @@
 <template>
   <div id="app">
     <b-navbar variant="light">
-      <b-navbar-brand>CAMPI</b-navbar-brand>
+      <b-navbar-brand :to="{name: 'Home'}">CAMPI</b-navbar-brand>
       <b-navbar-nav v-if="logged_in">
         <b-nav-item :to="{name: 'Browse'}">Browse</b-nav-item>
       </b-navbar-nav>
-      <b-navbar-nav class="ml-auto">
-        <b-nav-item v-if="logged_in" :href="$APIConstants.API_LOGOUT">Logout</b-nav-item>
-        <b-nav-item v-else :href="$APIConstants.API_LOGIN">Login</b-nav-item>
+      <b-navbar-nav v-if="logged_in" class="ml-auto">
+        <b-nav-item-dropdown :text="user.username" right>
+          <b-dropdown-item disabled>Tasks</b-dropdown-item>
+          <b-dropdown-item :href="$APIConstants.API_LOGOUT">Logout</b-dropdown-item>
+        </b-nav-item-dropdown>
+      </b-navbar-nav>
+      <b-navbar-nav v-else class="ml-auto">
+        <b-nav-item :href="$APIConstants.API_LOGIN">Login</b-nav-item>
       </b-navbar-nav>
     </b-navbar>
     <router-view />
@@ -24,7 +29,7 @@ export default {
     };
   },
   mounted() {
-    return HTTP.get("/", {}).then(
+    return HTTP.get("/").then(
       response => {
         this.logged_in = !!response;
       },
@@ -33,6 +38,18 @@ export default {
         this.logged_in = false;
       }
     );
+  },
+  asyncComputed: {
+    user() {
+      return HTTP.get("/current_user/").then(
+        response => {
+          return response.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
   }
 };
 </script>
@@ -40,7 +57,7 @@ export default {
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
