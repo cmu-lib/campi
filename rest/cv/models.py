@@ -209,18 +209,21 @@ class IndexEmbedding(sequentialModel):
         unique_together = ("annoy_idx", "embedding", "sequence")
 
 
-class SimilarityMatchRun(dateModifiedModel):
+class CloseMatchRun(dateModifiedModel):
     pytorch_model = models.ForeignKey(
-        PyTorchModel, on_delete=models.CASCADE, related_name="similarity_match_runs"
+        PyTorchModel, on_delete=models.CASCADE, related_name="close_match_runs"
     )
     annoy_idx = models.ForeignKey(
-        AnnoyIdx, on_delete=models.CASCADE, related_name="similarity_match_runs"
+        AnnoyIdx, on_delete=models.CASCADE, related_name="close_match_runs"
     )
     max_neighbors = models.PositiveIntegerField(
-        help_text="Number of nearest neighbors to request from the index.", default=20
+        help_text="Number of nearest neighbors to request from the index.", default=6
     )
     cutoff_distance = models.FloatField(
         help_text="Photographs returned from the index query farther away from the photograph will be excluded."
+    )
+    exclude_future_distance = models.FloatField(
+        help_text="Photographs returned from the index query farther away than this measure will be excluded from future consideration from any CloseMatchSet in this run."
     )
 
     class Meta:
@@ -229,35 +232,34 @@ class SimilarityMatchRun(dateModifiedModel):
             "annoy_idx",
             "max_neighbors",
             "cutoff_distance",
+            "exclude_future_distance",
         )
 
 
-class SimilarityMatchSet(dateModifiedModel):
-    similarity_match_run = models.ForeignKey(
-        SimilarityMatchRun,
-        on_delete=models.CASCADE,
-        related_name="similarity_match_sets",
+class CloseMatchSet(dateModifiedModel):
+    close_match_run = models.ForeignKey(
+        CloseMatchRun, on_delete=models.CASCADE, related_name="close_match_sets"
     )
     seed_photograph = models.ForeignKey(
         photograph.models.Photograph,
         on_delete=models.CASCADE,
-        related_name="seeded_similarity_match_sets",
+        related_name="seeded_close_match_sets",
     )
 
     class Meta:
-        unique_together = ("similarity_match_run", "seed_photograph")
+        unique_together = ("close_match_run", "seed_photograph")
 
 
-class SimilarityMatchSetMembership(models.Model):
-    similarity_match_set = models.ForeignKey(
-        SimilarityMatchSet, on_delete=models.CASCADE, related_name="memberships"
+class CloseMatchSetMembership(models.Model):
+    close_match_set = models.ForeignKey(
+        CloseMatchSet, on_delete=models.CASCADE, related_name="memberships"
     )
     photograph = models.ForeignKey(
         photograph.models.Photograph,
         on_delete=models.CASCADE,
-        related_name="similarity_match_memberships",
+        related_name="close_match_memberships",
     )
     distance = models.FloatField()
 
     class Meta:
-        unique_together = ("similarity_match_set", "photograph")
+        unique_together = ("close_match_set", "photograph")
