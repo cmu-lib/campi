@@ -12,7 +12,7 @@
         <b-col cols="6">
           <p>Max neighbors: {{ cmr.max_neighbors }}</p>
           <p>Cutoff distance: {{ cmr.cutoff_distance }}</p>
-          <p>Max neighbors: {{ cmr.max_neighbors }}</p>
+          <p>Exclusion distance: {{ cmr.exclude_future_distance }}</p>
         </b-col>
       </b-row>
     </b-list-group-item>
