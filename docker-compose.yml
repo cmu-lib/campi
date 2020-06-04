@@ -3,7 +3,7 @@ services:
   rest:
     build: rest
     restart: always
-    command: "python manage.py runserver 0.0.0.0:8000"
+    command: ${SERVE_COMMAND}
     volumes:
       - ./rest:/vol/app:z
       - ./data/cv/indices:${DIST_INDICES_PATH}:z
