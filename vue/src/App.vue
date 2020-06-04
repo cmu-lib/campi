@@ -4,6 +4,7 @@
       <b-navbar-brand :to="{name: 'Home'}">CAMPI</b-navbar-brand>
       <b-navbar-nav v-if="logged_in">
         <b-nav-item :to="{name: 'Browse'}">Browse</b-nav-item>
+        <b-nav-item :to="{name: 'CloseMatch'}">Close Matches</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav v-if="logged_in" class="ml-auto">
         <b-nav-item-dropdown :text="user.username" right>
