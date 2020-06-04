@@ -24,7 +24,11 @@
         </b-button>
       </b-button-group>
     </b-row>
-    <b-img :src="close_match_set_membership.photograph.image.square" width="150" :id="popover_id" />
+    <b-img-lazy
+      :src="close_match_set_membership.photograph.image.square"
+      width="150"
+      :id="popover_id"
+    />
     <b-popover :target="popover_id" triggers="hover" placement="top">
       <template v-slot:title>{{ popover_title }}</template>
       <b-img :src="popover_preivew_src" />
