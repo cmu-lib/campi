@@ -161,8 +161,6 @@ class AnnoyIdx(models.Model):
         # load index
         ix = annoy.AnnoyIndex(self.pytorch_model.n_dimensions, "angular")
         ix.load(self.index_file)
-        print(ix.get_n_items())
-        print(ix.get_n_trees())
         pic_index = (
             self.indexed_embeddings.filter(embedding__photograph=photo).first().sequence
         )
@@ -225,6 +223,12 @@ class CloseMatchRun(dateModifiedModel):
     exclude_future_distance = models.FloatField(
         help_text="Photographs returned from the index query farther away than this measure will be excluded from future consideration from any CloseMatchSet in this run."
     )
+    considered_photos = models.ManyToManyField(
+        photograph.models.Photograph,
+        through="CloseMatchRunConsidered",
+        through_fields=("close_match_run", "photograph"),
+        related_name="considered_by_run",
+    )
 
     class Meta:
         unique_together = (
@@ -234,6 +238,63 @@ class CloseMatchRun(dateModifiedModel):
             "cutoff_distance",
             "exclude_future_distance",
         )
+
+    def generate_match_sets(self):
+        if not self.annoy_idx.index_built:
+            self.annoy_idx.generate_index()
+        # For photos not yet under the auto_distance of a close_match_run:
+        photos_to_do = self.pytorch_model.embeddings.exclude(
+            photograph__considered_by_run=self
+        ).distinct()
+        while photos_to_do.count() != 0:
+            print(photos_to_do.count())
+            photo = photos_to_do.first().photograph
+            self.generate_match_set(photo)
+
+    def generate_match_set(self, photograph):
+        print(f"Photo: {photograph.id}")
+        photo_neighbors = self.annoy_idx.get_nn(
+            photograph, n_neighbors=self.max_neighbors
+        )
+        # Are there any neighbors close enough to make a match?
+        print(photo_neighbors["distances"])
+        any_distance = any(
+            d <= self.cutoff_distance for d in photo_neighbors["distances"][1:]
+        )
+        if any_distance:
+            match_set = CloseMatchSet.objects.create(
+                close_match_run=self, seed_photograph=photograph
+            )
+            for i, photo in enumerate(photo_neighbors["photographs"]):
+                photo_distance = photo_neighbors["distances"][i]
+                if photo_distance <= self.cutoff_distance:
+                    print(f"member: {photo.id} distance {photo_distance}")
+                    CloseMatchSetMembership.objects.create(
+                        close_match_set=match_set,
+                        photograph=photo,
+                        distance=photo_distance,
+                    )
+                if photo_distance <= self.exclude_future_distance:
+                    self.considered_photos.add(photo)
+
+        # Whether added to the index or not, still add the photo to the "considered" list so it won't be used again.
+        self.considered_photos.add(photograph)
+
+
+class CloseMatchRunConsidered(models.Model):
+    close_match_run = models.ForeignKey(
+        CloseMatchRun,
+        on_delete=models.CASCADE,
+        related_name="considered_photo_membership",
+    )
+    photograph = models.ForeignKey(
+        photograph.models.Photograph,
+        on_delete=models.CASCADE,
+        related_name="considered_photo_membership",
+    )
+
+    class Meta:
+        unique_together = ("close_match_run", "photograph")
 
 
 class CloseMatchSet(dateModifiedModel):
