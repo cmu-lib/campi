@@ -306,6 +306,11 @@ class CloseMatchSet(dateModifiedModel):
         on_delete=models.CASCADE,
         related_name="seeded_close_match_sets",
     )
+    photographs = models.ManyToManyField(
+        photograph.models.Photograph,
+        through="CloseMatchSetMembership",
+        through_fields=("close_match_set", "photograph"),
+    )
 
     class Meta:
         unique_together = ("close_match_run", "seed_photograph")

@@ -15,6 +15,8 @@ router.register(r"job", collection.views.JobViewSet)
 router.register(r"job_tag", collection.views.JobTagViewSet)
 router.register(r"pytorch_model", cv.views.PytorchModelViewset)
 router.register(r"annoy_idx", cv.views.AnnoyIdxViewset)
+router.register(r"close_match/run", cv.views.CloseMatchRunViewset)
+router.register(r"close_match/set", cv.views.CloseMatchSetViewset)
 
 schema_view = get_schema_view(
     openapi.Info(

@@ -26,7 +26,7 @@ class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
 
 class PhotographListSerializer(serializers.HyperlinkedModelSerializer):
     directory = collection.serializers.DirectoryListSerializer()
-    job = collection.serializers.JobDetailSerializer()
+    job = collection.serializers.JobListSerializer()
 
     class Meta:
         model = models.Photograph

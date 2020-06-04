@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Count, Q, BooleanField, ExpressionWrapper
+from django.db.models import Count, Q, BooleanField, ExpressionWrapper, Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +7,7 @@ from cv import models, serializers
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
 import photograph
+import collection
 
 
 class PyTorchModelFilter(filters.FilterSet):
@@ -69,3 +70,38 @@ class AnnoyIdxViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             return Response(serialized_neighbors, status.HTTP_200_OK)
         else:
             return Response(raw_nn_req.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = models.CloseMatchRun.objects.select_related(
+        "pytorch_model", "annoy_idx"
+    ).annotate(n_sets=Count("close_match_sets", distinct=True))
+    serializer_class = serializers.CloseMatchRunSerializer
+
+
+class CloseMatchSetFilter(filters.FilterSet):
+    close_match_run = filters.ModelChoiceFilter(
+        queryset=models.CloseMatchRun.objects.all(),
+        help_text="The run that created this match set",
+    )
+
+
+class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = (
+        models.CloseMatchSet.objects.select_related(
+            "close_match_run",
+            "close_match_run__pytorch_model",
+            "close_match_run__annoy_idx",
+            "seed_photograph",
+            "seed_photograph__directory",
+            "seed_photograph__job",
+        )
+        .annotate(n_images=Count("photographs", distinct=True))
+        .prefetch_related(
+            "memberships",
+            "memberships__photograph__directory",
+            "memberships__photograph__job",
+        )
+    )
+    serializer_class = serializers.CloseMatchSetSerializer
+    filterset_class = CloseMatchSetFilter
