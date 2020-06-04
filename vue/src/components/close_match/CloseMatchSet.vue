@@ -5,6 +5,7 @@
         v-for="cmsm in close_match_set.memberships"
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
+        class="m-3"
       />
     </b-row>
   </b-card>
