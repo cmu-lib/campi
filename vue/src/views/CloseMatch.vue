@@ -31,7 +31,7 @@ export default {
     close_match_sets() {
       if (!!this.close_match_run_id) {
         return HTTP.get("/close_match/set/", {
-          params: { close_match_run: this.close_match_run_id, limit: 10 }
+          params: { close_match_run: this.close_match_run_id, limit: 100 }
         }).then(
           results => {
             return results.data.results;
