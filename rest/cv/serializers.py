@@ -41,6 +41,7 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
         fields = [
             "id",
             "url",
+            "created_on",
             "pytorch_model",
             "annoy_idx",
             "max_neighbors",
