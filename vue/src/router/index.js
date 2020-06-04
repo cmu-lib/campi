@@ -4,7 +4,7 @@ import Home from "@/views/Home.vue"
 import Browse from '@/views/Browse.vue'
 import Photo from "@/views/Photo.vue"
 import Similarity from "@/views/Similarity.vue"
-
+import CloseMatch from "@/views/CloseMatch.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -36,6 +36,11 @@ const routes = [
     scrollBehavior() {
       return { x: 0, y: 0 }
     }
+  },
+  {
+    path: "/close_match",
+    name: "CloseMatch",
+    component: CloseMatch
   }
 ]
 
