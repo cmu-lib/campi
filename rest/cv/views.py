@@ -117,3 +117,68 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
     ordering_fields = ["last_updated", "seed_photo"]
+
+    @transaction.atomic
+    @action(detail=True, methods=["patch"])
+    def approve(self, request, pk=None):
+        close_match_set = self.get_object()
+        raw_approval_data = serializers.CloseMatchSetApprovalSerializer(
+            data=request.data
+        )
+        if raw_approval_data.is_valid():
+            approval_data = raw_approval_data.validated_data
+            # Set memberships to false, then updated selected ones
+            close_match_set.memberships.all().update(accepted=False)
+            for m in approval_data["accepted_memberships"]:
+                m.accepted = True
+                m.save()
+
+            # Set representative photograph on set
+            close_match_set.representative_photograph = approval_data[
+                "representative_photograph"
+            ]
+
+            # Tag this set with the user who has sent the approval notice
+            close_match_set.user_last_modified = request.user
+            close_match_set.save()
+
+            # Once saved, remove all accepted photos from other memberships
+            accepted_photographs = photograph.models.Photograph.objects.filter(
+                close_match_memberships__in=close_match_set.memberships.filter(
+                    accepted=True
+                ).all()
+            ).distinct()
+            n_memberships_deleted = (
+                models.CloseMatchSetMembership.objects.filter(
+                    photograph__in=accepted_photographs
+                )
+                .all()
+                .delete()
+            )
+
+            # Delete any sets that no longer have 2 or more photos, or where the seed photo was any of the accepted photos
+            n_sets_too_small = (
+                models.CloseMatchSet.objects.annotate(
+                    n_memberships=Count("memberships", distinct=True)
+                )
+                .filter(n_memberhips__lte=2)
+                .delete()
+            )
+
+            n_sets_seed = (
+                models.CloseMatchSet.objects.filter(
+                    seed_photograph__in=accepted_photographs
+                )
+                .distinct()
+                .delete()
+            )
+
+            res = {
+                "n_memberships_deleted": n_memberships_deleted,
+                "n_sets_too_small": n_sets_too_small,
+                "n_sets_seed": n_sets_seed,
+            }
+
+            return Response(res, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
