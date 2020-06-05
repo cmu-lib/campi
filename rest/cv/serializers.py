@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from cv import models
 import photograph.models
+from campi.serializers import UserSerializer
 
 
 class PytorchModelListSerializer(serializers.HyperlinkedModelSerializer):
@@ -62,8 +63,29 @@ class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
 class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
     close_match_run = CloseMatchRunSerializer(many=False)
     seed_photograph = photograph.serializers.PhotographListSerializer(many=False)
+    representative_photograph = photograph.serializers.PhotographListSerializer(
+        many=False
+    )
     memberships = CloseMatchSetMembershipSerializer(many=True)
+    user_last_modified = UserSerializer(many=False)
 
     class Meta:
         model = models.CloseMatchSet
-        fields = ["id", "close_match_run", "seed_photograph", "memberships"]
+        fields = [
+            "id",
+            "close_match_run",
+            "seed_photograph",
+            "representative_photograph",
+            "memberships",
+            "user_last_modified",
+            "last_updated",
+        ]
+
+
+class CloseMatchSetJudgementSerializer(serializers.Serializer):
+    accepted_memberships = serializers.PrimaryKeyRelatedField(
+        queryset=models.CloseMatchSetMembership.objects.all(), many=True
+    )
+    primary_photho = serializers.PrimaryKeyRelatedField(
+        queryset=models.CloseMatchSetMembership.objects.all(), many=False
+    )

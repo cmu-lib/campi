@@ -84,6 +84,13 @@ class CloseMatchSetFilter(filters.FilterSet):
         queryset=models.CloseMatchRun.objects.all(),
         help_text="The run that created this match set",
     )
+    signed_off = filters.BooleanFilter(method="has_user_signed_off")
+
+    def has_user_signed_off(self, queryset, name, value):
+        if value:
+            return queryset.filter(user_last_modified__isnull=False)
+        else:
+            return queryset
 
 
 class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
@@ -95,6 +102,10 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "seed_photograph",
             "seed_photograph__directory",
             "seed_photograph__job",
+            "representative_photograph",
+            "representative_photograph__directory",
+            "representative_photograph__job",
+            "user_last_modified",
         )
         .annotate(n_images=Count("photographs", distinct=True))
         .prefetch_related(
@@ -105,3 +116,4 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
+    ordering_fields = ["last_updated", "seed_photo"]

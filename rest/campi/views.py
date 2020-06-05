@@ -21,7 +21,7 @@ class GetSerializerClassMixin(object):
 class CurrentUserView(APIView):
     def get(self, request, format=None):
         current_user = request.user
-        serialized_user = serializers.CurrentUserSerializer(
+        serialized_user = serializers.UserSerializer(
             current_user, context={"request": request}
         )
         return Response(serialized_user.data, status=status.HTTP_200_OK)

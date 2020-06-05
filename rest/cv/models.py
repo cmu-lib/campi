@@ -312,6 +312,12 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
         through="CloseMatchSetMembership",
         through_fields=("close_match_set", "photograph"),
     )
+    representative_photograph = models.ForeignKey(
+        photograph.models.Photograph,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="representative_of_sets",
+    )
 
     class Meta:
         unique_together = ("close_match_run", "seed_photograph")
@@ -327,6 +333,9 @@ class CloseMatchSetMembership(models.Model):
         related_name="close_match_memberships",
     )
     distance = models.FloatField()
+    accepted = models.NullBooleanField(
+        default=None, help_text="Has this membership been validated by an editor?"
+    )
 
     class Meta:
         unique_together = ("close_match_set", "photograph")

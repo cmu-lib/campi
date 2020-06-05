@@ -1,9 +1,12 @@
 <template>
-  <b-row align-h="center">
-    <b-overlay :show="loading">
-      <CloseMatchSet v-for="cms in close_match_sets" :key="cms.id" :close_match_set="cms" />
-    </b-overlay>
-  </b-row>
+  <div>
+    <b-button-toolbar></b-button-toolbar>
+    <b-row align-h="center">
+      <b-overlay :show="loading">
+        <CloseMatchSet v-for="cms in close_match_sets" :key="cms.id" :close_match_set="cms" />
+      </b-overlay>
+    </b-row>
+  </div>
 </template>
 
 <script>
@@ -20,7 +23,8 @@ export default {
   },
   data() {
     return {
-      loading: null
+      loading: null,
+      page: 1
     };
   },
   asyncComputed: {
