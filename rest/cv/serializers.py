@@ -57,7 +57,7 @@ class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.CloseMatchSetMembership
-        fields = ["id", "photograph", "distance"]
+        fields = ["id", "photograph", "distance", "accepted"]
 
 
 class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
@@ -82,10 +82,10 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class CloseMatchSetJudgementSerializer(serializers.Serializer):
+class CloseMatchSetApprovalSerializer(serializers.Serializer):
     accepted_memberships = serializers.PrimaryKeyRelatedField(
         queryset=models.CloseMatchSetMembership.objects.all(), many=True
     )
-    primary_photho = serializers.PrimaryKeyRelatedField(
-        queryset=models.CloseMatchSetMembership.objects.all(), many=False
+    representative_photograph = serializers.PrimaryKeyRelatedField(
+        queryset=photograph.models.Photograph.objects.all(), many=False
     )
