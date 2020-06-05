@@ -66,7 +66,7 @@ class dateModifiedModel(models.Model):
         db_index=True,
         help_text="Date created (automatically recorded)",
     )
-    last_updated = models.DateField(
+    last_updated = models.DateTimeField(
         auto_now=True,
         editable=False,
         db_index=True,

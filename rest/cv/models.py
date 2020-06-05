@@ -7,6 +7,7 @@ from campi.models import (
     descriptionModel,
     sequentialModel,
     dateModifiedModel,
+    userModifiedModel,
 )
 import photograph
 import annoy
@@ -297,7 +298,7 @@ class CloseMatchRunConsidered(models.Model):
         unique_together = ("close_match_run", "photograph")
 
 
-class CloseMatchSet(dateModifiedModel):
+class CloseMatchSet(dateModifiedModel, userModifiedModel):
     close_match_run = models.ForeignKey(
         CloseMatchRun, on_delete=models.CASCADE, related_name="close_match_sets"
     )
