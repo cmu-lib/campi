@@ -5,6 +5,7 @@ import Browse from '@/views/Browse.vue'
 import Photo from "@/views/Photo.vue"
 import Similarity from "@/views/Similarity.vue"
 import CloseMatch from "@/views/CloseMatch.vue"
+import CloseMatchRun from "@/views/CloseMatchRun.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -33,14 +34,21 @@ const routes = [
     props: (route) => {
       return { seed_image_id: Number(route.params.id) }
     },
-    scrollBehavior() {
-      return { x: 0, y: 0 }
-    }
   },
   {
     path: "/close_match",
     name: "CloseMatch",
-    component: CloseMatch
+    component: CloseMatch,
+    children: [
+      {
+        name: "CloseMatchRun",
+        path: "run/:id",
+        component: CloseMatchRun,
+        props: (route) => {
+          return { close_match_run_id: Number(route.params.id) }
+        }
+      }
+    ]
   }
 ]
 

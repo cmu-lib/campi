@@ -1,20 +1,11 @@
 <template>
   <b-list-group v-if="close_match_runs">
-    <b-list-group-item v-for="cmr in close_match_runs" :key="cmr.id" :active="cmr.id==selected">
-      <h6>{{ cmr.created_on }}</h6>
+    <b-list-group-item v-for="cmr in close_match_runs" :key="cmr.id" :active="cmr.id==value">
+      <h6>CMR {{ cmr.id }}</h6>
       <b-button size="sm" @click="select_cmr(cmr)" block>Evaluate</b-button>
-      <b-row>
-        <b-col cols="6">
-          <p>Model: {{ cmr.pytorch_model.label }}</p>
-          <p>Index trees: {{ cmr.annoy_idx.n_trees }}</p>
-          <p>Sets: {{ cmr.n_sets }}</p>
-        </b-col>
-        <b-col cols="6">
-          <p>Max neighbors: {{ cmr.max_neighbors }}</p>
-          <p>Cutoff distance: {{ cmr.cutoff_distance }}</p>
-          <p>Exclusion distance: {{ cmr.exclude_future_distance }}</p>
-        </b-col>
-      </b-row>
+      <p>{{ cmr.pytorch_model.label }} - {{ cmr.annoy_idx.n_trees }} trees</p>
+      <p>{{ cmr.max_neighbors }} neighbors, >{{ cmr.exclude_future_distance }} and >{{ cmr.cutoff_distance }}</p>
+      <p>{{ cmr.n_sets }} sets</p>
     </b-list-group-item>
   </b-list-group>
 </template>
@@ -23,10 +14,11 @@
 import { HTTP } from "@/main";
 export default {
   name: "CloseMatchRunMenu",
-  data() {
-    return {
-      selected: null
-    };
+  props: {
+    value: {
+      type: Number,
+      default: null
+    }
   },
   asyncComputed: {
     close_match_runs() {
@@ -42,7 +34,6 @@ export default {
   },
   methods: {
     select_cmr(cmr) {
-      this.selected = cmr.id;
       this.$emit("input", cmr.id);
     }
   }
