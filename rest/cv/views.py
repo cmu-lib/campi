@@ -142,7 +142,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             close_match_set.user_last_modified = request.user
             close_match_set.save()
 
-            # Once saved, remove all accepted photos from other memberships
+            # Once saved, remove all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
             accepted_photographs = photograph.models.Photograph.objects.filter(
                 close_match_memberships__in=close_match_set.memberships.filter(
                     accepted=True
@@ -150,7 +150,8 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             ).distinct()
             n_memberships_deleted = (
                 models.CloseMatchSetMembership.objects.filter(
-                    photograph__in=accepted_photographs
+                    close_match_set__user_last_modified__isnull=True,
+                    photograph__in=accepted_photographs,
                 )
                 .all()
                 .delete()
@@ -161,13 +162,14 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 models.CloseMatchSet.objects.annotate(
                     n_memberships=Count("memberships", distinct=True)
                 )
-                .filter(n_memberhips__lte=2)
+                .filter(n_memberships__lt=2)
                 .delete()
             )
 
             n_sets_seed = (
                 models.CloseMatchSet.objects.filter(
-                    seed_photograph__in=accepted_photographs
+                    user_last_modified__isnull=True,
+                    seed_photograph__in=accepted_photographs,
                 )
                 .distinct()
                 .delete()
@@ -181,4 +183,6 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 
             return Response(res, status=status.HTTP_202_ACCEPTED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                raw_approval_data.errors, status=status.HTTP_400_BAD_REQUEST
+            )

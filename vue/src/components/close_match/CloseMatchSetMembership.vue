@@ -5,22 +5,22 @@
         <b-button
           :variant="accept_variant"
           size="sm"
-          :pressed="selection==true"
-          @click="selection=true"
+          :pressed="close_match_set_membership.accepted==true"
+          @click="accept"
         >
           <BIconCheck2 />
         </b-button>
         <b-button
           :variant="reject_variant"
           size="sm"
-          :pressed="selection==false"
-          @click="selection=false"
+          :pressed="close_match_set_membership.accepted==false"
+          @click="reject"
         >
           <BIconX />
         </b-button>
         <b-button variant="light" size="sm">
-          <BIconStarFill v-if="primary" variant="warning" @click="primary_toggle" />
-          <BIconStar v-else @click="primary_toggle" />
+          <BIconStarFill v-if="primary" variant="warning" @click="claim_primary" />
+          <BIconStar v-else @click="claim_primary" />
         </b-button>
       </b-button-group>
     </b-row>
@@ -51,6 +51,10 @@ export default {
       type: Object,
       required: true
     },
+    primary: {
+      type: Boolean,
+      default: false
+    },
     popup_size: {
       type: Number,
       default: 500
@@ -58,20 +62,19 @@ export default {
   },
   data() {
     return {
-      selection: null,
-      primary: false
+      selection: null
     };
   },
   computed: {
     accept_variant() {
-      if (this.selection == true) {
+      if (this.close_match_set_membership.accepted == true) {
         return "success";
       } else {
         return "light";
       }
     },
     reject_variant() {
-      if (this.selection == false) {
+      if (this.close_match_set_membership.accepted == false) {
         return "danger";
       } else {
         return "light";
@@ -104,19 +107,30 @@ export default {
     }
   },
   methods: {
-    primary_toggle() {
-      this.primary = !this.primary;
+    claim_primary() {
+      // Emits a signal to the match set to take status as the representative photo
+      this.$emit(
+        "claim_primary",
+        this.close_match_set_membership.photograph.id
+      );
+    },
+    cancel_primary() {
+      this.$emit(
+        "cancel_primary",
+        this.close_match_set_membership.photograph.id
+      );
+    },
+    accept() {
+      this.$emit("accept", this.close_match_set_membership.id);
+    },
+    reject() {
+      this.$emit("reject", this.close_match_set_membership.id);
     }
   },
   watch: {
-    selection() {
-      if (this.selection == false) {
-        this.primary = false;
-      }
-    },
     primary() {
       if (this.primary) {
-        this.selection = true;
+        this.accept();
       }
     }
   }
