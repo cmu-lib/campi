@@ -24,30 +24,65 @@
         </b-button>
       </b-button-group>
     </b-row>
-    <b-img-lazy
-      :src="close_match_set_membership.photograph.image.square"
-      width="150"
-      :id="popover_id"
-    />
-    <b-popover :target="popover_id" triggers="hover" placement="top">
-      <template v-slot:title>{{ popover_title }}</template>
-      <b-img :src="popover_preivew_src" />
-    </b-popover>
+    <b-row>
+      <b-img-lazy
+        :src="close_match_set_membership.photograph.image.square"
+        width="150"
+        :id="popover_id"
+      />
+      <b-popover :target="popover_id" triggers="hover" placement="top">
+        <template v-slot:title>{{ popover_title }}</template>
+        <b-img :src="popover_preivew_src" />
+      </b-popover>
+    </b-row>
+    <b-badge class="mx-1" variant="primary" size="sm">
+      <BIconFolderFill />
+      <span class="mx-2">{{ close_match_set_membership.photograph.directory.label }}</span>
+    </b-badge>
+    <b-badge
+      class="mx-1"
+      variant="info"
+      size="sm"
+      v-if="!!close_match_set_membership.photograph.job"
+    >
+      <BIconCamera />
+      <span class="mx-2">{{ close_match_set_membership.photograph.job.label }}</span>
+    </b-badge>
+    <b-badge
+      size="sm"
+      variant="info"
+      v-if="close_match_set_membership.distance <= close_match_run.exclude_future_distance"
+      v-b-tooltip.hover
+      title="This photo is so similar to the others in the set that it isn't included in future potential match sets"
+    >Only here</b-badge>
   </div>
 </template>
 
 <script>
-import { BIconStar, BIconStarFill, BIconCheck2, BIconX } from "bootstrap-vue";
+import {
+  BIconStar,
+  BIconStarFill,
+  BIconCheck2,
+  BIconX,
+  BIconCamera,
+  BIconFolderFill
+} from "bootstrap-vue";
 export default {
   name: "CloseMatchSetMembership",
   components: {
     BIconStar,
     BIconStarFill,
     BIconCheck2,
-    BIconX
+    BIconX,
+    BIconCamera,
+    BIconFolderFill
   },
   props: {
     close_match_set_membership: {
+      type: Object,
+      required: true
+    },
+    close_match_run: {
       type: Object,
       required: true
     },
@@ -129,7 +164,7 @@ export default {
   },
   watch: {
     primary() {
-      if (this.primary) {
+      if (this.primary == this.close_match_set_membership.photograph) {
         this.accept();
       }
     }

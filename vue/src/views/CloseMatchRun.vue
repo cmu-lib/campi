@@ -1,9 +1,16 @@
 <template>
   <div>
-    <b-button-toolbar></b-button-toolbar>
+    <b-button-toolbar>
+      <b-form-checkbox v-model="not_signed_off" name="check-button" switch>Only show to-dos</b-form-checkbox>
+    </b-button-toolbar>
     <b-row align-h="center">
       <b-overlay :show="loading">
-        <CloseMatchSet v-for="cms in close_match_sets" :key="cms.id" :close_match_set="cms" />
+        <CloseMatchSet
+          v-for="cms in close_match_sets"
+          :key="cms.id"
+          :close_match_set="cms"
+          @set_submitted="refresh"
+        />
       </b-overlay>
     </b-row>
   </div>
@@ -24,7 +31,8 @@ export default {
   data() {
     return {
       loading: null,
-      page: 1
+      page: 1,
+      not_signed_off: false
     };
   },
   asyncComputed: {
@@ -32,7 +40,11 @@ export default {
       if (!!this.close_match_run_id) {
         this.loading = true;
         return HTTP.get("/close_match/set/", {
-          params: { close_match_run: this.close_match_run_id, limit: 10 }
+          params: {
+            close_match_run: this.close_match_run_id,
+            limit: 10,
+            not_signed_off: this.not_signed_off
+          }
         }).then(
           results => {
             this.loading = false;
@@ -46,6 +58,9 @@ export default {
         return null;
       }
     }
+  },
+  methods: {
+    refresh() {}
   }
 };
 </script>

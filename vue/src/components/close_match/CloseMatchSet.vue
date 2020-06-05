@@ -23,8 +23,9 @@
         v-for="cmsm in close_match_set_state.memberships"
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
+        :close_match_run="close_match_set_state.close_match_run"
         :primary="close_match_set_state.representative_photograph"
-        class="m-3"
+        class="m-4"
         @accept="accept"
         @reject="reject"
         @claim_primary="claim_primary"
@@ -32,7 +33,7 @@
       />
     </b-row>
     <template v-slot:footer v-if="!!modifying_user">
-      <p>Approved by {{ close_match_set_state.user_last_modified.username }} on {{ close_match_set_state.last_updated }}</p>
+      <p>Reveiwed by {{ close_match_set_state.user_last_modified.username }} on {{ close_match_set_state.last_updated }}</p>
     </template>
   </b-card>
 </template>
@@ -125,6 +126,9 @@ export default {
         .filter(x => x.accepted == null)
         .map(x => (x.accepted = false));
     },
+    get_registration_toast(res) {
+      return `${res.n_sets_too_small}`;
+    },
     register_set() {
       this.reject_remaining();
       return HTTP.patch(
@@ -132,7 +136,12 @@ export default {
         this.close_match_approval
       ).then(
         results => {
-          return results.data.results;
+          this.$bvToast.toast(this.get_registration_toast(results.data), {
+            title: `Set ${this.close_match_set.id} saved`,
+            autoHideDelay: 5000,
+            variant: "success"
+          });
+          this.$emit("set_submitted", this.close_match_set.id);
         },
         error => {
           console.log(error);
