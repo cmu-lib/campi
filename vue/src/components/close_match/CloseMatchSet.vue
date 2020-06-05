@@ -18,14 +18,14 @@
         </b-button-toolbar>
       </b-row>
     </template>
-    <b-row flex align-v="center" v-if="!!close_match_set_state">
+    <b-row flex v-if="!!close_match_set_state">
       <CloseMatchSetMembership
         v-for="cmsm in close_match_set_state.memberships"
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
         :close_match_run="close_match_set_state.close_match_run"
         :primary="close_match_set_state.representative_photograph"
-        class="m-4"
+        class="m-2"
         @accept="accept"
         @reject="reject"
         @claim_primary="claim_primary"
