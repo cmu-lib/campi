@@ -84,11 +84,11 @@ class CloseMatchSetFilter(filters.FilterSet):
         queryset=models.CloseMatchRun.objects.all(),
         help_text="The run that created this match set",
     )
-    signed_off = filters.BooleanFilter(method="has_user_signed_off")
+    not_signed_off = filters.BooleanFilter(method="has_user_signed_off")
 
     def has_user_signed_off(self, queryset, name, value):
         if value:
-            return queryset.filter(user_last_modified__isnull=False)
+            return queryset.filter(user_last_modified__isnull=True)
         else:
             return queryset
 
