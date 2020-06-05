@@ -19,7 +19,7 @@
           <BIconX />
         </b-button>
         <b-button variant="light" size="sm">
-          <BIconStarFill v-if="primary" variant="warning" @click="claim_primary" />
+          <BIconStarFill v-if="is_primary" variant="warning" @click="claim_primary" />
           <BIconStar v-else @click="claim_primary" />
         </b-button>
       </b-button-group>
@@ -52,8 +52,8 @@ export default {
       required: true
     },
     primary: {
-      type: Boolean,
-      default: false
+      type: Object,
+      default: null
     },
     popup_size: {
       type: Number,
@@ -66,6 +66,12 @@ export default {
     };
   },
   computed: {
+    is_primary() {
+      if (!!this.primary) {
+        return this.primary.id == this.close_match_set_membership.photograph.id;
+      }
+      return false;
+    },
     accept_variant() {
       if (this.close_match_set_membership.accepted == true) {
         return "success";
@@ -109,16 +115,10 @@ export default {
   methods: {
     claim_primary() {
       // Emits a signal to the match set to take status as the representative photo
-      this.$emit(
-        "claim_primary",
-        this.close_match_set_membership.photograph.id
-      );
+      this.$emit("claim_primary", this.close_match_set_membership.photograph);
     },
     cancel_primary() {
-      this.$emit(
-        "cancel_primary",
-        this.close_match_set_membership.photograph.id
-      );
+      this.$emit("cancel_primary", this.close_match_set_membership.photograph);
     },
     accept() {
       this.$emit("accept", this.close_match_set_membership.id);

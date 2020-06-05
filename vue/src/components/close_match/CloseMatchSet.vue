@@ -1,5 +1,5 @@
 <template>
-  <b-card :border-variant="set_variant" :header-border-variant="set_variant">
+  <b-card :border-variant="set_variant" :header-border-variant="set_variant" class="my-2">
     <template v-slot:header>
       <b-row class="px-2" flex align-h="between" align-v="center">
         <span>Match set {{ close_match_set.id }}</span>
@@ -23,7 +23,7 @@
         v-for="cmsm in close_match_set_state.memberships"
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
-        :primary="close_match_set_state.representative_photograph.id==cmsm.photograph.id"
+        :primary="close_match_set_state.representative_photograph"
         class="m-3"
         @accept="accept"
         @reject="reject"
@@ -66,7 +66,7 @@ export default {
       if (!!this.modifying_user) {
         return "success";
       }
-      return null;
+      return "null";
     },
     modifying_user() {
       if (!!this.close_match_set_state) {
@@ -82,10 +82,14 @@ export default {
         accepted_memberships: [],
         representative_photograph: null
       };
-      payload.accepted_memberships = this.close_match_set_state.memberships
-        .filter(x => x.accepted)
-        .map(x => x.id);
-      payload.representative_photograph = this.close_match_set_state.representative_photograph;
+      if (!!this.close_match_set_state) {
+        payload.accepted_memberships = this.close_match_set_state.memberships
+          .filter(x => x.accepted)
+          .map(x => x.id);
+        if (!!this.close_match_set_state.representative_photograph) {
+          payload.representative_photograph = this.close_match_set_state.representative_photograph.id;
+        }
+      }
       return payload;
     }
   },
@@ -101,11 +105,11 @@ export default {
       const set_index = this.get_index(id);
       this.close_match_set_state.memberships[set_index].accepted = false;
     },
-    claim_primary(id) {
-      this.close_match_set_state.representative_photograph = id;
+    claim_primary(photograph) {
+      this.close_match_set_state.representative_photograph = photograph;
     },
-    cancel_primary(id) {
-      if (id == this.close_match_set_state.representative_photograph) {
+    cancel_primary(photograph) {
+      if (photograph == this.close_match_set_state.representative_photograph) {
         this.close_match_set_state.representative_photograph = null;
       }
     },

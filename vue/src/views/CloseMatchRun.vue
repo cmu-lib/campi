@@ -32,7 +32,7 @@ export default {
       if (!!this.close_match_run_id) {
         this.loading = true;
         return HTTP.get("/close_match/set/", {
-          params: { close_match_run: this.close_match_run_id, limit: 100 }
+          params: { close_match_run: this.close_match_run_id, limit: 10 }
         }).then(
           results => {
             this.loading = false;
