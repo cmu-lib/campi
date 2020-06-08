@@ -1,7 +1,7 @@
 <template>
   <b-card no-body>
     <template v-slot:header>
-      <b-row align-v="center" align-h="around">
+      <b-row>
         <b-button-group>
           <b-button
             :variant="accept_variant"
@@ -36,28 +36,37 @@
       <b-img :src="popover_preivew_src" />
     </b-popover>
     <template v-slot:footer>
-      <div class="d-flex flex-wrap">
+      <b-row flex align-h="center">
         <b-badge
-          size="sm"
-          variant="info"
-          v-if="close_match_set_membership.distance <= close_match_run.exclude_future_distance"
+          class="mx-1"
+          variant="warning"
+          v-if="close_match_set_membership.distance==0.0"
           v-b-tooltip.hover
-          title="This photo is so similar to the others in the set that it isn't included in future potential match sets"
-        >Only here</b-badge>
-        <b-badge class="mx-1" variant="primary" size="sm">
-          <BIconFolderFill />
-          <span class="mx-2">{{ close_match_set_membership.photograph.directory.label }}</span>
+          title="This is the seed photograph used as the starting point of the search"
+        >
+          <BIconAward />
         </b-badge>
         <b-badge
           class="mx-1"
-          variant="info"
-          size="sm"
-          v-if="!!close_match_set_membership.photograph.job"
+          variant="warning"
+          v-else-if="close_match_set_membership.distance <= close_match_run.exclude_future_distance"
+          v-b-tooltip.hover
+          title="This photo is so similar to the the seed photograph that it won't be included in future potential match sets"
         >
-          <BIconCamera />
-          <span class="mx-2">{{ close_match_set_membership.photograph.job.label }}</span>
+          <BIconConeStriped />
         </b-badge>
-      </div>
+        <b-badge
+          class="mx-1"
+          variant="primary"
+          :title="close_match_set_membership.photograph.directory.label"
+          v-b-tooltip.hover
+        >
+          <BIconFolderFill />
+        </b-badge>
+        <b-badge class="mx-1" variant="info" v-if="!!close_match_set_membership.photograph.job">
+          <BIconCamera v-b-tooltip.hover :title="close_match_set_membership.photograph.job.label" />
+        </b-badge>
+      </b-row>
     </template>
   </b-card>
 </template>
@@ -69,7 +78,9 @@ import {
   BIconCheck2,
   BIconX,
   BIconCamera,
-  BIconFolderFill
+  BIconFolderFill,
+  BIconConeStriped,
+  BIconAward
 } from "bootstrap-vue";
 export default {
   name: "CloseMatchSetMembership",
@@ -79,7 +90,9 @@ export default {
     BIconCheck2,
     BIconX,
     BIconCamera,
-    BIconFolderFill
+    BIconFolderFill,
+    BIconConeStriped,
+    BIconAward
   },
   props: {
     close_match_set_membership: {
