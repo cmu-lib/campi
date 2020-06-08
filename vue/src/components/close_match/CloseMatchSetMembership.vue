@@ -85,7 +85,11 @@
       </b-row>
     </template>
     <div @click="$bvModal.show(popover_id)" class="magnify">
-      <b-img :src="close_match_set_membership.photograph.image.thumbnail" width="300" class="m-0" />
+      <b-img-lazy
+        :src="close_match_set_membership.photograph.image.thumbnail"
+        width="300"
+        class="m-0"
+      />
     </div>
     <b-modal :id="popover_id" size="xl" centered hide-footer :title="popover_title">
       <b-row align-h="center">
