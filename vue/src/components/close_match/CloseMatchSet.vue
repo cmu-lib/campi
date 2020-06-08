@@ -2,7 +2,7 @@
   <b-card :border-variant="set_variant" :header-border-variant="set_variant" class="my-2">
     <template v-slot:header>
       <b-row class="px-2" flex align-h="between" align-v="center">
-        <span>Match set {{ close_match_set.id }}</span>
+        <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
         <b-button-toolbar>
           <b-button-group>
             <b-button variant="success" size="sm" @click="accept_all">
