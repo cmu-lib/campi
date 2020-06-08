@@ -49,7 +49,7 @@
             <BIconStarFill variant="warning" />
           </b-button>
           <b-button v-else variant="secondary" size="sm" @click="claim_primary">
-            <BIconStar @click="claim_primary" />
+            <BIconStar />
           </b-button>
         </b-button-group>
       </b-row>

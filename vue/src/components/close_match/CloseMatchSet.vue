@@ -110,10 +110,13 @@ export default {
       this.close_match_set_state.representative_photograph = photograph;
     },
     cancel_primary(photograph) {
-      if (
-        photograph.id == this.close_match_set_state.representative_photograph.id
-      ) {
-        this.close_match_set_state.representative_photograph = null;
+      if (!!this.close_match_set_state.representative_photograph) {
+        if (
+          photograph.id ==
+          this.close_match_set_state.representative_photograph.id
+        ) {
+          this.close_match_set_state.representative_photograph = null;
+        }
       }
     },
     accept_all() {
