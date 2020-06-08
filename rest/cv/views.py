@@ -85,6 +85,15 @@ class CloseMatchSetFilter(filters.FilterSet):
         help_text="The run that created this match set",
     )
     not_signed_off = filters.BooleanFilter(method="has_user_signed_off")
+    seed_photograph = filters.ModelChoiceFilter(
+        queryset=photograph.models.Photograph.objects.all(),
+        help_text="The seed photograph for this match set",
+    )
+    memberships = filters.ModelChoiceFilter(
+        queryset=photograph.models.Photograph.objects.all(),
+        help_text="Photograph within this proposed match set",
+        field_name="memberships__photograph",
+    )
 
     def has_user_signed_off(self, queryset, name, value):
         if value:
