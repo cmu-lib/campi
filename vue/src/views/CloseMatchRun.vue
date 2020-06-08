@@ -55,6 +55,7 @@ export default {
         this.loading = true;
         return HTTP.get("/close_match/set/", {
           params: {
+            ordering: "seed_photograph",
             close_match_run: this.close_match_run_id,
             limit: this.per_page,
             offset: this.rest_page,

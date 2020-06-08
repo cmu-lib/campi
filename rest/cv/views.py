@@ -116,7 +116,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
-    ordering_fields = ["last_updated", "seed_photo"]
+    ordering_fields = ["last_updated", "seed_photograph"]
 
     @transaction.atomic
     @action(detail=True, methods=["patch"])

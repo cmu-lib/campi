@@ -51,6 +51,9 @@ class Photograph(
         help_text="Sequence in the series of photos taken during the job listing",
     )
 
+    class Meta:
+        ordering = ["image_path"]
+
     def push_parent_directory(self, coll_instance):
         self.all_directories.add(coll_instance)
         instance_parent = coll_instance.parent_directory
