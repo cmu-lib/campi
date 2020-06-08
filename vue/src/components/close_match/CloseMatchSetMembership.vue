@@ -1,7 +1,7 @@
 <template>
   <b-card no-body>
     <template v-slot:header>
-      <b-row>
+      <b-row flex align-h="center">
         <b-button-group>
           <b-button
             :variant="accept_variant"
@@ -20,7 +20,7 @@
             <BIconX />
           </b-button>
           <b-button variant="secondary" size="sm">
-            <BIconStarFill v-if="is_primary" variant="warning" @click="claim_primary" />
+            <BIconStarFill v-if="is_primary" variant="warning" @click="cancel_primary" />
             <BIconStar v-else @click="claim_primary" />
           </b-button>
         </b-button-group>
@@ -55,16 +55,11 @@
         >
           <BIconConeStriped />
         </b-badge>
-        <b-badge
-          class="mx-1"
-          variant="primary"
-          :title="close_match_set_membership.photograph.directory.label"
-          v-b-tooltip.hover
-        >
+        <b-badge class="mx-1" variant="primary" :title="directory_tooltip" v-b-tooltip.hover>
           <BIconFolderFill />
         </b-badge>
         <b-badge class="mx-1" variant="info" v-if="!!close_match_set_membership.photograph.job">
-          <BIconCamera v-b-tooltip.hover :title="close_match_set_membership.photograph.job.label" />
+          <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
         </b-badge>
       </b-row>
     </template>
@@ -118,6 +113,19 @@ export default {
     };
   },
   computed: {
+    directory_tooltip() {
+      return `Directory: ${this.close_match_set_membership.photograph.directory.label}`;
+    },
+    job_tooltip() {
+      if (
+        this.close_match_set_membership.photograph.job.label ==
+        this.close_match_set_membership.photograph.job.job_code
+      ) {
+        return `Job: ${this.close_match_set_membership.photograph.job.job_code}`;
+      } else {
+        return `Job: ${this.close_match_set_membership.photograph.job.label} (${this.close_match_set_membership.photograph.job.job_code})`;
+      }
+    },
     is_primary() {
       if (!!this.primary) {
         return this.primary.id == this.close_match_set_membership.photograph.id;
