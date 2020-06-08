@@ -1,7 +1,33 @@
 <template>
   <b-card no-body>
     <template v-slot:header>
-      <b-row flex align-h="center">
+      <b-row flex align-h="between">
+        <span class="info-badges">
+          <b-badge
+            class="mx-1"
+            variant="warning"
+            v-if="close_match_set_membership.distance==0.0"
+            v-b-tooltip.hover
+            title="This is the seed photograph used as the starting point of the search"
+          >
+            <BIconAward />
+          </b-badge>
+          <b-badge
+            class="mx-1"
+            variant="warning"
+            v-else-if="close_match_set_membership.distance <= close_match_run.exclude_future_distance"
+            v-b-tooltip.hover
+            title="This photo is so similar to the the seed photograph that it won't be included in future potential match sets"
+          >
+            <BIconConeStriped />
+          </b-badge>
+          <b-badge class="mx-1" variant="primary" :title="directory_tooltip" v-b-tooltip.hover>
+            <BIconFolderFill />
+          </b-badge>
+          <b-badge class="mx-1" variant="info" v-if="!!close_match_set_membership.photograph.job">
+            <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
+          </b-badge>
+        </span>
         <b-button-group>
           <b-button
             :variant="accept_variant"
@@ -30,37 +56,16 @@
       :src="close_match_set_membership.photograph.image.thumbnail"
       width="300"
       :id="popover_id"
+      class="m-0"
     />
     <b-popover :target="popover_id" triggers="hover" placement="top">
       <template v-slot:title>{{ popover_title }}</template>
       <b-img :src="popover_preivew_src" />
     </b-popover>
     <template v-slot:footer>
-      <b-row flex align-h="center">
-        <b-badge
-          class="mx-1"
-          variant="warning"
-          v-if="close_match_set_membership.distance==0.0"
-          v-b-tooltip.hover
-          title="This is the seed photograph used as the starting point of the search"
-        >
-          <BIconAward />
-        </b-badge>
-        <b-badge
-          class="mx-1"
-          variant="warning"
-          v-else-if="close_match_set_membership.distance <= close_match_run.exclude_future_distance"
-          v-b-tooltip.hover
-          title="This photo is so similar to the the seed photograph that it won't be included in future potential match sets"
-        >
-          <BIconConeStriped />
-        </b-badge>
-        <b-badge class="mx-1" variant="primary" :title="directory_tooltip" v-b-tooltip.hover>
-          <BIconFolderFill />
-        </b-badge>
-        <b-badge class="mx-1" variant="info" v-if="!!close_match_set_membership.photograph.job">
-          <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
-        </b-badge>
+      <b-row align-h="between">
+        <span>{{ close_match_set_membership.photograph.filename }}</span>
+        <span>Distance: {{ close_match_set_membership.distance.toFixed(3) }}</span>
       </b-row>
     </template>
   </b-card>
@@ -197,3 +202,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.info-badges {
+  font-size: x-large;
+}
+</style>
