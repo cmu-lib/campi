@@ -1,10 +1,10 @@
 <template>
   <b-container fluid>
     <b-row>
-      <b-col cols="3">
+      <b-col cols="2">
         <CloseMatchRunMenu v-model="close_match_run_id" />
       </b-col>
-      <b-col cols-9>
+      <b-col cols="10">
         <router-view v-if="!!close_match_run_id" />
         <b-alert v-else show variant="info">
           <h2>Select a close match run at left to begin review</h2>
