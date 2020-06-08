@@ -25,11 +25,13 @@
         :close_match_set_membership="cmsm"
         :close_match_run="close_match_set_state.close_match_run"
         :primary="close_match_set_state.representative_photograph"
+        :searched_photo="searched_photo"
         class="m-2"
         @accept="accept"
         @reject="reject"
         @claim_primary="claim_primary"
         @cancel_primary="cancel_primary"
+        @photo_search="photo_search"
       />
     </b-row>
     <template v-slot:footer v-if="!!modifying_user">
@@ -55,6 +57,10 @@ export default {
     close_match_set: {
       type: Object,
       required: true
+    },
+    searched_photo: {
+      type: Number,
+      default: null
     }
   },
   data() {
@@ -95,6 +101,9 @@ export default {
     }
   },
   methods: {
+    photo_search(id) {
+      this.$emit("photo_search", id);
+    },
     get_index(id) {
       return _.findIndex(this.close_match_set_state.memberships, { id: id });
     },

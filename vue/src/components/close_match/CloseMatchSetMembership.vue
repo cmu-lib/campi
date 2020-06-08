@@ -1,5 +1,5 @@
 <template>
-  <b-card no-body>
+  <b-card :border-variant="border_variant">
     <template v-slot:header>
       <b-row flex align-h="between">
         <span class="info-badges">
@@ -29,6 +29,9 @@
           </b-badge>
         </span>
         <b-button-group>
+          <b-button variant="secondary" size="sm" @click="photo_search">
+            <BIconSearch />
+          </b-button>
           <b-button
             :variant="accept_variant"
             size="sm"
@@ -62,12 +65,12 @@
     />
     <b-popover :target="popover_id" triggers="hover" placement="top">
       <template v-slot:title>{{ popover_title }}</template>
-      <b-img :src="popover_preivew_src" />
+      <b-img :src="popover_preivew_src" :width="popup_size" />
     </b-popover>
     <template v-slot:footer>
       <b-row align-h="between">
-        <span>{{ close_match_set_membership.photograph.filename }}</span>
-        <span>Distance: {{ close_match_set_membership.distance.toFixed(3) }}</span>
+        <small>{{ close_match_set_membership.photograph.filename }}</small>
+        <small>Distance: {{ close_match_set_membership.distance.toFixed(3) }}</small>
       </b-row>
     </template>
   </b-card>
@@ -82,7 +85,8 @@ import {
   BIconCamera,
   BIconFolderFill,
   BIconConeStriped,
-  BIconAward
+  BIconAward,
+  BIconSearch
 } from "bootstrap-vue";
 export default {
   name: "CloseMatchSetMembership",
@@ -94,7 +98,8 @@ export default {
     BIconCamera,
     BIconFolderFill,
     BIconConeStriped,
-    BIconAward
+    BIconAward,
+    BIconSearch
   },
   props: {
     close_match_set_membership: {
@@ -109,9 +114,13 @@ export default {
       type: Object,
       default: null
     },
+    searched_photo: {
+      type: Number,
+      default: null
+    },
     popup_size: {
       type: Number,
-      default: 500
+      default: 800
     }
   },
   data() {
@@ -120,6 +129,16 @@ export default {
     };
   },
   computed: {
+    border_variant() {
+      if (!!this.searched_photo) {
+        if (
+          this.searched_photo == this.close_match_set_membership.photograph.id
+        ) {
+          return "danger";
+        }
+      }
+      return null;
+    },
     directory_tooltip() {
       return `Directory: ${this.close_match_set_membership.photograph.directory.label}`;
     },
@@ -180,6 +199,9 @@ export default {
     }
   },
   methods: {
+    photo_search() {
+      this.$emit("photo_search", this.close_match_set_membership.photograph.id);
+    },
     claim_primary() {
       // Emits a signal to the match set to take status as the representative photo
       this.$emit("claim_primary", this.close_match_set_membership.photograph);

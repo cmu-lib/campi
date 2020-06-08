@@ -1,16 +1,28 @@
 <template>
   <div>
-    <b-button-toolbar>
+    <b-row flex align-h="between">
       <b-form-checkbox v-model="not_signed_off" name="check-button" switch>Only show to-dos</b-form-checkbox>
+      <b-form-group
+        id="contain-photo"
+        label-for="contain-photo-input"
+        label="Contains photo"
+        description="Match set must contain this photo"
+      >
+        <b-form-input
+          id="contain-photo-input"
+          type="number"
+          v-model="photo_memberships"
+          debounce="750"
+        />
+      </b-form-group>
       <b-pagination
         v-if="close_match_sets"
         v-model="current_page"
         :total-rows="close_match_sets.count"
         :per-page="per_page"
-        class="mx-auto"
       />
       <span v-if="!!close_match_sets">{{ close_match_sets.count }} {{ set_count_type }} sets</span>
-    </b-button-toolbar>
+    </b-row>
     <b-row align-h="center">
       <b-overlay :show="loading">
         <div v-if="close_match_sets">
@@ -18,7 +30,9 @@
             v-for="cms in close_match_sets.results"
             :key="cms.id"
             :close_match_set="cms"
+            :searched_photo="photo_memberships"
             @set_submitted="set_submitted"
+            @photo_search="photo_search"
           />
         </div>
       </b-overlay>
@@ -44,7 +58,8 @@ export default {
       current_page: 1,
       not_signed_off: false,
       per_page: 10,
-      close_match_sets: null
+      close_match_sets: null,
+      photo_memberships: null
     };
   },
   computed: {
@@ -64,7 +79,8 @@ export default {
         close_match_run: this.close_match_run_id,
         limit: this.per_page,
         offset: this.rest_page,
-        not_signed_off: this.not_signed_off
+        not_signed_off: this.not_signed_off,
+        memberships: this.photo_memberships
       };
     }
   },
@@ -89,6 +105,9 @@ export default {
     },
     set_submitted() {
       this.get_close_match_sets();
+    },
+    photo_search(id) {
+      this.photo_memberships = id;
     }
   },
   watch: {
