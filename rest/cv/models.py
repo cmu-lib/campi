@@ -268,6 +268,7 @@ class CloseMatchRun(dateModifiedModel):
             )
             for i, photo in enumerate(photo_neighbors["photographs"]):
                 photo_distance = photo_neighbors["distances"][i]
+                # If so, for each photo under the cutoff distance, add it to the membership list
                 if photo_distance <= self.cutoff_distance:
                     print(f"member: {photo.id} distance {photo_distance}")
                     CloseMatchSetMembership.objects.create(
@@ -275,6 +276,7 @@ class CloseMatchRun(dateModifiedModel):
                         photograph=photo,
                         distance=photo_distance,
                     )
+                # In addition, if that photo is under the exclude_future_distance threshold, add it to the already-considered-photos list so it won't be used as a seed photo in future sets.
                 if photo_distance <= self.exclude_future_distance:
                     self.considered_photos.add(photo)
 
