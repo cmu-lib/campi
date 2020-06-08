@@ -45,9 +45,11 @@
           >
             <BIconX />
           </b-button>
-          <b-button variant="secondary" size="sm">
-            <BIconStarFill v-if="is_primary" variant="warning" @click="cancel_primary" />
-            <BIconStar v-else @click="claim_primary" />
+          <b-button v-if="is_primary" variant="secondary" size="sm" @click="cancel_primary">
+            <BIconStarFill variant="warning" />
+          </b-button>
+          <b-button v-else variant="secondary" size="sm" @click="claim_primary">
+            <BIconStar @click="claim_primary" />
           </b-button>
         </b-button-group>
       </b-row>
