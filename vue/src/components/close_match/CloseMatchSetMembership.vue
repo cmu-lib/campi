@@ -84,16 +84,14 @@
         </b-button-toolbar>
       </b-row>
     </template>
-    <b-img-lazy
-      :src="close_match_set_membership.photograph.image.thumbnail"
-      width="300"
-      :id="popover_id"
-      class="m-0"
-    />
-    <b-popover :target="popover_id" triggers="hover" placement="top">
-      <template v-slot:title>{{ popover_title }}</template>
-      <b-img :src="popover_preivew_src" :width="popup_size" />
-    </b-popover>
+    <div @click="$bvModal.show(popover_id)" class="magnify">
+      <b-img :src="close_match_set_membership.photograph.image.thumbnail" width="300" class="m-0" />
+    </div>
+    <b-modal :id="popover_id" size="xl" centered hide-footer :title="popover_title">
+      <b-row align-h="center">
+        <b-img :src="popover_preivew_src" :width="popup_size" />
+      </b-row>
+    </b-modal>
     <template v-slot:footer>
       <b-row align-h="between">
         <small>{{ close_match_set_membership.photograph.filename }}</small>
@@ -147,7 +145,7 @@ export default {
     },
     popup_size: {
       type: Number,
-      default: 800
+      default: 900
     }
   },
   data() {
@@ -200,11 +198,7 @@ export default {
       }
     },
     popover_title() {
-      return (
-        this.close_match_set_membership.photograph.id +
-        "-" +
-        this.close_match_set_membership.distance
-      );
+      return `${this.close_match_set_membership.photograph.id} - ${this.close_match_set_membership.photograph.filename} - ${this.close_match_set_membership.distance}`;
     },
     popover_id() {
       return (
@@ -215,17 +209,13 @@ export default {
       );
     },
     popover_preivew_src() {
-      return (
-        this.close_match_set_membership.photograph.image.id +
-        "/full/!" +
-        this.popup_size +
-        "," +
-        this.popup_size +
-        "/0/default.jpg"
-      );
+      return `${this.close_match_set_membership.photograph.image.id}/full/!${this.popup_size},${this.popup_size}/0/default.jpg`;
     }
   },
   methods: {
+    show_modal() {
+      this.$bvModal.show(this.popover_id);
+    },
     photo_search() {
       this.$emit("photo_search", this.close_match_set_membership.photograph.id);
     },
@@ -257,5 +247,8 @@ export default {
 <style>
 .info-badges {
   font-size: x-large;
+}
+.magnify {
+  cursor: zoom-in;
 }
 </style>
