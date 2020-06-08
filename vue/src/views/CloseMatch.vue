@@ -1,9 +1,5 @@
 <template>
   <b-container fluid>
-    <b-alert
-      show
-      variant="warning"
-    >This is for display only now. None of the buttons are functioning for data entry yet :)</b-alert>
     <b-row>
       <b-col cols="3">
         <CloseMatchRunMenu v-model="close_match_run_id" />
