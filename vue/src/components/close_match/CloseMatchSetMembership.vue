@@ -176,6 +176,7 @@ export default {
       this.$emit("accept", this.close_match_set_membership.id);
     },
     reject() {
+      this.cancel_primary();
       this.$emit("reject", this.close_match_set_membership.id);
     }
   },
