@@ -5,7 +5,7 @@
         <span class="info-badges">
           <b-badge
             class="mx-1"
-            variant="warning"
+            variant="dark"
             v-if="close_match_set_membership.distance==0.0"
             v-b-tooltip.hover
             title="This is the seed photograph used as the starting point of the search"
@@ -28,33 +28,60 @@
             <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
           </b-badge>
         </span>
-        <b-button-group>
-          <b-button variant="secondary" size="sm" @click="photo_search">
+        <b-button-toolbar>
+          <b-button
+            variant="secondary"
+            class="mx-1"
+            size="sm"
+            @click="photo_search"
+            v-b-tooltip.hover
+            title="Search for match sets containing this photo"
+          >
             <BIconSearch />
           </b-button>
-          <b-button
-            :variant="accept_variant"
-            size="sm"
-            :pressed="close_match_set_membership.accepted==true"
-            @click="accept"
-          >
-            <BIconCheck2 />
-          </b-button>
-          <b-button
-            :variant="reject_variant"
-            size="sm"
-            :pressed="close_match_set_membership.accepted==false"
-            @click="reject"
-          >
-            <BIconX />
-          </b-button>
-          <b-button v-if="is_primary" variant="secondary" size="sm" @click="cancel_primary">
-            <BIconStarFill variant="warning" />
-          </b-button>
-          <b-button v-else variant="secondary" size="sm" @click="claim_primary">
-            <BIconStar />
-          </b-button>
-        </b-button-group>
+          <b-button-group>
+            <b-button
+              :variant="accept_variant"
+              size="sm"
+              :pressed="close_match_set_membership.accepted==true"
+              @click="accept"
+              v-b-tooltip.hover
+              title="Keep this photo in this match set (will remove it from any other unapproved set.)"
+            >
+              <BIconCheck2 />
+            </b-button>
+            <b-button
+              :variant="reject_variant"
+              size="sm"
+              :pressed="close_match_set_membership.accepted==false"
+              @click="reject"
+              v-b-tooltip.hover
+              title="Reject this photo from the match set (it may still show up in later match sets.)"
+            >
+              <BIconX />
+            </b-button>
+            <b-button
+              v-if="is_primary"
+              variant="secondary"
+              size="sm"
+              @click="cancel_primary"
+              v-b-tooltip.hover
+              title="Mark this as the representative photo of the match set."
+            >
+              <BIconStarFill variant="warning" />
+            </b-button>
+            <b-button
+              v-else
+              variant="secondary"
+              size="sm"
+              @click="claim_primary"
+              v-b-tooltip.hover
+              title="Mark this as the representative photo of the match set."
+            >
+              <BIconStar />
+            </b-button>
+          </b-button-group>
+        </b-button-toolbar>
       </b-row>
     </template>
     <b-img-lazy

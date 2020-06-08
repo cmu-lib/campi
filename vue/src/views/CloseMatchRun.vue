@@ -1,19 +1,25 @@
 <template>
   <div>
-    <b-row flex align-h="between">
+    <b-row flex align-h="between" align-v="center" class="m-2">
       <b-form-checkbox v-model="not_signed_off" name="check-button" switch>Only show to-dos</b-form-checkbox>
       <b-form-group
         id="contain-photo"
         label-for="contain-photo-input"
-        label="Contains photo"
-        description="Match set must contain this photo"
+        label="Match set contains photo:"
       >
-        <b-form-input
-          id="contain-photo-input"
-          type="number"
-          v-model="photo_memberships"
-          debounce="750"
-        />
+        <b-input-group>
+          <b-form-input
+            id="contain-photo-input"
+            type="number"
+            v-model="photo_memberships"
+            debounce="750"
+          />
+          <b-input-group-append v-if="!!photo_memberships">
+            <b-button variant="danger" @click="photo_memberships=null">
+              <BIconX />
+            </b-button>
+          </b-input-group-append>
+        </b-input-group>
       </b-form-group>
       <b-pagination
         v-if="close_match_sets"
@@ -43,9 +49,10 @@
 <script>
 import { HTTP } from "@/main";
 import CloseMatchSet from "@/components/close_match/CloseMatchSet.vue";
+import { BIconX } from "bootstrap-vue";
 export default {
   name: "CloseMatchRun",
-  components: { CloseMatchSet },
+  components: { CloseMatchSet, BIconX },
   props: {
     close_match_run_id: {
       type: Number,

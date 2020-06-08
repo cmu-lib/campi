@@ -5,14 +5,33 @@
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
         <b-button-toolbar>
           <b-button-group>
-            <b-button variant="success" size="sm" @click="accept_all">
+            <b-button
+              variant="success"
+              size="sm"
+              @click="accept_all"
+              v-b-tooltip.hover
+              title="Mark every photo as accepted. If you haven't starred a photo, it will star the first accepted one in the set."
+            >
               <BIconCheck2All class="mr-1" />Accept all
             </b-button>
-            <b-button variant="danger" size="sm" @click="reject_all">
+            <b-button
+              variant="danger"
+              size="sm"
+              @click="reject_all"
+              v-b-tooltip.hover
+              title="Mark every photo as rejected."
+            >
               <BIconXOctagon class="mr-1" />Reject all
             </b-button>
           </b-button-group>
-          <b-button class="ml-2" variant="primary" size="sm" @click="register_set">
+          <b-button
+            class="ml-2"
+            variant="primary"
+            size="sm"
+            @click="register_set"
+            v-b-tooltip.hover
+            title="Save your judgments to the server. Any photo left blank will be automatically marked as 'rejected'"
+          >
             <BIconCloudUpload class="mr-1" />Save
           </b-button>
         </b-button-toolbar>
