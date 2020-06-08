@@ -1,9 +1,9 @@
-django
+django==3.0.7
 coverage
 psycopg2-binary
-gunicorn
+gunicorn==20.0.4
 tblib
-djangorestframework
+djangorestframework==3.11.0
 django-cors-headers
 django-filter
 tqdm
@@ -12,7 +12,7 @@ torch
 pillow
 torchvision
 annoy
-requests
+requests==2.23.0
 scipy
 drf-yasg
 lxml
