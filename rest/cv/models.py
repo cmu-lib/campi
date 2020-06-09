@@ -22,11 +22,23 @@ import numpy as np
 
 
 class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
+    """
+    All CV models must describe a set of dimensions and provide a build_embeddings method
+    """
+
     n_dimensions = models.PositiveIntegerField()
 
-    # @classmethod
-    # def from_db(cls, db, firled_names, values):
-    # possibly override from_db to load the index file into memory when the instance is loaded from the database. Not sure if this would work with caching or repeated calls to an API
+    def save(self, *args, **kwargs):
+        """
+        When creating a proxy class, store the classname in the description for reference
+        """
+        self.description = self.description + "\n" + self.__class__.__name__
+        return super().save(self, *args, **kwargs)
+
+
+class ColorInceptionV3(PyTorchModel):
+    class Meta:
+        proxy = True
 
     def build_embeddings(self, photograph_queryset):
         """
@@ -62,6 +74,134 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         for pic in tqdm(embeddings_to_be_calculated):
             try:
                 squared_small_path = f"{pic.iiif_base}/full/299,299/0/default.jpg"
+
+                res = requests.get(squared_small_path)
+                img = Image.open(BytesIO(res.content))
+
+                # If image is grayscale, convert it to a false RGB
+                if img.mode == "L":
+                    img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
+                    # Convert to a false rgb image
+                    rgb_img = Image.fromarray(img_array)
+                else:
+                    rgb_img = img
+
+                input_tensor = preprocess(rgb_img)
+                input_batch = input_tensor.unsqueeze(0)
+
+                with torch.no_grad():
+                    output = np.array(embeddings_model(input_batch).flatten())
+                    embedding_list = output.tolist()
+                    Embedding.objects.create(
+                        pytorch_model=self, photograph=pic, array=embedding_list
+                    )
+            except:
+                print(f"Error processing {pic.full_image}")
+                continue
+
+
+class GrayInceptionV3(PyTorchModel):
+    class Meta:
+        proxy = True
+
+    def build_embeddings(self, photograph_queryset):
+        """
+        Take a queryset of photographs and calculate their embeddings
+
+        https://towardsdatascience.com/finding-similar-images-using-deep-learning-and-locality-sensitive-hashing-9528afee02f5
+
+        https://pytorch.org/hub/pytorch_vision_inception_v3/
+        """
+
+        print("Loading inception v3 model")
+        model = torch.hub.load("pytorch/vision:v0.5.0", "resnet18", pretrained=True)
+        print("Model downloaded. Begin eval")
+        model.eval()
+        print("Eval finished")
+        embeddings_model = torch.nn.Sequential(*list(model.children())[:-1])
+
+        preprocess = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
+
+        already_calculated_embeddings = self.embeddings.all()
+        # From the supplied photographs, find the ones that haven't had embeddings created yet for the current model
+        embeddings_to_be_calculated = photograph_queryset.exclude(
+            embeddings__in=already_calculated_embeddings
+        ).all()
+
+        for pic in tqdm(embeddings_to_be_calculated):
+            try:
+                squared_small_path = f"{pic.iiif_base}/full/299,299/0/gray.jpg"
+
+                res = requests.get(squared_small_path)
+                img = Image.open(BytesIO(res.content))
+
+                # If image is grayscale, convert it to a false RGB
+                if img.mode == "L":
+                    img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
+                    # Convert to a false rgb image
+                    rgb_img = Image.fromarray(img_array)
+                else:
+                    rgb_img = img
+
+                input_tensor = preprocess(rgb_img)
+                input_batch = input_tensor.unsqueeze(0)
+
+                with torch.no_grad():
+                    output = np.array(embeddings_model(input_batch).flatten())
+                    embedding_list = output.tolist()
+                    Embedding.objects.create(
+                        pytorch_model=self, photograph=pic, array=embedding_list
+                    )
+            except:
+                print(f"Error processing {pic.full_image}")
+                continue
+
+
+class BitonalInceptionV3(PyTorchModel):
+    class Meta:
+        proxy = True
+
+    def build_embeddings(self, photograph_queryset):
+        """
+        Take a queryset of photographs and calculate their embeddings
+
+        https://towardsdatascience.com/finding-similar-images-using-deep-learning-and-locality-sensitive-hashing-9528afee02f5
+
+        https://pytorch.org/hub/pytorch_vision_inception_v3/
+        """
+
+        print("Loading inception v3 model")
+        model = torch.hub.load("pytorch/vision:v0.5.0", "resnet18", pretrained=True)
+        print("Model downloaded. Begin eval")
+        model.eval()
+        print("Eval finished")
+        embeddings_model = torch.nn.Sequential(*list(model.children())[:-1])
+
+        preprocess = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
+
+        already_calculated_embeddings = self.embeddings.all()
+        # From the supplied photographs, find the ones that haven't had embeddings created yet for the current model
+        embeddings_to_be_calculated = photograph_queryset.exclude(
+            embeddings__in=already_calculated_embeddings
+        ).all()
+
+        for pic in tqdm(embeddings_to_be_calculated):
+            try:
+                squared_small_path = f"{pic.iiif_base}/full/299,299/0/bitonal.jpg"
 
                 res = requests.get(squared_small_path)
                 img = Image.open(BytesIO(res.content))
