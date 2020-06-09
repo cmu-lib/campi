@@ -1,5 +1,5 @@
 <template>
-  <b-card :border-variant="border_variant">
+  <b-card :border-variant="border_variant" :bg-variant="background_variant" v-if="show_membership">
     <template v-slot:header>
       <b-row flex align-h="between">
         <span class="info-badges">
@@ -27,6 +27,12 @@
           <b-badge class="mx-1" variant="info" v-if="!!close_match_set_membership.photograph.job">
             <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
           </b-badge>
+          <b-badge
+            v-if="close_match_set_membership.invalid"
+            variant="danger"
+            v-b-tooltip.hover
+            title="This photo has already been reviewed and added to another match set by an editor."
+          >ALREADY COMMITTED</b-badge>
         </span>
         <b-button-toolbar>
           <b-button
@@ -147,6 +153,10 @@ export default {
       type: Number,
       default: null
     },
+    show_invalid: {
+      type: Boolean,
+      default: false
+    },
     popup_size: {
       type: Number,
       default: 900
@@ -158,6 +168,16 @@ export default {
     };
   },
   computed: {
+    show_membership() {
+      return this.show_invalid | !this.close_match_set_membership.invalid;
+    },
+    background_variant() {
+      if (this.close_match_set_membership.invalid) {
+        return "secondary";
+      } else {
+        return null;
+      }
+    },
     border_variant() {
       if (!!this.searched_photo) {
         if (

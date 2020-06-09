@@ -48,6 +48,7 @@
         :close_match_run="close_match_set_state.close_match_run"
         :primary="close_match_set_state.representative_photograph"
         :searched_photo="searched_photo"
+        :show_invalid="show_invalid"
         class="m-2"
         @accept="accept"
         @reject="reject"
@@ -56,12 +57,16 @@
         @photo_search="photo_search"
       />
     </b-row>
+    <b-toast :id="toast_id" :variant="toast_variant">
+      <Nested :value="toast_response" />
+    </b-toast>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "@/main";
 import CloseMatchSetMembership from "@/components/close_match/CloseMatchSetMembership.vue";
+import Nested from "@/components/Nested.vue";
 import _ from "lodash";
 import { BIconCheck2All, BIconXOctagon, BIconCloudUpload } from "bootstrap-vue";
 export default {
@@ -70,7 +75,8 @@ export default {
     CloseMatchSetMembership,
     BIconCheck2All,
     BIconXOctagon,
-    BIconCloudUpload
+    BIconCloudUpload,
+    Nested
   },
   props: {
     close_match_set: {
@@ -80,14 +86,23 @@ export default {
     searched_photo: {
       type: Number,
       default: null
+    },
+    show_invalid: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {
-      close_match_set_state: null
+      close_match_set_state: null,
+      toast_response: null,
+      toast_variant: null
     };
   },
   computed: {
+    toast_id() {
+      return `toast-${this.close_match_set.id}`;
+    },
     set_variant() {
       if (!!this.modifying_user) {
         return "success";
@@ -169,15 +184,15 @@ export default {
         this.close_match_approval
       ).then(
         results => {
-          this.$bvToast.toast(this.get_registration_toast(results.data), {
-            title: `Set ${this.close_match_set.id} saved`,
-            autoHideDelay: 5000,
-            variant: "success"
-          });
+          this.toast_response = results.data;
+          this.toast_variant = "success";
+          this.$bvToast.show(`toast-${this.close_match_set.id}`);
           this.$emit("set_submitted", this.close_match_set.id);
         },
         error => {
-          console.log(error);
+          this.toast_response = error;
+          this.toast_variant = "danger";
+          this.$bvToast.show(`toast-${this.close_match_set.id}`);
         }
       );
     }

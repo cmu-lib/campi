@@ -84,6 +84,7 @@ class CloseMatchSetFilter(filters.FilterSet):
         queryset=models.CloseMatchRun.objects.all(),
         help_text="The run that created this match set",
     )
+    invalid = filters.BooleanFilter()
     not_signed_off = filters.BooleanFilter(method="has_user_signed_off")
     seed_photograph = filters.ModelChoiceFilter(
         queryset=photograph.models.Photograph.objects.all(),
@@ -151,7 +152,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             close_match_set.user_last_modified = request.user
             close_match_set.save()
 
-            # Once saved, remove all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
+            # Once saved, mark invalid all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
             accepted_photographs = photograph.models.Photograph.objects.filter(
                 close_match_memberships__in=close_match_set.memberships.filter(
                     accepted=True
@@ -159,29 +160,35 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             ).distinct()
             n_memberships_deleted = (
                 models.CloseMatchSetMembership.objects.filter(
+                    close_match_set__close_match_run=close_match_set.close_match_run,
                     close_match_set__user_last_modified__isnull=True,
                     photograph__in=accepted_photographs,
                 )
                 .all()
-                .delete()
+                .update(invalid=True)
             )
 
-            # Delete any sets that no longer have 2 or more photos, or where the seed photo was any of the accepted photos
+            # Mark invalid any sets that no longer have 2 or more photos, or where the seed photo was any of the accepted photos
             n_sets_too_small = (
                 models.CloseMatchSet.objects.annotate(
-                    n_memberships=Count("memberships", distinct=True)
+                    n_memberships=Count(
+                        "memberships", filter=Q(invalid=False), distinct=True
+                    )
                 )
-                .filter(n_memberships__lt=2)
-                .delete()
+                .filter(
+                    n_memberships__lt=2, close_match_run=close_match_set.close_match_run
+                )
+                .update(invalid=True)
             )
 
             n_sets_seed = (
                 models.CloseMatchSet.objects.filter(
                     user_last_modified__isnull=True,
+                    close_match_run=close_match_set.close_match_run,
                     seed_photograph__in=accepted_photographs,
                 )
                 .distinct()
-                .delete()
+                .update(invalid=True)
             )
 
             res = {

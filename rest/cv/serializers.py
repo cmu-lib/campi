@@ -57,7 +57,7 @@ class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.CloseMatchSetMembership
-        fields = ["id", "photograph", "distance", "accepted"]
+        fields = ["id", "photograph", "distance", "accepted", "invalid"]
 
 
 class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
@@ -79,6 +79,7 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
             "memberships",
             "user_last_modified",
             "last_updated",
+            "invalid",
         ]
 
 

@@ -24,11 +24,22 @@
       </b-col>
       <b-col cols="10">
         <b-row flex align-h="between" align-v="center" class="m-3">
-          <b-form-checkbox
-            v-model="not_signed_off"
-            name="check-button"
-            switch
-          >Only show unconfirmed sets</b-form-checkbox>
+          <b-col cols="3">
+            <b-form-checkbox
+              v-model="not_signed_off"
+              name="check-button"
+              switch
+              v-b-tooltip.hover
+              title="Only show sets that have not yet been reviewed by an editor."
+            >Only show unreviewed sets</b-form-checkbox>
+            <b-form-checkbox
+              v-model="show_invalid"
+              name="check-button"
+              switch
+              v-b-tooltip.hover
+              title="Only show sets that haven't yet been invalidated by photo assignments made to other sets. (This should almost always be off.)"
+            >See invalid sets</b-form-checkbox>
+          </b-col>
           <b-form-group
             id="contain-photo"
             label-for="contain-photo-input"
@@ -69,6 +80,7 @@
                 :key="cms.id"
                 :close_match_set="cms"
                 :searched_photo="photo_memberships"
+                :show_invalid="show_invalid"
                 @set_submitted="set_submitted"
                 @photo_search="photo_search"
               />
@@ -97,7 +109,8 @@ export default {
     return {
       loading: null,
       current_page: 1,
-      not_signed_off: false,
+      not_signed_off: true,
+      show_invalid: false,
       per_page: 10,
       close_match_sets: null,
       photo_memberships: null
@@ -116,6 +129,7 @@ export default {
     },
     query_payload() {
       return {
+        invalid: this.show_invalid,
         ordering: "seed_photograph",
         close_match_run: this.close_match_run_id,
         limit: this.per_page,
