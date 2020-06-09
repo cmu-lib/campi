@@ -28,13 +28,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
 
     n_dimensions = models.PositiveIntegerField()
 
-    def save(self, *args, **kwargs):
-        """
-        When creating a proxy class, store the classname in the description for reference
-        """
-        self.description = self.description + "\n" + self.__class__.__name__
-        return super().save(self, *args, **kwargs)
-
 
 class ColorInceptionV3(PyTorchModel):
     class Meta:
