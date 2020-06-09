@@ -3,6 +3,9 @@
     <template v-slot:header>
       <b-row class="px-2" flex align-h="between" align-v="center">
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
+        <span
+          v-if="modifying_user"
+        >Reveiwed by {{ close_match_set_state.user_last_modified.username }} on {{ close_match_set_state.last_updated }}</span>
         <b-button-toolbar>
           <b-button-group>
             <b-button
@@ -53,9 +56,6 @@
         @photo_search="photo_search"
       />
     </b-row>
-    <template v-slot:footer v-if="!!modifying_user">
-      <p>Reveiwed by {{ close_match_set_state.user_last_modified.username }} on {{ close_match_set_state.last_updated }}</p>
-    </template>
   </b-card>
 </template>
 

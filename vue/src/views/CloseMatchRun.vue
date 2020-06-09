@@ -10,7 +10,10 @@
                 v-for="cms in close_match_sets.results"
                 :key="cms.id"
                 :href="`#cms-${cms.id}`"
+                :class="{completed: !!cms.user_last_modified}"
               >
+                <BIconCheck2 v-if="!!cms.user_last_modified" variant="success" />
+                <BIconX v-else variant="warning" />
                 Match set {{ cms.id }}
                 <br />
                 ({{ cms.memberships.length }} images)
@@ -80,10 +83,10 @@
 <script>
 import { HTTP } from "@/main";
 import CloseMatchSet from "@/components/close_match/CloseMatchSet.vue";
-import { BIconX } from "bootstrap-vue";
+import { BIconCheck2, BIconX } from "bootstrap-vue";
 export default {
   name: "CloseMatchRun",
-  components: { CloseMatchSet, BIconX },
+  components: { CloseMatchSet, BIconCheck2, BIconX },
   props: {
     close_match_run_id: {
       type: Number,
