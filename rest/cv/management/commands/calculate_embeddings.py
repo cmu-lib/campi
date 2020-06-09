@@ -26,5 +26,7 @@ class Command(BaseCommand):
         torch_model = getattr(cv.models, options["model"][0]).objects.get_or_create(
             label=options["label"], n_dimensions=int(options["n_dimensions"])
         )[0]
+        torch_model.description = options["model"][0]
+        torch_model.save()
         allpics = photograph.models.Photograph.objects.all()
         torch_model.build_embeddings(allpics)
