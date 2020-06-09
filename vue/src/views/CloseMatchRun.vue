@@ -1,49 +1,80 @@
 <template>
-  <div>
-    <b-row flex align-h="between" align-v="center" class="m-2">
-      <b-form-checkbox v-model="not_signed_off" name="check-button" switch>Only show to-dos</b-form-checkbox>
-      <b-form-group
-        id="contain-photo"
-        label-for="contain-photo-input"
-        label="Match set contains photo:"
-      >
-        <b-input-group>
-          <b-form-input
-            id="contain-photo-input"
-            type="number"
-            v-model="photo_memberships"
-            debounce="750"
+  <b-container fluid>
+    <b-row>
+      <b-col cols="2">
+        <b-overlay :show="loading">
+          <b-navbar v-b-scrollspy:scrollspy-cms class="flex-column" v-if="close_match_sets">
+            <b-navbar-brand href="#">Match Groups</b-navbar-brand>
+            <b-nav pills vertical>
+              <b-nav-item
+                v-for="cms in close_match_sets.results"
+                :key="cms.id"
+                :href="`#cms-${cms.id}`"
+              >
+                Match set {{ cms.id }}
+                <br />
+                ({{ cms.memberships.length }} images)
+              </b-nav-item>
+            </b-nav>
+          </b-navbar>
+        </b-overlay>
+      </b-col>
+      <b-col cols="10">
+        <b-row flex align-h="between" align-v="center" class="m-3">
+          <b-form-checkbox
+            v-model="not_signed_off"
+            name="check-button"
+            switch
+          >Only show unconfirmed sets</b-form-checkbox>
+          <b-form-group
+            id="contain-photo"
+            label-for="contain-photo-input"
+            label="Match set contains photo:"
+          >
+            <b-input-group>
+              <b-form-input
+                id="contain-photo-input"
+                type="number"
+                v-model="photo_memberships"
+                debounce="750"
+              />
+              <b-input-group-append v-if="!!photo_memberships">
+                <b-button variant="danger" @click="photo_memberships=null">
+                  <BIconX />
+                </b-button>
+              </b-input-group-append>
+            </b-input-group>
+          </b-form-group>
+          <b-pagination
+            v-if="close_match_sets"
+            v-model="current_page"
+            :total-rows="close_match_sets.count"
+            :per-page="per_page"
           />
-          <b-input-group-append v-if="!!photo_memberships">
-            <b-button variant="danger" @click="photo_memberships=null">
-              <BIconX />
-            </b-button>
-          </b-input-group-append>
-        </b-input-group>
-      </b-form-group>
-      <b-pagination
-        v-if="close_match_sets"
-        v-model="current_page"
-        :total-rows="close_match_sets.count"
-        :per-page="per_page"
-      />
-      <span v-if="!!close_match_sets">{{ close_match_sets.count }} {{ set_count_type }} sets</span>
+          <span v-if="!!close_match_sets">{{ close_match_sets.count }} {{ set_count_type }} sets</span>
+        </b-row>
+        <b-row align-h="center" class="m-3">
+          <b-overlay :show="loading">
+            <div
+              v-if="close_match_sets"
+              id="scrollspy-cms"
+              style="position:relative; height:700px; overflow-y:auto"
+            >
+              <CloseMatchSet
+                v-for="cms in close_match_sets.results"
+                :id="`cms-${cms.id}`"
+                :key="cms.id"
+                :close_match_set="cms"
+                :searched_photo="photo_memberships"
+                @set_submitted="set_submitted"
+                @photo_search="photo_search"
+              />
+            </div>
+          </b-overlay>
+        </b-row>
+      </b-col>
     </b-row>
-    <b-row align-h="center">
-      <b-overlay :show="loading">
-        <div v-if="close_match_sets">
-          <CloseMatchSet
-            v-for="cms in close_match_sets.results"
-            :key="cms.id"
-            :close_match_set="cms"
-            :searched_photo="photo_memberships"
-            @set_submitted="set_submitted"
-            @photo_search="photo_search"
-          />
-        </div>
-      </b-overlay>
-    </b-row>
-  </div>
+  </b-container>
 </template>
 
 <script>

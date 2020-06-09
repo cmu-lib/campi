@@ -39,16 +39,15 @@ const routes = [
     path: "/close_match",
     name: "CloseMatch",
     component: CloseMatch,
-    children: [
-      {
-        name: "CloseMatchRun",
-        path: "run/:id",
-        component: CloseMatchRun,
-        props: (route) => {
-          return { close_match_run_id: Number(route.params.id) }
-        }
-      }
-    ]
+
+  },
+  {
+    name: "CloseMatchRun",
+    path: "/close_match/run/:id",
+    component: CloseMatchRun,
+    props: (route) => {
+      return { close_match_run_id: Number(route.params.id) }
+    }
   }
 ]
 

@@ -1,12 +1,11 @@
 <template>
-  <b-container fluid>
+  <b-container>
     <b-row>
-      <b-col cols="2">
+      <b-col cols="6">
         <CloseMatchRunMenu v-model="close_match_run_id" />
       </b-col>
-      <b-col cols="10">
-        <router-view v-if="!!close_match_run_id" />
-        <b-alert v-else show variant="info">
+      <b-col cols="6">
+        <b-alert show variant="info">
           <h2>Select a close match run at left to begin review</h2>
         </b-alert>
       </b-col>
@@ -30,11 +29,6 @@ export default {
         name: "CloseMatchRun",
         params: { id: this.close_match_run_id }
       });
-    }
-  },
-  created() {
-    if (!!this.$route.params.id) {
-      this.close_match_run_id = Number(this.$route.params.id);
     }
   }
 };
