@@ -102,6 +102,60 @@ class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     ).annotate(n_sets=Count("close_match_sets", distinct=True))
     serializer_class = serializers.CloseMatchRunSerializer
 
+    @action(detail=True, methods=["get"])
+    def download_matches(
+        self,
+        request,
+        pk=None,
+        name="Download a CSV with filenames and their approved match groups",
+    ):
+        close_match_run = self.get_object()
+        useful_match_sets = close_match_run.close_match_sets.annotate(
+            n_approved=Count("memberships", filter=Q(memberships__accepted=True))
+        ).filter(n_approved__gte=2, user_last_modified__isnull=False, invalid=False)
+
+        all_memberships = (
+            models.CloseMatchSetMembership.objects.filter(
+                close_match_set__in=useful_match_sets
+            )
+            .order_by("id")
+            .distinct()
+            .values(
+                "close_match_set__id",
+                "photograph__id",
+                "photograph__original_server_path",
+                "close_match_set__representative_photograph__id",
+                "close_match_set__user_last_modified__username",
+                "close_match_set__last_updated",
+            )
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename=close_match_sets.csv"
+        writer = csv.writer(response)
+        headers = [
+            "photograph_file_name",
+            "photograph_id",
+            "set_id",
+            "is_primary",
+            "approving_user",
+            "date_approved",
+        ]
+        writer.writerow(headers)
+        for match in all_memberships:
+            writer.writerow(
+                [
+                    match["photograph__original_server_path"],
+                    match["photograph__id"],
+                    match["close_match_set__id"],
+                    match["close_match_set__representative_photograph__id"]
+                    == match["photograph__id"],
+                    match["close_match_set__user_last_modified__username"],
+                    match["close_match_set__last_updated"],
+                ]
+            )
+
+        return response
+
 
 class CloseMatchSetFilter(filters.FilterSet):
     close_match_run = filters.ModelChoiceFilter(
