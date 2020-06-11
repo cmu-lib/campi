@@ -44,7 +44,8 @@
             v-b-tooltip.hover
             title="Save your judgments to the server. Any photo left blank will be automatically marked as 'rejected'"
           >
-            <BIconCloudUpload class="mr-1" />Save
+            <BIconCloudUpload v-if="!uploading" class="mr-1" />
+            <b-spinner v-else small class="mr-1" />Save
           </b-button>
         </b-button-toolbar>
       </b-row>
@@ -115,7 +116,8 @@ export default {
       close_match_set_state: null,
       eliminated_photographs: [],
       toast_response: null,
-      toast_variant: null
+      toast_variant: null,
+      uploading: false
     };
   },
   computed: {
@@ -216,12 +218,14 @@ export default {
       return `${res.invalidations}`;
     },
     register_set() {
+      this.uploading = true;
       this.reject_remaining();
       return HTTP.patch(
         "/close_match/set/" + this.close_match_set.id + "/approve/",
         this.close_match_approval
       ).then(
         results => {
+          this.uploading = false;
           this.toast_variant = "success";
           this.toast_response = results.data.invalidations;
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
@@ -231,6 +235,7 @@ export default {
           });
         },
         error => {
+          this.uploading = false;
           this.toast_response = error;
           this.toast_variant = "danger";
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
