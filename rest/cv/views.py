@@ -164,10 +164,6 @@ class CloseMatchSetFilter(filters.FilterSet):
     )
     invalid = filters.BooleanFilter()
     not_signed_off = filters.BooleanFilter(method="has_user_signed_off")
-    seed_photograph = filters.ModelChoiceFilter(
-        queryset=photograph.models.Photograph.objects.all(),
-        help_text="The seed photograph for this match set",
-    )
     memberships = filters.ModelChoiceFilter(
         queryset=photograph.models.Photograph.objects.all(),
         help_text="Photograph within this proposed match set",
@@ -187,9 +183,6 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "close_match_run",
             "close_match_run__pytorch_model",
             "close_match_run__annoy_idx",
-            "seed_photograph",
-            "seed_photograph__directory",
-            "seed_photograph__job",
             "representative_photograph",
             "representative_photograph__directory",
             "representative_photograph__job",
@@ -204,7 +197,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
-    ordering_fields = ["last_updated", "seed_photograph", "n_images"]
+    ordering_fields = ["last_updated", "n_images"]
 
     @transaction.atomic
     @action(detail=True, methods=["patch"])
@@ -273,22 +266,11 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 .update(invalid=True, user_last_modified=request.user)
             )
 
-            n_sets_seed = (
-                models.CloseMatchSet.objects.filter(
-                    user_last_modified__isnull=True,
-                    close_match_run=close_match_set.close_match_run,
-                    seed_photograph__in=accepted_photographs,
-                )
-                .distinct()
-                .update(invalid=True, user_last_modified=request.user)
-            )
-
             res = {
                 "invalidations": {
                     "n_memberships_deleted": n_memberships_deleted,
                     "n_memberships_eliminated": n_memberships_eliminated,
                     "n_sets_too_small": n_sets_too_small,
-                    "n_sets_seed": n_sets_seed,
                 }
             }
 

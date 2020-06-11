@@ -333,77 +333,21 @@ class CloseMatchRun(dateModifiedModel):
     pytorch_model = models.ForeignKey(
         PyTorchModel, on_delete=models.CASCADE, related_name="close_match_runs"
     )
-    annoy_idx = models.ForeignKey(
-        AnnoyIdx, null=True, on_delete=models.CASCADE, related_name="close_match_runs"
-    )
-    max_neighbors = models.PositiveIntegerField(
-        help_text="Number of nearest neighbors to request from the index.", default=6
-    )
     cutoff_distance = models.FloatField(
         help_text="Photographs returned from the index query farther away from the photograph will be excluded."
     )
-    min_samples = models.PositiveIntegerField(null=True, help_text="")
+    min_samples = models.PositiveIntegerField(default=2, help_text="")
     exclude_future_distance = models.FloatField(
         help_text="Photographs returned from the index query farther away than this measure will be excluded from future consideration from any CloseMatchSet in this run."
-    )
-    considered_photos = models.ManyToManyField(
-        photograph.models.Photograph,
-        through="CloseMatchRunConsidered",
-        through_fields=("close_match_run", "photograph"),
-        related_name="considered_by_run",
     )
 
     class Meta:
         unique_together = (
             "pytorch_model",
-            "annoy_idx",
-            "max_neighbors",
             "cutoff_distance",
             "exclude_future_distance",
+            "min_samples",
         )
-
-    def generate_match_sets(self):
-        if not self.annoy_idx.index_built:
-            self.annoy_idx.generate_index()
-        # For photos not yet under the auto_distance of a close_match_run:
-        photos_to_do = self.pytorch_model.embeddings.exclude(
-            photograph__considered_by_run=self
-        ).distinct()
-        while photos_to_do.count() != 0:
-            print(photos_to_do.count())
-            photo = photos_to_do.first().photograph
-            self.generate_match_set(photo)
-
-    def generate_match_set(self, photograph):
-        print(f"Photo: {photograph.id}")
-        photo_neighbors = self.annoy_idx.get_nn(
-            photograph, n_neighbors=self.max_neighbors
-        )
-        # Are there any neighbors close enough to make a match?
-        print(photo_neighbors["distances"])
-        any_distance = any(
-            d <= self.cutoff_distance for d in photo_neighbors["distances"][1:]
-        )
-        if any_distance:
-            match_set = CloseMatchSet.objects.create(
-                close_match_run=self, seed_photograph=photograph
-            )
-            for i, photo in enumerate(photo_neighbors["photographs"]):
-                photo_distance = photo_neighbors["distances"][i]
-                # If so, for each photo under the cutoff distance, add it to the membership list
-                if photo_distance <= self.cutoff_distance:
-                    print(f"member: {photo.id} distance {photo_distance}")
-                    CloseMatchSetMembership.objects.create(
-                        close_match_set=match_set,
-                        photograph=photo,
-                        distance=photo_distance,
-                    )
-                # In addition, if that photo is under the exclude_future_distance threshold, add it to the already-considered-photos list so it won't be used as a seed photo in future sets.
-                if photo_distance <= self.exclude_future_distance:
-                    self.considered_photos.add(photo)
-
-        # Whether added to the index or not, still add the photo to the "considered" list so it won't be used again.
-        self.considered_photos.add(photograph)
 
     def generate_clusters_dbscan(self):
         """
@@ -516,12 +460,6 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
     close_match_run = models.ForeignKey(
         CloseMatchRun, on_delete=models.CASCADE, related_name="close_match_sets"
     )
-    seed_photograph = models.ForeignKey(
-        photograph.models.Photograph,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name="seeded_close_match_sets",
-    )
     photographs = models.ManyToManyField(
         photograph.models.Photograph,
         through="CloseMatchSetMembership",
@@ -540,7 +478,7 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
     )
 
     class Meta:
-        unique_together = ("close_match_run", "seed_photograph")
+        unique_together = ("close_match_run", "representative_photograph")
 
 
 class CloseMatchSetMembership(models.Model):

@@ -34,7 +34,6 @@ class AnnoyIdxGetNNSerializer(serializers.Serializer):
 
 class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
     pytorch_model = PytorchModelListSerializer(many=False)
-    annoy_idx = AnnoyIdxFlatSerializer(many=False)
     n_sets = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -44,10 +43,9 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
             "url",
             "created_on",
             "pytorch_model",
-            "annoy_idx",
-            "max_neighbors",
             "cutoff_distance",
             "exclude_future_distance",
+            "min_samples",
             "n_sets",
         ]
 
@@ -62,7 +60,6 @@ class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
 
 class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
     close_match_run = CloseMatchRunSerializer(many=False)
-    seed_photograph = photograph.serializers.PhotographListSerializer(many=False)
     representative_photograph = photograph.serializers.PhotographListSerializer(
         many=False
     )
@@ -74,7 +71,6 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
         fields = [
             "id",
             "close_match_run",
-            "seed_photograph",
             "representative_photograph",
             "memberships",
             "user_last_modified",
