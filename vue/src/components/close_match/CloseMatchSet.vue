@@ -213,7 +213,7 @@ export default {
         .map(x => (x.accepted = false));
     },
     get_registration_toast(res) {
-      return `${res.n_sets_too_small}`;
+      return `${res.invalidations}`;
     },
     register_set() {
       this.reject_remaining();
@@ -223,6 +223,7 @@ export default {
       ).then(
         results => {
           this.toast_variant = "success";
+          this.toast_response = results.data.invalidations;
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
           this.$emit("set_submitted", {
             id: this.close_match_set.id,

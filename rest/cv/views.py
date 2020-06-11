@@ -217,9 +217,11 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                     )
                 )
                 .filter(
-                    n_memberships__lt=2, close_match_run=close_match_set.close_match_run
+                    invalid=False,
+                    n_memberships__lt=2,
+                    close_match_run=close_match_set.close_match_run,
                 )
-                .update(invalid=True)
+                .update(invalid=True, user_last_modified=request.user)
             )
 
             n_sets_seed = (
@@ -229,21 +231,22 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                     seed_photograph__in=accepted_photographs,
                 )
                 .distinct()
-                .update(invalid=True)
+                .update(invalid=True, user_last_modified=request.user)
             )
 
             res = {
-                "n_memberships_deleted": n_memberships_deleted,
-                "n_sets_too_small": n_sets_too_small,
-                "n_sets_seed": n_sets_seed,
-            }
-
-            return Response(
-                serializers.CloseMatchSetSerializer(
+                "object": serializers.CloseMatchSetSerializer(
                     close_match_set, context={"request": request}
                 ).data,
-                status=status.HTTP_202_ACCEPTED,
-            )
+                "invalidations": {
+                    "n_memberships_deleted": n_memberships_deleted,
+                    "n_memberships_eliminated": n_memberships_eliminated,
+                    "n_sets_too_small": n_sets_too_small,
+                    "n_sets_seed": n_sets_seed,
+                },
+            }
+
+            return Response(res, status=status.HTTP_202_ACCEPTED)
         else:
             return Response(
                 raw_approval_data.errors, status=status.HTTP_400_BAD_REQUEST
