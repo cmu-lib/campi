@@ -183,7 +183,8 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             # Once saved, mark invalid all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
             accepted_photographs = photograph.models.Photograph.objects.filter(
                 close_match_memberships__in=close_match_set.memberships.filter(
-                    accepted=True
+                    close_match_set__close_match_run=close_match_set.close_match_run,
+                    accepted=True,
                 ).all()
             ).distinct()
             n_memberships_deleted = (
@@ -191,6 +192,16 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                     close_match_set__close_match_run=close_match_set.close_match_run,
                     close_match_set__user_last_modified__isnull=True,
                     photograph__in=accepted_photographs,
+                )
+                .all()
+                .update(invalid=True)
+            )
+
+            # Mark invalid all memberships in this run with the invalidated photos
+            n_memberships_eliminated = (
+                models.CloseMatchSetMembership.objects.filter(
+                    close_match_set__close_match_run=close_match_set.close_match_run,
+                    photograph__in=approval_data["eliminated_photographs"],
                 )
                 .all()
                 .update(invalid=True)

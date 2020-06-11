@@ -67,6 +67,16 @@
               <BIconX />
             </b-button>
             <b-button
+              :variant="eliminate_variant"
+              size="sm"
+              @click="toggle_eliminate"
+              :pressed="eliminated"
+              v-b-tooltip.hover
+              title="Eliminate this photo from this AND ALL OTHER MATCH SETS."
+            >
+              <BIconExclamationOctagonFill />
+            </b-button>
+            <b-button
               v-if="is_primary"
               variant="secondary"
               size="sm"
@@ -121,7 +131,8 @@ import {
   BIconFolderFill,
   BIconConeStriped,
   BIconAward,
-  BIconSearch
+  BIconSearch,
+  BIconExclamationOctagonFill
 } from "bootstrap-vue";
 export default {
   name: "CloseMatchSetMembership",
@@ -134,7 +145,8 @@ export default {
     BIconFolderFill,
     BIconConeStriped,
     BIconAward,
-    BIconSearch
+    BIconSearch,
+    BIconExclamationOctagonFill
   },
   props: {
     close_match_set_membership: {
@@ -160,12 +172,14 @@ export default {
     popup_size: {
       type: Number,
       default: 900
+    },
+    eliminated: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
-    return {
-      selection: null
-    };
+    return {};
   },
   computed: {
     show_membership() {
@@ -214,6 +228,13 @@ export default {
         return "secondary";
       }
     },
+    eliminate_variant() {
+      if (this.eliminated) {
+        return "warning";
+      } else {
+        return "secondary";
+      }
+    },
     reject_variant() {
       if (this.close_match_set_membership.accepted == false) {
         return "danger";
@@ -250,6 +271,16 @@ export default {
     cancel_primary() {
       this.$emit("cancel_primary", this.close_match_set_membership.photograph);
     },
+    toggle_eliminate() {
+      if (this.eliminated) {
+        this.$emit(
+          "uneliminate",
+          this.close_match_set_membership.photograph.id
+        );
+      } else {
+        this.$emit("eliminate", this.close_match_set_membership.photograph.id);
+      }
+    },
     accept() {
       this.$emit("accept", this.close_match_set_membership.id);
     },
@@ -262,6 +293,11 @@ export default {
     primary() {
       if (this.primary == this.close_match_set_membership.photograph) {
         this.accept();
+      }
+    },
+    eliminated() {
+      if (this.eliminated) {
+        this.reject();
       }
     }
   }

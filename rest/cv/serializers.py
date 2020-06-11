@@ -87,6 +87,9 @@ class CloseMatchSetApprovalSerializer(serializers.Serializer):
     accepted_memberships = serializers.PrimaryKeyRelatedField(
         queryset=models.CloseMatchSetMembership.objects.all(), many=True
     )
+    eliminated_photographs = serializers.PrimaryKeyRelatedField(
+        queryset=photograph.models.Photograph.objects.all(), many=True
+    )
     representative_photograph = serializers.PrimaryKeyRelatedField(
         queryset=photograph.models.Photograph.objects.all(), many=False, allow_null=True
     )

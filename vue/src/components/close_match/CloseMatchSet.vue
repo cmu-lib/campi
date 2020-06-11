@@ -26,6 +26,15 @@
             >
               <BIconXOctagon class="mr-1" />Reject all
             </b-button>
+            <b-button
+              variant="warning"
+              size="sm"
+              @click="eliminate_all"
+              v-b-tooltip.hover
+              title="Mark every photo as eliminated."
+            >
+              <BIconExclamationOctagonFill class="mr-1" />Eliminate All
+            </b-button>
           </b-button-group>
           <b-button
             class="ml-2"
@@ -49,9 +58,12 @@
         :primary="close_match_set_state.representative_photograph"
         :searched_photo="searched_photo"
         :show_invalid="show_invalid"
+        :eliminated="eliminated_photographs.includes(cmsm.photograph.id)"
         class="m-2"
         @accept="accept"
         @reject="reject"
+        @eliminate="eliminate"
+        @uneliminate="uneliminate"
         @claim_primary="claim_primary"
         @cancel_primary="cancel_primary"
         @photo_search="photo_search"
@@ -68,7 +80,12 @@ import { HTTP } from "@/main";
 import CloseMatchSetMembership from "@/components/close_match/CloseMatchSetMembership.vue";
 import Nested from "@/components/Nested.vue";
 import _ from "lodash";
-import { BIconCheck2All, BIconXOctagon, BIconCloudUpload } from "bootstrap-vue";
+import {
+  BIconCheck2All,
+  BIconXOctagon,
+  BIconExclamationOctagonFill,
+  BIconCloudUpload
+} from "bootstrap-vue";
 export default {
   name: "CloseMatchSet",
   components: {
@@ -76,6 +93,7 @@ export default {
     BIconCheck2All,
     BIconXOctagon,
     BIconCloudUpload,
+    BIconExclamationOctagonFill,
     Nested
   },
   props: {
@@ -95,6 +113,7 @@ export default {
   data() {
     return {
       close_match_set_state: null,
+      eliminated_photographs: [],
       toast_response: null,
       toast_variant: null
     };
@@ -121,12 +140,14 @@ export default {
     close_match_approval() {
       var payload = {
         accepted_memberships: [],
+        eliminated_photographs: [],
         representative_photograph: null
       };
       if (!!this.close_match_set_state) {
         payload.accepted_memberships = this.close_match_set_state.memberships
           .filter(x => x.accepted)
           .map(x => x.id);
+        payload.eliminated_photographs = this.eliminated_photographs;
         if (!!this.close_match_set_state.representative_photograph) {
           payload.representative_photograph = this.close_match_set_state.representative_photograph.id;
         }
@@ -149,6 +170,12 @@ export default {
       const set_index = this.get_index(id);
       this.close_match_set_state.memberships[set_index].accepted = false;
     },
+    eliminate(photograph_id) {
+      this.eliminated_photographs.push(photograph_id);
+    },
+    uneliminate(photograph_id) {
+      _.pull(this.eliminated_photographs, photograph_id);
+    },
     claim_primary(photograph) {
       this.close_match_set_state.representative_photograph = photograph;
     },
@@ -164,11 +191,21 @@ export default {
     },
     accept_all() {
       this.close_match_set_state.memberships.map(x => (x.accepted = true));
+      this.eliminated_photographs = [];
       this.close_match_set_state.representative_photograph = this.close_match_set_state.memberships[0].photograph;
     },
     reject_all() {
       this.close_match_set_state.representative_photograph = null;
+      this.eliminated_photographs = [];
       this.close_match_set_state.memberships.map(x => (x.accepted = false));
+    },
+    eliminate_all() {
+      this.eliminated_photographs = this.close_match_set_state.memberships.map(
+        x => {
+          return x.photograph.id;
+        }
+      );
+      this.close_match_set_state.representative_photograph = null;
     },
     reject_remaining() {
       this.close_match_set_state.memberships
@@ -201,9 +238,6 @@ export default {
     }
   },
   mounted() {
-    this.close_match_set_state = this.close_match_set;
-  },
-  updated() {
     this.close_match_set_state = this.close_match_set;
   }
 };
