@@ -382,9 +382,7 @@ class CloseMatchRun(dateModifiedModel):
                 min_memberships[str(membership)].append(i)
         for membership_id in tqdm(set(min_clusters[1])):
             if membership_id != -1:
-                cms = CloseMatchSet.objects.create(
-                    close_match_run=self, seed_photograph=None
-                )
+                cms = CloseMatchSet.objects.create(close_match_run=self)
                 photo_indices = min_memberships[str(membership_id)]
                 photographs = [embedding_photo_ids[i] for i in photo_indices]
                 photolist = [
