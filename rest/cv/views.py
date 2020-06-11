@@ -97,9 +97,9 @@ class AnnoyIdxViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 
 
 class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.CloseMatchRun.objects.select_related(
-        "pytorch_model", "annoy_idx"
-    ).annotate(n_sets=Count("close_match_sets", distinct=True))
+    queryset = models.CloseMatchRun.objects.select_related("pytorch_model").annotate(
+        n_sets=Count("close_match_sets", distinct=True)
+    )
     serializer_class = serializers.CloseMatchRunSerializer
 
     @action(detail=True, methods=["get"])
@@ -182,7 +182,6 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         models.CloseMatchSet.objects.select_related(
             "close_match_run",
             "close_match_run__pytorch_model",
-            "close_match_run__annoy_idx",
             "representative_photograph",
             "representative_photograph__directory",
             "representative_photograph__job",
