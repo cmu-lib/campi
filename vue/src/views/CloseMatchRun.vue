@@ -67,26 +67,24 @@
           />
           <span v-if="!!close_match_sets">{{ close_match_set_count }} {{ set_count_type }} sets</span>
         </b-row>
-        <b-row align-h="center" class="m-3">
-          <b-overlay :show="loading">
-            <div
-              v-if="close_match_sets"
-              id="scrollspy-cms"
-              style="position:relative; height:700px; overflow-y:auto"
-            >
-              <CloseMatchSet
-                v-for="cms in close_match_sets"
-                :id="`cms-${cms.id}`"
-                :key="cms.id"
-                :close_match_set="cms"
-                :searched_photo="photo_memberships"
-                :show_invalid="show_invalid"
-                @set_submitted="set_submitted"
-                @photo_search="photo_search"
-              />
-            </div>
-          </b-overlay>
-        </b-row>
+        <b-overlay :show="loading">
+          <div
+            v-if="close_match_sets"
+            id="scrollspy-cms"
+            style="position:relative; height:700px; overflow-y:auto"
+          >
+            <CloseMatchSet
+              v-for="cms in close_match_sets"
+              :id="`cms-${cms.id}`"
+              :key="cms.id"
+              :close_match_set="cms"
+              :searched_photo="photo_memberships"
+              :show_invalid="show_invalid"
+              @set_submitted="set_submitted"
+              @photo_search="photo_search"
+            />
+          </div>
+        </b-overlay>
       </b-col>
     </b-row>
   </b-container>
