@@ -13,9 +13,6 @@ class Command(BaseCommand):
             nargs="+",
             help="Name of pytorch model whose embeddings have already been run",
         )
-        parser.add_argument(
-            "--n_trees", help="Index with this number of trees to use", type=int
-        )
         parser.add_argument("--min_samples", help="Minimum samples", type=int)
         parser.add_argument(
             "--cutoff_distance", help="Maximum distance to include matches", type=float
@@ -29,12 +26,8 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         pytorch_model = cv.models.PyTorchModel.objects.get(label=options["model"][0])
-        annoy_idx = cv.models.AnnoyIdx.objects.get(
-            pytorch_model=pytorch_model, n_trees=options["n_trees"]
-        )
         close_match_run = cv.models.CloseMatchRun.objects.get_or_create(
             pytorch_model=pytorch_model,
-            annoy_idx=annoy_idx,
             min_samples=options["min_samples"],
             cutoff_distance=options["cutoff_distance"],
             exclude_future_distance=options["exclude_future_distance"],
