@@ -141,7 +141,11 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "representative_photograph__job",
             "user_last_modified",
         )
-        .annotate(n_images=Count("photographs", distinct=True))
+        .annotate(
+            n_images=Count(
+                "memberships", filter=Q(memberships__invalid=False), distinct=True
+            )
+        )
         .prefetch_related(
             "memberships",
             "memberships__photograph__directory",
@@ -196,7 +200,9 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             n_sets_too_small = (
                 models.CloseMatchSet.objects.annotate(
                     n_memberships=Count(
-                        "memberships", filter=Q(invalid=False), distinct=True
+                        "memberships",
+                        filter=Q(memberships__invalid=False),
+                        distinct=True,
                     )
                 )
                 .filter(
@@ -221,7 +227,12 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 "n_sets_seed": n_sets_seed,
             }
 
-            return Response(res, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                serializers.CloseMatchSetSerializer(
+                    close_match_set, context={"request": request}
+                ).data,
+                status=status.HTTP_202_ACCEPTED,
+            )
         else:
             return Response(
                 raw_approval_data.errors, status=status.HTTP_400_BAD_REQUEST

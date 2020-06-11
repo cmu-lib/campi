@@ -17,4 +17,4 @@ scipy
 drf-yasg
 lxml
 django-silk
-
+sklearn

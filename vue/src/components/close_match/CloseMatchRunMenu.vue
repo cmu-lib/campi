@@ -3,7 +3,7 @@
     <b-list-group-item v-for="cmr in close_match_runs" :key="cmr.id" :active="cmr.id==value">
       <h6>CMR {{ cmr.id }}</h6>
       <b-button size="sm" @click="select_cmr(cmr)" block>Evaluate</b-button>
-      <p>{{ cmr.pytorch_model.label }} - {{ cmr.annoy_idx.n_trees }} trees</p>
+      <p>{{ cmr.pytorch_model.label }} - trees</p>
       <p>{{ cmr.max_neighbors }} neighbors, >{{ cmr.exclude_future_distance }} and >{{ cmr.cutoff_distance }}</p>
       <p>{{ cmr.n_sets }} sets</p>
     </b-list-group-item>

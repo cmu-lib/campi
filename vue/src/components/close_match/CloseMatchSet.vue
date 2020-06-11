@@ -164,6 +164,7 @@ export default {
     },
     accept_all() {
       this.close_match_set_state.memberships.map(x => (x.accepted = true));
+      this.close_match_set_state.representative_photograph = this.close_match_set_state.memberships[0].photograph;
     },
     reject_all() {
       this.close_match_set_state.representative_photograph = null;
@@ -184,10 +185,12 @@ export default {
         this.close_match_approval
       ).then(
         results => {
-          this.toast_response = results.data;
           this.toast_variant = "success";
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
-          this.$emit("set_submitted", this.close_match_set.id);
+          this.$emit("set_submitted", {
+            id: this.close_match_set.id,
+            object: results.data
+          });
         },
         error => {
           this.toast_response = error;
@@ -198,6 +201,9 @@ export default {
     }
   },
   mounted() {
+    this.close_match_set_state = this.close_match_set;
+  },
+  updated() {
     this.close_match_set_state = this.close_match_set;
   }
 };

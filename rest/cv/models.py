@@ -19,6 +19,7 @@ from torchvision import transforms
 from io import BytesIO
 from tqdm import tqdm
 import numpy as np
+from sklearn import cluster
 
 
 class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
@@ -237,19 +238,6 @@ class AnnoyIdx(models.Model):
     class Meta:
         unique_together = ("pytorch_model", "n_trees")
 
-    # @classmethod
-    # @transaction.atomic
-    # def create(cls, photograph_queryset, *args, **kwargs):
-    #     """
-    #     An index is only relevant for a specified corpus, so when creating an index you must specify the set of photogs to be covered by it
-    #     """
-    #     dm = cls(*args, **kwargs)
-    #     dm.save()
-    #     ordered_photoset = photograph_queryset.order_by("id")
-    #     for i, pic in enumerate(ordered_photoset):
-    #         IndexEmbedding.objects.create(annoy_idx=self, photograph=pic, sequence=i)
-    #     return dm
-
     @transaction.atomic
     def generate_index(self, overwrite=False):
         if self.index_file is None:
@@ -346,7 +334,7 @@ class CloseMatchRun(dateModifiedModel):
         PyTorchModel, on_delete=models.CASCADE, related_name="close_match_runs"
     )
     annoy_idx = models.ForeignKey(
-        AnnoyIdx, on_delete=models.CASCADE, related_name="close_match_runs"
+        AnnoyIdx, null=True, on_delete=models.CASCADE, related_name="close_match_runs"
     )
     max_neighbors = models.PositiveIntegerField(
         help_text="Number of nearest neighbors to request from the index.", default=6
@@ -354,6 +342,7 @@ class CloseMatchRun(dateModifiedModel):
     cutoff_distance = models.FloatField(
         help_text="Photographs returned from the index query farther away from the photograph will be excluded."
     )
+    min_samples = models.PositiveIntegerField(null=True, help_text="")
     exclude_future_distance = models.FloatField(
         help_text="Photographs returned from the index query farther away than this measure will be excluded from future consideration from any CloseMatchSet in this run."
     )
@@ -416,6 +405,96 @@ class CloseMatchRun(dateModifiedModel):
         # Whether added to the index or not, still add the photo to the "considered" list so it won't be used again.
         self.considered_photos.add(photograph)
 
+    def generate_clusters_dbscan(self):
+        """
+        Use sklearn's dbscan to generate clusters
+        """
+        print("Collecting embeddings")
+        ordered_embeddings = self.pytorch_model.embeddings.order_by("id")
+        embedding_photo_ids = list(
+            ordered_embeddings.values_list("photograph__id", flat=True)
+        )
+        embedding_matrix = np.array(ordered_embeddings.values_list("array", flat=True))
+
+        print("Minimum clusters")
+        min_clusters = cluster.dbscan(
+            embedding_matrix,
+            metric="cosine",
+            min_samples=self.min_samples,
+            eps=self.exclude_future_distance,
+        )
+        print("Maximum clusters")
+        max_clusters = cluster.dbscan(
+            embedding_matrix,
+            metric="cosine",
+            min_samples=self.min_samples,
+            eps=self.cutoff_distance,
+        )
+        # Regroup indices by membership before creating sets
+        min_memberships = {str(i): [] for i in set(min_clusters[1]) if i != -1}
+        print("Mapping membership ids")
+        for i, membership in enumerate(min_clusters[1]):
+            if membership != -1:
+                min_memberships[str(membership)].append(i)
+        for membership_id in tqdm(set(min_clusters[1])):
+            if membership_id != -1:
+                cms = CloseMatchSet.objects.create(
+                    close_match_run=self, seed_photograph=None
+                )
+                photo_indices = min_memberships[str(membership_id)]
+                photographs = [embedding_photo_ids[i] for i in photo_indices]
+                photolist = [
+                    value
+                    for key, value in photograph.models.Photograph.objects.in_bulk(
+                        photographs
+                    ).items()
+                ]
+                cms_members = [
+                    CloseMatchSetMembership(
+                        close_match_set=cms, photograph=p, distance=0.1
+                    )
+                    for p in photolist
+                ]
+                CloseMatchSetMembership.objects.bulk_create(cms_members)
+                # Find the sets that these pics belong to in the wider clusters, and add those photos to this set as well
+                larger_groups = set(
+                    [
+                        x
+                        for i, x in enumerate(list(max_clusters[1]))
+                        if i in photo_indices
+                    ]
+                )
+                for group in larger_groups:
+                    if group != -1:
+                        new_photo_indices = [
+                            i for i, x in enumerate(max_clusters[1]) if x == group
+                        ]
+                        # Find those photos that haven't already been added to this set
+                        additional_photo_indices = set(new_photo_indices) - set(
+                            photo_indices
+                        )
+                        additional_photographs = [
+                            embedding_photo_ids[i] for i in additional_photo_indices
+                        ]
+                        additional_photolist = [
+                            value
+                            for key, value in photograph.models.Photograph.objects.in_bulk(
+                                additional_photographs
+                            ).items()
+                        ]
+                        new_cms_members = [
+                            CloseMatchSetMembership(
+                                close_match_set=cms, photograph=p, distance=0.2
+                            )
+                            for p in additional_photolist
+                        ]
+                        CloseMatchSetMembership.objects.bulk_create(new_cms_members)
+        print(
+            self.close_match_sets.annotate(n_images=models.Count("memberships"))
+            .order_by("-n_images")
+            .values_list("n_images")
+        )
+
 
 class CloseMatchRunConsidered(models.Model):
     close_match_run = models.ForeignKey(
@@ -439,6 +518,7 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
     )
     seed_photograph = models.ForeignKey(
         photograph.models.Photograph,
+        null=True,
         on_delete=models.CASCADE,
         related_name="seeded_close_match_sets",
     )

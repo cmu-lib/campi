@@ -7,7 +7,7 @@
             <b-navbar-brand href="#">Match Groups</b-navbar-brand>
             <b-nav pills vertical>
               <b-nav-item
-                v-for="cms in close_match_sets.results"
+                v-for="cms in close_match_sets"
                 :key="cms.id"
                 :href="`#cms-${cms.id}`"
                 :class="{completed: !!cms.user_last_modified}"
@@ -62,10 +62,10 @@
           <b-pagination
             v-if="close_match_sets"
             v-model="current_page"
-            :total-rows="close_match_sets.count"
+            :total-rows="close_match_set_count"
             :per-page="per_page"
           />
-          <span v-if="!!close_match_sets">{{ close_match_sets.count }} {{ set_count_type }} sets</span>
+          <span v-if="!!close_match_sets">{{ close_match_set_count }} {{ set_count_type }} sets</span>
         </b-row>
         <b-row align-h="center" class="m-3">
           <b-overlay :show="loading">
@@ -75,7 +75,7 @@
               style="position:relative; height:700px; overflow-y:auto"
             >
               <CloseMatchSet
-                v-for="cms in close_match_sets.results"
+                v-for="cms in close_match_sets"
                 :id="`cms-${cms.id}`"
                 :key="cms.id"
                 :close_match_set="cms"
@@ -111,12 +111,19 @@ export default {
       current_page: 1,
       not_signed_off: true,
       show_invalid: false,
-      per_page: 10,
       close_match_sets: null,
+      close_match_set_count: 0,
       photo_memberships: null
     };
   },
   computed: {
+    per_page() {
+      if (!!this.photo_memberships) {
+        return 50;
+      } else {
+        return 1;
+      }
+    },
     set_count_type() {
       if (this.not_signed_off) {
         return "unapproved";
@@ -148,7 +155,8 @@ export default {
         }).then(
           results => {
             this.loading = false;
-            this.close_match_sets = results.data;
+            this.close_match_sets = results.data.results;
+            this.close_match_set_count = results.data.count;
           },
           error => {
             console.log(error);
