@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "collection.apps.collectionConfig",
     "vocabulary.apps.vocabularyConfig",
     "cv.apps.cvConfig",
+    "gcv.apps.gcvConfig",
     "tagging.apps.taggingConfig",
     "rest_framework",
     "django.contrib.auth",
