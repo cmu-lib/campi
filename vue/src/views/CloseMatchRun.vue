@@ -135,7 +135,7 @@ export default {
     query_payload() {
       return {
         invalid: this.show_invalid,
-        ordering: "seed_photograph",
+        ordering: "-n_images",
         close_match_run: this.close_match_run_id,
         limit: this.per_page,
         offset: this.rest_page,

@@ -141,11 +141,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "representative_photograph__job",
             "user_last_modified",
         )
-        .annotate(
-            n_images=Count(
-                "memberships", filter=Q(memberships__invalid=False), distinct=True
-            )
-        )
+        .annotate(n_images=Count("memberships", filter=Q(memberships__invalid=False)))
         .prefetch_related(
             "memberships",
             "memberships__photograph__directory",
@@ -154,7 +150,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
-    ordering_fields = ["last_updated", "seed_photograph"]
+    ordering_fields = ["last_updated", "seed_photograph", "n_images"]
 
     @transaction.atomic
     @action(detail=True, methods=["patch"])
@@ -183,8 +179,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             # Once saved, mark invalid all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
             accepted_photographs = photograph.models.Photograph.objects.filter(
                 close_match_memberships__in=close_match_set.memberships.filter(
-                    close_match_set__close_match_run=close_match_set.close_match_run,
-                    accepted=True,
+                    accepted=True
                 ).all()
             ).distinct()
             n_memberships_deleted = (
@@ -235,15 +230,12 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             )
 
             res = {
-                "object": serializers.CloseMatchSetSerializer(
-                    close_match_set, context={"request": request}
-                ).data,
                 "invalidations": {
                     "n_memberships_deleted": n_memberships_deleted,
                     "n_memberships_eliminated": n_memberships_eliminated,
                     "n_sets_too_small": n_sets_too_small,
                     "n_sets_seed": n_sets_seed,
-                },
+                }
             }
 
             return Response(res, status=status.HTTP_202_ACCEPTED)
