@@ -2,12 +2,20 @@ from rest_framework import serializers
 from cv import models
 import photograph.models
 from campi.serializers import UserSerializer
+from rest_framework.reverse import reverse
 
 
 class PytorchModelListSerializer(serializers.HyperlinkedModelSerializer):
+    feature_matrix = serializers.SerializerMethodField()
+
+    def get_feature_matrix(self, obj):
+        return reverse(
+            "pytorchmodel-feature-matrix", [obj.id], request=self.context["request"]
+        )
+
     class Meta:
         model = models.PyTorchModel
-        fields = ["id", "url", "label", "n_dimensions"]
+        fields = ["id", "url", "label", "n_dimensions", "feature_matrix"]
 
 
 class AnnoyIdxFlatSerializer(serializers.HyperlinkedModelSerializer):
@@ -35,6 +43,14 @@ class AnnoyIdxGetNNSerializer(serializers.Serializer):
 class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
     pytorch_model = PytorchModelListSerializer(many=False)
     n_sets = serializers.IntegerField(read_only=True)
+    n_complete = serializers.IntegerField(read_only=True)
+    pct_complete = serializers.FloatField(read_only=True)
+    download_matches = serializers.SerializerMethodField()
+
+    def get_download_matches(self, obj):
+        return reverse(
+            "closematchrun-download-matches", [obj.id], request=self.context["request"]
+        )
 
     class Meta:
         model = models.CloseMatchRun
@@ -47,6 +63,9 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
             "exclude_future_distance",
             "min_samples",
             "n_sets",
+            "n_complete",
+            "pct_complete",
+            "download_matches",
         ]
 
 
