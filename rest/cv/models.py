@@ -488,7 +488,11 @@ class CloseMatchSetMembership(models.Model):
         on_delete=models.CASCADE,
         related_name="close_match_memberships",
     )
-    distance = models.FloatField()
+    core = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text="Is this membership part of the core cluster or added in the second pass?",
+    )
     accepted = models.NullBooleanField(
         default=None, help_text="Has this membership been validated by an editor?"
     )

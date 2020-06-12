@@ -3,6 +3,17 @@
     <template v-slot:header>
       <b-row class="px-2" flex align-h="between" align-v="center">
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
+        <span class="info-badges">
+          <b-badge
+            size="lg"
+            class="mx-1"
+            variant="warning"
+            v-b-tooltip.hover
+            title="This set contains photos that may also appear in other sets."
+          >
+            <BIconConeStriped />
+          </b-badge>
+        </span>
         <span
           v-if="modifying_user"
         >Reveiwed by {{ close_match_set_state.user_last_modified.username }} on {{ close_match_set_state.last_updated }}</span>
@@ -85,7 +96,8 @@ import {
   BIconCheck2All,
   BIconXOctagon,
   BIconExclamationOctagonFill,
-  BIconCloudUpload
+  BIconCloudUpload,
+  BIconConeStriped
 } from "bootstrap-vue";
 export default {
   name: "CloseMatchSet",
@@ -95,6 +107,7 @@ export default {
     BIconXOctagon,
     BIconCloudUpload,
     BIconExclamationOctagonFill,
+    BIconConeStriped,
     Nested
   },
   props: {
@@ -121,6 +134,9 @@ export default {
     };
   },
   computed: {
+    has_secondary_images() {
+      return this.close_match_set.memberships.some(x => !x.core);
+    },
     toast_id() {
       return `toast-${this.close_match_set.id}`;
     },
@@ -248,3 +264,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.info-badges {
+  font-size: x-large;
+}
+</style>

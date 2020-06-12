@@ -3,24 +3,6 @@
     <template v-slot:header>
       <b-row flex align-h="between">
         <span class="info-badges">
-          <b-badge
-            class="mx-1"
-            variant="dark"
-            v-if="close_match_set_membership.distance==0.0"
-            v-b-tooltip.hover
-            title="This is the seed photograph used as the starting point of the search"
-          >
-            <BIconAward />
-          </b-badge>
-          <b-badge
-            class="mx-1"
-            variant="warning"
-            v-else-if="close_match_set_membership.distance <= close_match_run.exclude_future_distance"
-            v-b-tooltip.hover
-            title="This photo is so similar to the the seed photograph that it won't be included in future potential match sets"
-          >
-            <BIconConeStriped />
-          </b-badge>
           <b-badge class="mx-1" variant="primary" :title="directory_tooltip" v-b-tooltip.hover>
             <BIconFolderFill />
           </b-badge>
@@ -36,12 +18,13 @@
         </span>
         <b-button-toolbar>
           <b-button
-            variant="secondary"
+            v-if="!close_match_set_membership.core"
+            variant="warning"
             class="mx-1"
             size="sm"
             @click="photo_search"
             v-b-tooltip.hover
-            title="Search for match sets containing this photo"
+            title="This photo appears in other sets. Click to display all sets."
           >
             <BIconSearch />
           </b-button>
@@ -115,7 +98,8 @@
     <template v-slot:footer>
       <b-row align-h="between">
         <small>{{ close_match_set_membership.photograph.filename }}</small>
-        <small>Distance: {{ close_match_set_membership.distance.toFixed(3) }}</small>
+        <small v-if="close_match_set_membership.core">Core</small>
+        <small v-else>Secondary</small>
       </b-row>
     </template>
   </b-card>
@@ -129,8 +113,6 @@ import {
   BIconX,
   BIconCamera,
   BIconFolderFill,
-  BIconConeStriped,
-  BIconAward,
   BIconSearch,
   BIconExclamationOctagonFill
 } from "bootstrap-vue";
@@ -143,8 +125,6 @@ export default {
     BIconX,
     BIconCamera,
     BIconFolderFill,
-    BIconConeStriped,
-    BIconAward,
     BIconSearch,
     BIconExclamationOctagonFill
   },
@@ -243,15 +223,10 @@ export default {
       }
     },
     popover_title() {
-      return `${this.close_match_set_membership.photograph.id} - ${this.close_match_set_membership.photograph.filename} - ${this.close_match_set_membership.distance}`;
+      return `${this.close_match_set_membership.photograph.id} - ${this.close_match_set_membership.photograph.filename}`;
     },
     popover_id() {
-      return (
-        "image-popover" +
-        this.close_match_set_membership.id +
-        "-" +
-        this.close_match_set_membership.photograph.id
-      );
+      return `image-popover${this.close_match_set_membership.id}-${this.close_match_set_membership.photograph.id}`;
     },
     popover_preivew_src() {
       return `${this.close_match_set_membership.photograph.image.id}/full/!${this.popup_size},${this.popup_size}/0/default.jpg`;
