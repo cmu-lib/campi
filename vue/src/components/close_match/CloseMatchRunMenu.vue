@@ -1,19 +1,23 @@
 <template>
   <b-list-group v-if="close_match_runs">
     <b-list-group-item v-for="cmr in close_match_runs" :key="cmr.id" :active="cmr.id==value">
-      <h6>CMR {{ cmr.id }}</h6>
-      <b-button size="sm" @click="select_cmr(cmr)" block>Evaluate</b-button>
-      <p>{{ cmr.pytorch_model.label }} - trees</p>
-      <p>{{ cmr.max_neighbors }} neighbors, >{{ cmr.exclude_future_distance }} and >{{ cmr.cutoff_distance }}</p>
-      <p>{{ cmr.n_sets }} sets</p>
+      <CloseMatchRunBar :close_match_run="cmr" />
+      <b-row flex align-h="between" class="my-2 mx-0">
+        <b-button variant="warning" size="sm" @click="select_cmr(cmr)">Evaluate</b-button>
+        <b-button variant="info" size="sm" :href="cmr.download_matches">Download results</b-button>
+      </b-row>
     </b-list-group-item>
   </b-list-group>
 </template>
 
 <script>
 import { HTTP } from "@/main";
+import CloseMatchRunBar from "@/components/close_match/CloseMatchRunBar.vue";
 export default {
   name: "CloseMatchRunMenu",
+  components: {
+    CloseMatchRunBar
+  },
   props: {
     value: {
       type: Number,

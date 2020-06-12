@@ -1,5 +1,6 @@
 <template>
   <b-container fluid>
+    <CloseMatchRunBar v-if="!!close_match_run" :close_match_run="close_match_run" />
     <b-row>
       <b-col cols="2">
         <b-overlay :show="loading">
@@ -23,7 +24,7 @@
         </b-overlay>
       </b-col>
       <b-col cols="10">
-        <b-row flex align-h="between" align-v="center" class="m-3">
+        <b-row flex align-h="between" align-v="center" class="mx-2">
           <b-col cols="3">
             <b-form-checkbox
               v-model="not_signed_off"
@@ -68,11 +69,7 @@
           <span v-if="!!close_match_sets">{{ close_match_set_count }} {{ set_count_type }} sets</span>
         </b-row>
         <b-overlay :show="loading">
-          <div
-            v-if="close_match_sets"
-            id="scrollspy-cms"
-            style="position:relative; height:700px; overflow-y:auto"
-          >
+          <div v-if="close_match_sets" id="scrollspy-cms" class="set-review-window">
             <CloseMatchSet
               v-for="cms in close_match_sets"
               :id="`cms-${cms.id}`"
@@ -93,10 +90,12 @@
 <script>
 import { HTTP } from "@/main";
 import CloseMatchSet from "@/components/close_match/CloseMatchSet.vue";
+import CloseMatchRunBar from "@/components/close_match/CloseMatchRunBar.vue";
+
 import { BIconCheck2, BIconX } from "bootstrap-vue";
 export default {
   name: "CloseMatchRun",
-  components: { CloseMatchSet, BIconCheck2, BIconX },
+  components: { CloseMatchSet, BIconCheck2, BIconX, CloseMatchRunBar },
   props: {
     close_match_run_id: {
       type: Number,
@@ -111,6 +110,7 @@ export default {
       show_invalid: false,
       close_match_sets: null,
       close_match_set_count: 0,
+      close_match_run: null,
       photo_memberships: null
     };
   },
@@ -145,6 +145,22 @@ export default {
     }
   },
   methods: {
+    get_close_match_run() {
+      if (!!this.close_match_run_id) {
+        return HTTP.get(`/close_match/run/${this.close_match_run_id}/`, {
+          params: this.query_payload
+        }).then(
+          results => {
+            this.close_match_run = results.data;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
+      }
+    },
     get_close_match_sets() {
       if (!!this.close_match_run_id) {
         this.loading = true;
@@ -165,6 +181,7 @@ export default {
       }
     },
     set_submitted() {
+      this.get_close_match_run();
       this.get_close_match_sets();
     },
     photo_search(id) {
@@ -173,6 +190,7 @@ export default {
   },
   watch: {
     query_payload() {
+      this.get_close_match_run();
       this.get_close_match_sets();
     },
     not_signed_off() {
@@ -180,7 +198,16 @@ export default {
     }
   },
   mounted() {
+    this.get_close_match_run();
     this.get_close_match_sets();
   }
 };
 </script>
+
+<style>
+.set-review-window {
+  position: relative;
+  height: 65vh;
+  overflow-y: auto;
+}
+</style>
