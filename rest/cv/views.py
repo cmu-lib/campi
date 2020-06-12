@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.db import transaction
-from django.db.models import Count, Q, BooleanField, ExpressionWrapper, Prefetch
+from django.db.models import Count, F, Q, Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -98,7 +98,11 @@ class AnnoyIdxViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 
 class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.CloseMatchRun.objects.select_related("pytorch_model").annotate(
-        n_sets=Count("close_match_sets", distinct=True)
+        n_sets=Count("close_match_sets", distinct=True),
+        n_complete=Count(
+            "close_match_sets",
+            filter=Q(close_match_sets__user_last_modified__isnull=False),
+        ),
     )
     serializer_class = serializers.CloseMatchRunSerializer
 
