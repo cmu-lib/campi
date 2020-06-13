@@ -393,7 +393,7 @@ class CloseMatchRun(dateModifiedModel):
                 ]
                 cms_members = [
                     CloseMatchSetMembership(
-                        close_match_set=cms, photograph=p, distance=0.1
+                        close_match_set=cms, photograph=p, core=True
                     )
                     for p in photolist
                 ]
@@ -426,7 +426,7 @@ class CloseMatchRun(dateModifiedModel):
                         ]
                         new_cms_members = [
                             CloseMatchSetMembership(
-                                close_match_set=cms, photograph=p, distance=0.2
+                                close_match_set=cms, photograph=p, core=False
                             )
                             for p in additional_photolist
                         ]
