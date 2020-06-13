@@ -182,6 +182,12 @@ class CloseMatchSetFilter(filters.FilterSet):
 
 
 class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
+    memberships = Prefetch(
+        "memberships",
+        queryset=models.CloseMatchSetMembership.objects.select_related(
+            "photograph", "photograph__directory", "photograph__job"
+        ).order_by("-core", "photograph__original_server_path"),
+    )
     queryset = (
         models.CloseMatchSet.objects.select_related(
             "close_match_run",
@@ -192,11 +198,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "user_last_modified",
         )
         .annotate(n_images=Count("memberships", filter=Q(memberships__invalid=False)))
-        .prefetch_related(
-            "memberships",
-            "memberships__photograph__directory",
-            "memberships__photograph__job",
-        )
+        .prefetch_related(memberships)
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
