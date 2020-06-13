@@ -186,7 +186,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         "memberships",
         queryset=models.CloseMatchSetMembership.objects.select_related(
             "photograph", "photograph__directory", "photograph__job"
-        ).order_by("-core", "photograph__original_server_path"),
+        ).order_by("-core", "distance"),
     )
     queryset = (
         models.CloseMatchSet.objects.select_related(

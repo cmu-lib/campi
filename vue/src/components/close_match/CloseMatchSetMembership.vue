@@ -98,8 +98,7 @@
     <template v-slot:footer>
       <b-row align-h="between">
         <small>{{ close_match_set_membership.photograph.filename }}</small>
-        <small v-if="close_match_set_membership.core">Core</small>
-        <small v-else>Secondary</small>
+        <small>{{ close_match_set_membership.distance.toFixed(7) }}</small>
       </b-row>
     </template>
   </b-card>
