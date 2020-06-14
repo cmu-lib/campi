@@ -44,7 +44,6 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
     pytorch_model = PytorchModelListSerializer(many=False)
     n_sets = serializers.IntegerField(read_only=True)
     n_complete = serializers.IntegerField(read_only=True)
-    pct_complete = serializers.FloatField(read_only=True)
     download_matches = serializers.SerializerMethodField()
 
     def get_download_matches(self, obj):
@@ -64,7 +63,6 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
             "min_samples",
             "n_sets",
             "n_complete",
-            "pct_complete",
             "download_matches",
         ]
 
@@ -84,6 +82,10 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
     )
     memberships = CloseMatchSetMembershipSerializer(many=True)
     user_last_modified = UserSerializer(many=False)
+    invalid = serializers.BooleanField(read_only=True)
+    overlapping = serializers.BooleanField(read_only=True)
+    n_images = serializers.IntegerField(read_only=True)
+    n_valid_images = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = models.CloseMatchSet
@@ -95,6 +97,9 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
             "user_last_modified",
             "last_updated",
             "invalid",
+            "n_images",
+            "n_valid_images",
+            "overlapping",
         ]
 
 

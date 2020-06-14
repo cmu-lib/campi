@@ -3,7 +3,11 @@
     <b-list-group-item v-for="cmr in close_match_runs" :key="cmr.id" :active="cmr.id==value">
       <CloseMatchRunBar :close_match_run="cmr" />
       <b-row flex align-h="between" class="my-2 mx-0">
-        <b-button variant="warning" size="sm" @click="select_cmr(cmr)">Evaluate</b-button>
+        <b-button
+          variant="warning"
+          size="sm"
+          :to="{name: 'CloseMatchRunList', params: { id: cmr.id }}"
+        >Evaluate</b-button>
         <b-button variant="info" size="sm" :href="cmr.download_matches">Download results</b-button>
       </b-row>
     </b-list-group-item>
@@ -18,12 +22,6 @@ export default {
   components: {
     CloseMatchRunBar
   },
-  props: {
-    value: {
-      type: Number,
-      default: null
-    }
-  },
   asyncComputed: {
     close_match_runs() {
       return HTTP.get("/close_match/run/").then(
@@ -34,11 +32,6 @@ export default {
           console.log(error);
         }
       );
-    }
-  },
-  methods: {
-    select_cmr(cmr) {
-      this.$emit("input", cmr.id);
     }
   }
 };

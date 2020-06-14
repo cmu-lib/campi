@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <b-col cols="6">
-        <CloseMatchRunMenu v-model="close_match_run_id" />
+        <CloseMatchRunMenu />
       </b-col>
       <b-col cols="6">
         <b-alert show variant="info">
@@ -19,17 +19,7 @@ export default {
   name: "CloseMatch",
   components: { CloseMatchRunMenu },
   data() {
-    return {
-      close_match_run_id: null
-    };
-  },
-  watch: {
-    close_match_run_id() {
-      this.$router.push({
-        name: "CloseMatchRun",
-        params: { id: this.close_match_run_id }
-      });
-    }
+    return {};
   }
 };
 </script>

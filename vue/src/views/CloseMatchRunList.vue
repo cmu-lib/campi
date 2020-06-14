@@ -132,7 +132,7 @@ export default {
     query_payload() {
       return {
         invalid: this.show_invalid,
-        ordering: "-n_images",
+        ordering: "-n_valid_images",
         close_match_run: this.close_match_run_id,
         limit: this.per_page,
         offset: this.rest_page,

@@ -1,6 +1,15 @@
 from django.http import HttpResponse
 from django.db import transaction
-from django.db.models import Count, F, Q, Prefetch
+from django.db.models import (
+    Count,
+    Exists,
+    F,
+    Q,
+    Prefetch,
+    OuterRef,
+    ExpressionWrapper,
+    BooleanField,
+)
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -167,6 +176,7 @@ class CloseMatchSetFilter(filters.FilterSet):
         help_text="The run that created this match set",
     )
     invalid = filters.BooleanFilter()
+    overlapping = filters.BooleanFilter()
     not_signed_off = filters.BooleanFilter(method="has_user_signed_off")
     memberships = filters.ModelChoiceFilter(
         queryset=photograph.models.Photograph.objects.all(),
@@ -188,6 +198,9 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "photograph", "photograph__directory", "photograph__job"
         ).order_by("-core", "distance"),
     )
+    secondary_memberships = models.CloseMatchSetMembership.objects.filter(
+        close_match_set=OuterRef("pk"), core=False
+    )
     queryset = (
         models.CloseMatchSet.objects.select_related(
             "close_match_run",
@@ -197,12 +210,19 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "representative_photograph__job",
             "user_last_modified",
         )
-        .annotate(n_images=Count("memberships", filter=Q(memberships__invalid=False)))
+        .annotate(
+            n_images=Count("memberships"),
+            n_valid_images=Count("memberships", filter=Q(memberships__invalid=False)),
+            invalid=ExpressionWrapper(
+                Q(n_valid_images__lte=1), output_field=BooleanField()
+            ),
+            overlapping=Exists(secondary_memberships),
+        )
         .prefetch_related(memberships)
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
-    ordering_fields = ["last_updated", "n_images"]
+    ordering_fields = ["last_updated", "n_valid_images"]
 
     @transaction.atomic
     @action(detail=True, methods=["patch"])
@@ -215,9 +235,12 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             approval_data = raw_approval_data.validated_data
             # Set memberships to false, then updated selected ones
             close_match_set.memberships.all().update(accepted=False)
+
             for m in approval_data["accepted_memberships"]:
                 m.accepted = True
-                m.save()
+            models.CloseMatchSetMembership.objects.bulk_update(
+                approval_data["accepted_memberships"], ["accepted"]
+            )
 
             # Set representative photograph on set
             close_match_set.representative_photograph = approval_data[
@@ -264,11 +287,9 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                     )
                 )
                 .filter(
-                    invalid=False,
-                    n_memberships__lt=2,
-                    close_match_run=close_match_set.close_match_run,
+                    n_memberships__lt=2, close_match_run=close_match_set.close_match_run
                 )
-                .update(invalid=True, user_last_modified=request.user)
+                .update(user_last_modified=request.user)
             )
 
             res = {

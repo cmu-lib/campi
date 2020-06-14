@@ -12,7 +12,7 @@
           <BIconCaretDownFill v-else />
         </span>
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
-        <span class="info-badges">
+        <span v-if="close_match_set_state.overlapping" class="info-badges">
           <b-badge
             size="lg"
             class="mx-1"

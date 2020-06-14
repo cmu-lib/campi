@@ -488,11 +488,6 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
         on_delete=models.CASCADE,
         related_name="representative_of_sets",
     )
-    invalid = models.BooleanField(
-        default=False,
-        db_index=True,
-        help_text="Has this set been rendered redundant because its seed photograph has been matched to another set, or because its member photos have all been matched to sets?",
-    )
 
     class Meta:
         unique_together = ("close_match_run", "representative_photograph")
