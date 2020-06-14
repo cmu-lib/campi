@@ -1,7 +1,16 @@
 <template>
-  <b-card :border-variant="set_variant" :header-border-variant="set_variant" class="my-2">
+  <b-card
+    :border-variant="set_variant"
+    :header-border-variant="set_variant"
+    class="my-2"
+    :no-body="collapsed"
+  >
     <template v-slot:header>
       <b-row class="px-2" flex align-h="between" align-v="center">
+        <span @click="collapsed=!collapsed">
+          <BIconCaretRightFill v-if="collapsed" />
+          <BIconCaretDownFill v-else />
+        </span>
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
         <span class="info-badges">
           <b-badge
@@ -16,7 +25,7 @@
         </span>
         <span
           v-if="modifying_user"
-        >Reveiwed by {{ close_match_set_state.user_last_modified.username }} on {{ close_match_set_state.last_updated }}</span>
+        >Reveiwed by {{ close_match_set_state.user_last_modified.username }} {{ from_now(close_match_set_state.last_updated) }}</span>
         <b-button-toolbar>
           <b-button-group>
             <b-button
@@ -61,7 +70,7 @@
         </b-button-toolbar>
       </b-row>
     </template>
-    <b-row flex v-if="!!close_match_set_state">
+    <b-row flex v-if="!!close_match_set_state & !collapsed">
       <CloseMatchSetMembership
         v-for="cmsm in close_match_set_state.memberships"
         :key="cmsm.id"
@@ -89,6 +98,7 @@
 
 <script>
 import { HTTP } from "@/main";
+import moment from "moment";
 import CloseMatchSetMembership from "@/components/close_match/CloseMatchSetMembership.vue";
 import Nested from "@/components/Nested.vue";
 import _ from "lodash";
@@ -97,7 +107,9 @@ import {
   BIconXOctagon,
   BIconExclamationOctagonFill,
   BIconCloudUpload,
-  BIconConeStriped
+  BIconConeStriped,
+  BIconCaretRightFill,
+  BIconCaretDownFill
 } from "bootstrap-vue";
 export default {
   name: "CloseMatchSet",
@@ -108,12 +120,18 @@ export default {
     BIconCloudUpload,
     BIconExclamationOctagonFill,
     BIconConeStriped,
+    BIconCaretRightFill,
+    BIconCaretDownFill,
     Nested
   },
   props: {
     close_match_set: {
       type: Object,
       required: true
+    },
+    collapsed: {
+      type: Boolean,
+      default: false
     },
     searched_photo: {
       type: Number,
@@ -174,6 +192,9 @@ export default {
     }
   },
   methods: {
+    from_now(dt) {
+      return moment(dt).fromNow();
+    },
     photo_search(id) {
       this.$emit("photo_search", id);
     },

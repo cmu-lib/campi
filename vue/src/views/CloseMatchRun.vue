@@ -75,6 +75,7 @@
               :id="`cms-${cms.id}`"
               :key="cms.id"
               :close_match_set="cms"
+              :collapsed="true"
               :searched_photo="photo_memberships"
               :show_invalid="show_invalid"
               @set_submitted="set_submitted"
@@ -116,11 +117,7 @@ export default {
   },
   computed: {
     per_page() {
-      if (!!this.photo_memberships) {
-        return 50;
-      } else {
-        return 1;
-      }
+      return 10;
     },
     set_count_type() {
       if (this.not_signed_off) {
