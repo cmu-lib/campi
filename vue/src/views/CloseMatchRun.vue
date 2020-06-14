@@ -207,7 +207,7 @@ export default {
 <style>
 .set-review-window {
   position: relative;
-  height: 65vh;
+  height: 70vh;
   overflow-y: auto;
 }
 </style>
