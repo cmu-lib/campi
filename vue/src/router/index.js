@@ -5,7 +5,7 @@ import Browse from '@/views/Browse.vue'
 import Photo from "@/views/Photo.vue"
 import Similarity from "@/views/Similarity.vue"
 import CloseMatch from "@/views/CloseMatch.vue"
-import CloseMatchRun from "@/views/CloseMatchRun.vue"
+import CloseMatchRunList from "@/views/CloseMatchRunList.vue"
 Vue.use(VueRouter)
 
 const routes = [

@@ -95,7 +95,7 @@ import CloseMatchRunBar from "@/components/close_match/CloseMatchRunBar.vue";
 
 import { BIconCheck2, BIconX } from "bootstrap-vue";
 export default {
-  name: "CloseMatchRun",
+  name: "CloseMatchRunList",
   components: { CloseMatchSet, BIconCheck2, BIconX, CloseMatchRunBar },
   props: {
     close_match_run_id: {
