@@ -37,12 +37,17 @@ export default {
       close_match_set: null
     };
   },
+  computed: {
+    live_set_id() {
+      return this.$route.params.set_id;
+    }
+  },
   methods: {
     photo_search(id) {
       this.$emit("photo_search", id);
     },
     get_close_match_set() {
-      return HTTP.get(`/close_match/set/${this.close_match_set_id}/`).then(
+      return HTTP.get(`/close_match/set/${this.live_set_id}/`).then(
         results => {
           this.close_match_set = results.data;
         },
@@ -78,16 +83,12 @@ export default {
       );
     }
   },
-  mounted() {
-    if (!!this.close_match_set) {
-      if (this.close_match_set.id != this.$route.params.set_id) {
-        this.get_close_match_set();
-      }
-    } else {
+  watch: {
+    live_set_id() {
       this.get_close_match_set();
     }
   },
-  updated() {
+  mounted() {
     if (!!this.close_match_set) {
       if (this.close_match_set.id != this.$route.params.set_id) {
         this.get_close_match_set();
