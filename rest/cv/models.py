@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Count, Q
 from campi.models import (
     uniqueLabledModel,
     descriptionModel,
@@ -450,11 +452,47 @@ class CloseMatchRun(dateModifiedModel):
                                 for i, p in enumerate(additional_photolist)
                             ]
                             CloseMatchSetMembership.objects.bulk_create(new_cms_members)
+        self.tidy_clusters()
         print(
             self.close_match_sets.annotate(n_images=models.Count("memberships"))
             .order_by("-n_images")
             .values_list("n_images")
         )
+
+    def tidy_clusters(self):
+        """
+        Check for duplicated filenames in sets of 2, and automatically mark those as done.
+        """
+        duo_sets = (
+            self.close_match_sets.annotate(
+                n_images=Count(
+                    "memberships", filter=Q(memberships__core=True), unique=True
+                )
+            )
+            .filter(n_images=2, user_last_modified__isnull=True)
+            .all()
+        )
+
+        for cms in tqdm(duo_sets):
+            setnames = {
+                m.photograph.filename for m in cms.memberships.filter(core=True).all()
+            }
+            if len(setnames) == 1:
+                print(setnames)
+                cms.memberships.all().update(accepted=True)
+                cms.representative_photograph = cms.memberships.first().photograph
+                cms.user_last_modified = User.objects.first()
+                cms.save()
+
+                accepted_photographs = photograph.models.Photograph.objects.filter(
+                    close_match_memberships__close_match_set=cms
+                ).distinct()
+
+                CloseMatchSetMembership.objects.filter(
+                    close_match_set__close_match_run=self,
+                    close_match_set__user_last_modified__isnull=True,
+                    photograph__in=accepted_photographs,
+                ).all().update(invalid=True)
 
 
 class CloseMatchRunConsidered(models.Model):
