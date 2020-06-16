@@ -13,8 +13,8 @@
             v-if="close_match_set_membership.invalid"
             variant="danger"
             v-b-tooltip.hover
-            title="This photo has already been reviewed and added to another match set by an editor."
-          >ALREADY COMMITTED</b-badge>
+            title="This photo has already been reviewed and added to another match set by an editor and/or has been marked for elimination from all matches."
+          >Invalid</b-badge>
         </span>
         <b-button-toolbar>
           <b-button
@@ -31,6 +31,7 @@
           <b-button-group>
             <b-button
               :variant="accept_variant"
+              :disabled="close_match_set_membership.invalid"
               size="sm"
               :pressed="close_match_set_membership.accepted==true"
               @click="accept"
@@ -41,6 +42,7 @@
             </b-button>
             <b-button
               :variant="reject_variant"
+              :disabled="close_match_set_membership.invalid"
               size="sm"
               :pressed="close_match_set_membership.accepted==false"
               @click="reject"
@@ -51,6 +53,7 @@
             </b-button>
             <b-button
               :variant="eliminate_variant"
+              :disabled="close_match_set_membership.invalid"
               size="sm"
               @click="toggle_eliminate"
               :pressed="eliminated"
@@ -61,6 +64,7 @@
             </b-button>
             <b-button
               v-if="is_primary"
+              :disabled="close_match_set_membership.invalid"
               variant="secondary"
               size="sm"
               @click="cancel_primary"
@@ -71,6 +75,7 @@
             </b-button>
             <b-button
               v-else
+              :disabled="close_match_set_membership.invalid"
               variant="secondary"
               size="sm"
               @click="claim_primary"

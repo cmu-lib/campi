@@ -5,6 +5,8 @@ import Browse from '@/views/Browse.vue'
 import Photo from "@/views/Photo.vue"
 import Similarity from "@/views/Similarity.vue"
 import CloseMatch from "@/views/CloseMatch.vue"
+import CloseMatchRun from "@/views/CloseMatchRun.vue"
+import CloseMatchRunDetail from "@/views/CloseMatchRunDetail.vue"
 import CloseMatchRunList from "@/views/CloseMatchRunList.vue"
 Vue.use(VueRouter)
 
@@ -42,12 +44,30 @@ const routes = [
 
   },
   {
-    name: "CloseMatchRunList",
+    name: "CloseMatchRun",
     path: "/close_match/run/:id",
-    component: CloseMatchRunList,
+    component: CloseMatchRun,
     props: (route) => {
       return { close_match_run_id: Number(route.params.id) }
-    }
+    },
+    children: [
+      {
+        name: "CloseMatchRunList",
+        path: "list",
+        component: CloseMatchRunList,
+        props: (route) => {
+          return { close_match_run_id: Number(route.params.id) }
+        }
+      },
+      {
+        name: "CloseMatchRunDetail",
+        path: ":set_id",
+        component: CloseMatchRunDetail,
+        props: (route) => {
+          return { close_match_set_id: Number(route.params.set_id), close_match_run_id: Number(route.params.id) }
+        }
+      }
+    ]
   }
 ]
 

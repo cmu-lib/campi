@@ -3,16 +3,16 @@
     :border-variant="set_variant"
     :header-border-variant="set_variant"
     class="my-2"
-    :no-body="collapsed"
+    :no-body="collapsed_state"
   >
     <template v-slot:header>
-      <b-row class="px-2" flex align-h="between" align-v="center">
-        <span @click="collapsed=!collapsed">
-          <BIconCaretRightFill v-if="collapsed" />
+      <b-row class="px-2" flex align-h="between" align-v="center" v-if="!!close_match_set_state">
+        <span @click="collapsed_state=!collapsed_state">
+          <BIconCaretRightFill v-if="collapsed_state" />
           <BIconCaretDownFill v-else />
         </span>
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
-        <span v-if="close_match_set_state.overlapping" class="info-badges">
+        <span v-if="close_match_set.overlapping" class="info-badges">
           <b-badge
             size="lg"
             class="mx-1"
@@ -70,7 +70,7 @@
         </b-button-toolbar>
       </b-row>
     </template>
-    <b-row flex v-if="!!close_match_set_state & !collapsed">
+    <b-row flex v-if="!!close_match_set_state & !collapsed_state">
       <CloseMatchSetMembership
         v-for="cmsm in close_match_set_state.memberships"
         :key="cmsm.id"
@@ -144,6 +144,7 @@ export default {
   },
   data() {
     return {
+      collapsed_state: true,
       close_match_set_state: null,
       eliminated_photographs: [],
       toast_response: null,
@@ -159,6 +160,9 @@ export default {
       return `toast-${this.close_match_set.id}`;
     },
     set_variant() {
+      if (this.close_match_set.invalid) {
+        return "warning";
+      }
       if (!!this.modifying_user) {
         return "success";
       }
@@ -229,14 +233,22 @@ export default {
       }
     },
     accept_all() {
-      this.close_match_set_state.memberships.map(x => (x.accepted = true));
+      this.close_match_set_state.memberships.map(x => {
+        if (!x.invalid) {
+          x.accepted = true;
+        }
+      });
       this.eliminated_photographs = [];
       this.close_match_set_state.representative_photograph = this.close_match_set_state.memberships[0].photograph;
     },
     reject_all() {
       this.close_match_set_state.representative_photograph = null;
       this.eliminated_photographs = [];
-      this.close_match_set_state.memberships.map(x => (x.accepted = false));
+      this.close_match_set_state.memberships.map(x => {
+        if (!x.invalid) {
+          x.accepted = false;
+        }
+      });
     },
     eliminate_all() {
       this.eliminated_photographs = this.close_match_set_state.memberships.map(
@@ -279,6 +291,9 @@ export default {
         }
       );
     }
+  },
+  created() {
+    this.collapsed_state = this.collapsed;
   },
   mounted() {
     this.close_match_set_state = this.close_match_set;
