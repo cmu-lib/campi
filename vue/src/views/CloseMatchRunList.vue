@@ -170,12 +170,26 @@ export default {
   watch: {
     query_payload() {
       this.get_close_match_sets();
+      this.$router.push({
+        name: "CloseMatchRunList",
+        params: { id: this.close_match_run_id },
+        query: this.query_payload
+      });
     },
     not_signed_off() {
       this.current_page = 1;
     }
   },
   mounted() {
+    if (!!this.$route.query.offset) {
+      this.current_page = (this.$route.query.offset + 1) / this.per_page;
+    }
+    if (!!this.$route.query.not_signed_off) {
+      this.not_signed_off = this.$route.query.not_signed_off;
+    }
+    if (!!this.$route.query.memberships) {
+      this.photo_memberships = this.$route.query.memberships;
+    }
     this.get_close_match_sets();
   }
 };

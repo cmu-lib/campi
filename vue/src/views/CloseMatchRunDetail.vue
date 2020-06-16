@@ -44,7 +44,11 @@ export default {
   },
   methods: {
     photo_search(id) {
-      this.$emit("photo_search", id);
+      this.$router.push({
+        name: "CloseMatchRunList",
+        params: { id: this.close_match_run_id },
+        query: { memberships: id }
+      });
     },
     get_close_match_set() {
       return HTTP.get(`/close_match/set/${this.live_set_id}/`).then(

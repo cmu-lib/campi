@@ -39,6 +39,13 @@
         <span
           v-if="modifying_user"
         >Reveiwed by {{ close_match_set_state.user_last_modified.username }} {{ from_now(close_match_set_state.last_updated) }}</span>
+        <b-form-checkbox
+          v-model="show_invalid"
+          name="check-button"
+          switch
+          v-b-tooltip.hover
+          title="Only show photographs that have not yet been added to other sets."
+        >Show photos already in other sets</b-form-checkbox>
         <b-button-toolbar>
           <b-button-group>
             <b-button
@@ -154,15 +161,12 @@ export default {
     searched_photo: {
       type: Number,
       default: null
-    },
-    show_invalid: {
-      type: Boolean,
-      default: false
     }
   },
   data() {
     return {
       show_sidebar: false,
+      show_invalid: false,
       sidebar_payload: null,
       collapsed_state: true,
       close_match_set_state: null,

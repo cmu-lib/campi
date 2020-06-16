@@ -2,7 +2,7 @@
   <b-card :border-variant="border_variant" :bg-variant="background_variant" v-if="show_membership">
     <template v-slot:header>
       <b-row flex align-h="between">
-        <span class="info-badges">
+        <b-button-toolbar>
           <b-button
             class="mx-1"
             size="sm"
@@ -27,12 +27,13 @@
             <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
           </b-button>
           <b-badge
+            class="mx-1 align-self-center"
             v-if="close_match_set_membership.invalid"
             variant="danger"
             v-b-tooltip.hover
             title="This photo has already been reviewed and added to another match set by an editor and/or has been marked for elimination from all matches."
           >Invalid</b-badge>
-        </span>
+        </b-button-toolbar>
         <b-button-toolbar>
           <b-button
             v-if="!close_match_set_membership.core"
