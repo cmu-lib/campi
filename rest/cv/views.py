@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import (
     Count,
     Exists,
@@ -289,7 +290,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 .filter(
                     n_memberships__lt=2, close_match_run=close_match_set.close_match_run
                 )
-                .update(user_last_modified=request.user)
+                .update(user_last_modified=request.user, last_updated=timezone.now())
             )
 
             res = {
