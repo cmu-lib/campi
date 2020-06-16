@@ -259,8 +259,6 @@ class AnnoyIdx(models.Model):
         # Generate matrix
         disk_path = f"{settings.DIST_INDICES_PATH}/{self.id}.ix"
         embed_dims = self.pytorch_model.n_dimensions
-        print(embed_dims)
-        print(self.indexed_embeddings.count())
         ix = annoy.AnnoyIndex(f=embed_dims, metric="angular")
         ix.on_disk_build(disk_path)
         for pic in tqdm(self.indexed_embeddings.all()):
@@ -479,20 +477,23 @@ class CloseMatchRun(dateModifiedModel):
             }
             if len(setnames) == 1:
                 print(setnames)
-                cms.memberships.all().update(accepted=True)
-                cms.representative_photograph = cms.memberships.first().photograph
+                cms.memberships.filter(core=True).update(accepted=True)
+                cms.representative_photograph = (
+                    cms.memberships.filter(core=True).first().photograph
+                )
                 cms.user_last_modified = User.objects.first()
                 cms.save()
 
                 accepted_photographs = photograph.models.Photograph.objects.filter(
-                    close_match_memberships__close_match_set=cms
+                    close_match_memberships__close_match_set=cms,
+                    close_match_memberships__accepted=True,
                 ).distinct()
 
                 CloseMatchSetMembership.objects.filter(
                     close_match_set__close_match_run=self,
                     close_match_set__user_last_modified__isnull=True,
                     photograph__in=accepted_photographs,
-                ).all().update(invalid=True)
+                ).exclude(accepted=True).all().update(invalid=True)
 
 
 class CloseMatchRunConsidered(models.Model):
