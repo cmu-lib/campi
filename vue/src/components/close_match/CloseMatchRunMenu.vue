@@ -4,12 +4,26 @@
       <CloseMatchRunBar :close_match_run="cmr" />
       <b-row flex align-h="between" class="my-2 mx-0">
         <b-button
-          variant="warning"
+          variant="secondary"
           size="sm"
           :to="{name: 'CloseMatchRunList', params: { id: cmr.id }}"
+          v-b-tooltip:hover
+          title="Review sets that have already been approved/invalidated by an editor."
         >Review decisions</b-button>
-        <b-button variant="primary" size="sm" @click="goto_next_set(cmr.id)">See next set</b-button>
-        <b-button variant="info" size="sm" :href="cmr.download_matches">Download results</b-button>
+        <b-button
+          variant="primary"
+          size="sm"
+          @click="goto_next_set(cmr.id) "
+          v-b-tooltip:hover
+          title="Approve sets one at a time."
+        >See next set</b-button>
+        <b-button
+          variant="info"
+          size="sm"
+          :href="cmr.download_matches"
+          v-b-tooltip:hover
+          title="Download a CSV of close match sets with image filenames, set ids, and more metadata."
+        >Download results</b-button>
       </b-row>
     </b-list-group-item>
   </b-list-group>
