@@ -5,6 +5,19 @@
     class="my-2"
     :no-body="collapsed_state"
   >
+    <b-sidebar
+      :id="`sidebar-${close_match_set.id}`"
+      v-model="show_sidebar"
+      v-if="show_sidebar"
+      width="500px"
+      right
+    >
+      <b-container>
+        <h3>{{ sidebar_title }}</h3>
+        <PhotoGrid v-if="sidebar_payload.class=='job'" :job="sidebar_payload.object" />
+        <PhotoGrid v-if="sidebar_payload.class=='directory'" :directory="sidebar_payload.object" />
+      </b-container>
+    </b-sidebar>
     <template v-slot:header>
       <b-row class="px-2" flex align-h="between" align-v="center" v-if="!!close_match_set_state">
         <span @click="collapsed_state=!collapsed_state">
@@ -76,10 +89,12 @@
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
         :close_match_run="close_match_set_state.close_match_run"
+        :close_match_set="close_match_set_state"
         :primary="close_match_set_state.representative_photograph"
         :searched_photo="searched_photo"
         :show_invalid="show_invalid"
         :eliminated="eliminated_photographs.includes(cmsm.photograph.id)"
+        :show_sidebar="show_sidebar"
         class="m-2"
         @accept="accept"
         @reject="reject"
@@ -88,6 +103,7 @@
         @claim_primary="claim_primary"
         @cancel_primary="cancel_primary"
         @photo_search="photo_search"
+        @activate_sidebar="activate_sidebar"
       />
     </b-row>
     <b-toast :id="toast_id" :variant="toast_variant">
@@ -101,6 +117,7 @@ import { HTTP } from "@/main";
 import moment from "moment";
 import CloseMatchSetMembership from "@/components/close_match/CloseMatchSetMembership.vue";
 import Nested from "@/components/Nested.vue";
+import PhotoGrid from "@/components/PhotoGrid.vue";
 import _ from "lodash";
 import {
   BIconCheck2All,
@@ -122,6 +139,7 @@ export default {
     BIconConeStriped,
     BIconCaretRightFill,
     BIconCaretDownFill,
+    PhotoGrid,
     Nested
   },
   props: {
@@ -144,6 +162,8 @@ export default {
   },
   data() {
     return {
+      show_sidebar: false,
+      sidebar_payload: null,
       collapsed_state: true,
       close_match_set_state: null,
       eliminated_photographs: [],
@@ -153,6 +173,9 @@ export default {
     };
   },
   computed: {
+    sidebar_title() {
+      return `${this.sidebar_payload.class}: ${this.sidebar_payload.object.label}`;
+    },
     has_secondary_images() {
       return this.close_match_set.memberships.some(x => !x.core);
     },
@@ -196,6 +219,10 @@ export default {
     }
   },
   methods: {
+    activate_sidebar(payload) {
+      this.sidebar_payload = payload;
+      this.show_sidebar = true;
+    },
     from_now(dt) {
       return moment(dt).fromNow();
     },

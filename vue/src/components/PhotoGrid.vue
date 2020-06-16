@@ -36,9 +36,11 @@ export default {
   name: "PhotoGrid",
   props: {
     directory: {
+      type: Object,
       default: null
     },
     job: {
+      type: Object,
       default: null
     },
     job_tag: {

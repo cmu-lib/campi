@@ -3,12 +3,29 @@
     <template v-slot:header>
       <b-row flex align-h="between">
         <span class="info-badges">
-          <b-badge class="mx-1" variant="primary" :title="directory_tooltip" v-b-tooltip.hover>
+          <b-button
+            class="mx-1"
+            size="sm"
+            variant="primary"
+            :title="directory_tooltip"
+            v-b-tooltip.hover
+            @click="$emit('activate_sidebar', {class: 'directory', object: close_match_set_membership.photograph.directory})"
+            :aria-expanded="show_sidebar"
+            :aria-controls="`sidebar-${close_match_set.id}`"
+          >
             <BIconFolderFill />
-          </b-badge>
-          <b-badge class="mx-1" variant="info" v-if="!!close_match_set_membership.photograph.job">
+          </b-button>
+          <b-button
+            class="mx-1"
+            size="sm"
+            variant="info"
+            v-if="!!close_match_set_membership.photograph.job"
+            @click="$emit('activate_sidebar', {class: 'job', object: close_match_set_membership.photograph.job})"
+            :aria-expanded="show_sidebar"
+            :aria-controls="`sidebar-${close_match_set.id}`"
+          >
             <BIconCamera v-b-tooltip.hover :title="job_tooltip" />
-          </b-badge>
+          </b-button>
           <b-badge
             v-if="close_match_set_membership.invalid"
             variant="danger"
@@ -141,6 +158,10 @@ export default {
       type: Object,
       required: true
     },
+    close_match_set: {
+      type: Object,
+      required: true
+    },
     primary: {
       type: Object,
       default: null
@@ -158,6 +179,10 @@ export default {
       default: 900
     },
     eliminated: {
+      type: Boolean,
+      default: false
+    },
+    show_sidebar: {
       type: Boolean,
       default: false
     }
