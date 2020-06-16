@@ -217,7 +217,9 @@ export default {
       this.eliminated_photographs.push(photograph_id);
     },
     uneliminate(photograph_id) {
-      _.pull(this.eliminated_photographs, photograph_id);
+      this.eliminated_photographs = _.difference(this.eliminated_photographs, [
+        photograph_id
+      ]);
     },
     claim_primary(photograph) {
       this.close_match_set_state.representative_photograph = photograph;

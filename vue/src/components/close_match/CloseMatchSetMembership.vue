@@ -261,6 +261,9 @@ export default {
       }
     },
     accept() {
+      if (this.eliminated) {
+        this.toggle_eliminate();
+      }
       this.$emit("accept", this.close_match_set_membership.id);
     },
     reject() {
@@ -272,11 +275,15 @@ export default {
     primary() {
       if (this.primary == this.close_match_set_membership.photograph) {
         this.accept();
+        if (this.eliminated) {
+          this.toggle_eliminate();
+        }
       }
     },
     eliminated() {
       if (this.eliminated) {
         this.reject();
+        this.cancel_primary();
       }
     }
   }
