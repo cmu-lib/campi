@@ -126,7 +126,7 @@ class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         close_match_run = self.get_object()
         useful_match_sets = close_match_run.close_match_sets.annotate(
             n_approved=Count("memberships", filter=Q(memberships__accepted=True))
-        ).filter(n_approved__gte=2, user_last_modified__isnull=False, invalid=False)
+        ).filter(n_approved__gte=2, user_last_modified__isnull=False)
 
         all_memberships = (
             models.CloseMatchSetMembership.objects.filter(
