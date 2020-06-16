@@ -272,7 +272,9 @@ export default {
         }
       });
       this.eliminated_photographs = [];
-      this.close_match_set_state.representative_photograph = this.close_match_set_state.memberships[0].photograph;
+      this.close_match_set_state.representative_photograph = this.close_match_set_state.memberships.filter(
+        x => x.accepted
+      )[0].photograph;
     },
     reject_all() {
       this.close_match_set_state.representative_photograph = null;
