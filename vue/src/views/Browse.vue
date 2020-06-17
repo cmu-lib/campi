@@ -41,6 +41,7 @@
           :job_tag="job_tag"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
+          @photo_click="photo_click"
         />
       </b-col>
     </b-row>
@@ -74,6 +75,9 @@ export default {
   methods: {
     reset_date() {
       this.digitized_date_range = [2016, 2020];
+    },
+    photo_click(photograph) {
+      this.$router.push({ name: "Photo", params: { id: photograph.id } });
     }
   },
   computed: {

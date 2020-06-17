@@ -306,3 +306,17 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             return Response(
                 raw_approval_data.errors, status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class CloseMatchSetMembershipViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = models.CloseMatchSetMembership.objects.select_related(
+        "photograph", "photograph__directory", "photograph__job"
+    ).all()
+    serializer_class = serializers.CloseMatchSetMembershipSerializer
+    serializer_action_classes = {
+        "list": serializers.CloseMatchSetMembershipSerializer,
+        "detail": serializers.CloseMatchSetMembershipSerializer,
+        "create": serializers.CloseMatchSetMembershipPostSerializer,
+        "update": serializers.CloseMatchSetMembershipPostSerializer,
+        "partial_update": serializers.CloseMatchSetMembershipPostSerializer,
+    }

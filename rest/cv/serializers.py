@@ -67,12 +67,34 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
+class CloseMatchSetMembershipPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CloseMatchSetMembership
+        fields = [
+            "id",
+            "close_match_set",
+            "photograph",
+            "core",
+            "distance",
+            "accepted",
+            "invalid",
+        ]
+
+
 class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
     photograph = photograph.serializers.PhotographListSerializer(many=False)
 
     class Meta:
         model = models.CloseMatchSetMembership
-        fields = ["id", "photograph", "core", "distance", "accepted", "invalid"]
+        fields = [
+            "id",
+            "close_match_set",
+            "photograph",
+            "core",
+            "distance",
+            "accepted",
+            "invalid",
+        ]
 
 
 class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):

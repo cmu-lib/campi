@@ -11,13 +11,15 @@
       />
     </b-row>
     <b-row flex align-h="center">
-      <router-link
+      <b-img
+        lazy
         v-for="image in images.results"
         :key="image.id"
-        :to="{name: 'Photo', params: {id: image.id}}"
-      >
-        <b-img lazy :src="image.image.square" blank-width="150" blank-height="150" />
-      </router-link>
+        :src="image.image.square"
+        blank-width="150"
+        blank-height="150"
+        @click="$emit('photo_click', image)"
+      />
     </b-row>
     <b-row flex align-h="center" class="mt-3">
       <b-pagination

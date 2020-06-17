@@ -14,8 +14,16 @@
     >
       <b-container>
         <h3>{{ sidebar_title }}</h3>
-        <PhotoGrid v-if="sidebar_payload.class=='job'" :job="sidebar_payload.object" />
-        <PhotoGrid v-if="sidebar_payload.class=='directory'" :directory="sidebar_payload.object" />
+        <PhotoGrid
+          v-if="sidebar_payload.class=='job'"
+          :job="sidebar_payload.object"
+          @photo_click="add_membership"
+        />
+        <PhotoGrid
+          v-if="sidebar_payload.class=='directory'"
+          :directory="sidebar_payload.object"
+          @photo_click="add_membership"
+        />
       </b-container>
     </b-sidebar>
     <template v-slot:header>
@@ -320,6 +328,37 @@ export default {
         },
         error => {
           this.uploading = false;
+          this.toast_response = error;
+          this.toast_variant = "danger";
+          this.$bvToast.show(`toast-${this.close_match_set.id}`);
+        }
+      );
+    },
+    add_membership(photograph) {
+      return HTTP.post("/close_match/set_membership/", {
+        close_match_set: this.close_match_set.id,
+        photograph: photograph.id,
+        core: true,
+        distance: 0,
+        accepted: true,
+        invalid: false
+      }).then(
+        results => {
+          this.toast_variant = "success";
+          this.toast_response = "Photo added to set";
+          this.$bvToast.show(`toast-${this.close_match_set.id}`);
+          return HTTP.get(
+            `/close_match/set_membership/${results.data.id}`
+          ).then(
+            response => {
+              this.close_match_set_state.memberships.push(response.data);
+            },
+            error => {
+              console.log(error);
+            }
+          );
+        },
+        error => {
           this.toast_response = error;
           this.toast_variant = "danger";
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
