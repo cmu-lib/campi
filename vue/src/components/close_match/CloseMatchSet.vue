@@ -14,6 +14,7 @@
     >
       <b-container>
         <h3>{{ sidebar_title }}</h3>
+        <p>Click on a photograph to add it to the close match set.</p>
         <PhotoGrid
           v-if="sidebar_payload.class=='job'"
           :job="sidebar_payload.object"
@@ -162,6 +163,14 @@ export default {
     searched_photo: {
       type: Number,
       default: null
+    },
+    show_other_initial: {
+      type: Boolean,
+      default: false
+    },
+    show_excluded_initial: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -188,10 +197,9 @@ export default {
       return `toast-${this.close_match_set.id}`;
     },
     set_variant() {
-      if (this.close_match_set.invalid) {
+      if (this.close_match_set.redundant) {
         return "warning";
-      }
-      if (!!this.modifying_user) {
+      } else if (!!this.modifying_user) {
         return "success";
       }
       return "null";
@@ -266,8 +274,8 @@ export default {
     },
     reject_remaining() {
       this.close_match_set_state.memberships
-        .filter(x => x.accepted == null)
-        .map(x => (x.accepted = false));
+        .filter(x => x.state == "n")
+        .map(x => (x.state = "r"));
     },
     get_registration_toast(res) {
       return `${res.invalidations}`;
@@ -354,7 +362,7 @@ export default {
       this.close_match_set_state = this.close_match_set;
       var excl = [];
       if (!this.show_excluded) excl.push("e");
-      if (!this.show_other) excl.push("o");
+      // if (!this.show_other) excl.push("o");
       this.close_match_set_state.memberships = this.close_match_set.memberships.filter(
         m => !excl.includes(m.state)
       );
@@ -364,6 +372,8 @@ export default {
     this.collapsed_state = this.collapsed;
   },
   mounted() {
+    this.show_other = this.show_other_initial;
+    this.show_excluded = this.show_excluded_initial;
     this.update_state();
   },
   watch: {

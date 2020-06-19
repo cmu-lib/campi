@@ -75,6 +75,8 @@
             :close_match_set="cms"
             :collapsed="true"
             :searched_photo="photo_memberships"
+            :show_other_initial="show_redundant"
+            :show_excluded_initial="show_redundant"
             @set_submitted="set_submitted"
             @photo_search="photo_search"
           />

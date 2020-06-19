@@ -1,5 +1,5 @@
 <template>
-  <b-card :border-variant="border_variant" :bg-variant="background_variant" v-if="show_membership">
+  <b-card :border-variant="border_variant" :bg-variant="background_variant">
     <template v-slot:header>
       <b-row flex align-h="between">
         <b-button-toolbar>
@@ -192,9 +192,6 @@ export default {
   computed: {
     disable_buttons() {
       return this.close_match_set_membership.state == "o";
-    },
-    show_membership() {
-      return this.show_invalid | !this.disable_buttons;
     },
     background_variant() {
       if (this.disable_buttons) {

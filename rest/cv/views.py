@@ -314,6 +314,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 .filter(
                     n_unreviewed_memberships__lt=2,
                     close_match_run=close_match_set.close_match_run,
+                    user_last_modified__isnull=True,
                 )
                 .update(user_last_modified=request.user, last_updated=timezone.now())
             )
