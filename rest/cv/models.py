@@ -552,7 +552,7 @@ class CloseMatchSetMembership(models.Model):
         related_name="close_match_memberships",
     )
     distance = models.FloatField(
-        default=0.0,
+        null=True,
         db_index=True,
         help_text="Cosine distance from the first membership added to this set",
     )
@@ -569,6 +569,11 @@ class CloseMatchSetMembership(models.Model):
         choices=MEMBERSHIP_STATE_CHOICES,
         db_index=True,
         help_text="Status of this membership (e.g. accepted, rejected)",
+    )
+    user_added = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Was this match manually added by a user?",
     )
 
     class Meta:

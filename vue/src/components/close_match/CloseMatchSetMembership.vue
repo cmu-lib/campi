@@ -123,7 +123,17 @@
     <template v-slot:footer>
       <b-row align-h="between">
         <small>{{ close_match_set_membership.photograph.filename }}</small>
-        <small>{{ close_match_set_membership.distance.toFixed(7) }}</small>
+        <b-badge
+          v-if="close_match_set_membership.user_added"
+          title="This photo was manually added by an editor, not by computer clustering."
+          v-b-tooltip:hover
+          variant="light"
+        >
+          <BIconPersonPlusFill />
+        </b-badge>
+        <small
+          v-if="!!close_match_set_membership.distance"
+        >{{ close_match_set_membership.distance.toFixed(7) }}</small>
       </b-row>
     </template>
   </b-card>
@@ -138,7 +148,8 @@ import {
   BIconCamera,
   BIconFolderFill,
   BIconSearch,
-  BIconExclamationOctagonFill
+  BIconExclamationOctagonFill,
+  BIconPersonPlusFill
 } from "bootstrap-vue";
 export default {
   name: "CloseMatchSetMembership",
@@ -150,7 +161,8 @@ export default {
     BIconCamera,
     BIconFolderFill,
     BIconSearch,
-    BIconExclamationOctagonFill
+    BIconExclamationOctagonFill,
+    BIconPersonPlusFill
   },
   props: {
     close_match_set_membership: {

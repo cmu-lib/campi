@@ -18,6 +18,8 @@ from rest_framework.response import Response
 from cv import models, serializers
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
+from sklearn import metrics
+import numpy
 import photograph
 import collection
 import csv
@@ -340,3 +342,43 @@ class CloseMatchSetMembershipViewset(GetSerializerClassMixin, viewsets.ModelView
         "update": serializers.CloseMatchSetMembershipPostSerializer,
         "partial_update": serializers.CloseMatchSetMembershipPostSerializer,
     }
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        """
+        Override the basic POST method to calculate the distance on the fly
+        """
+        membership_serializer = self.get_serializer_class()(data=request.data)
+        if membership_serializer.is_valid():
+            obj = membership_serializer.save()
+            embedding_model = obj.close_match_set.close_match_run.pytorch_model
+            first_photo = obj.close_match_set.memberships.first().photograph
+            target_photo = obj.photograph
+
+            first_embeddings = models.Embedding.objects.get(
+                photograph=first_photo, pytorch_model=embedding_model
+            ).array
+            target_embeddings = models.Embedding.objects.get(
+                photograph=target_photo, pytorch_model=embedding_model
+            ).array
+
+            cosine_distance = list(
+                metrics.pairwise.cosine_distances(
+                    numpy.array([first_embeddings]), numpy.array([target_embeddings])
+                )[0,]
+            )[0]
+
+            obj.distance = cosine_distance
+            obj.core = False
+            obj.user_added = True
+            obj.save()
+            return Response(
+                self.get_serializer_class()(obj, context={"request": request}).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        else:
+            return Response(
+                membership_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+

@@ -398,7 +398,7 @@ export default {
           );
         },
         error => {
-          this.toast_response = error;
+          this.toast_response = error.data;
           this.toast_variant = "danger";
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
         }
