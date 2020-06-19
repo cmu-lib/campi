@@ -253,8 +253,10 @@ class AnnoyIdx(models.Model):
 
         print("Registering embedding ordering")
         ordered_embeddings = self.pytorch_model.embeddings.all().order_by("id")
+        ies = []
         for i, e in enumerate(ordered_embeddings):
-            IndexEmbedding.objects.create(annoy_idx=self, embedding=e, sequence=i)
+            ies.append(IndexEmbedding(annoy_idx=self, embedding=e, sequence=i))
+        IndexEmbedding.objects.bulk_create(ies)
 
         # Generate matrix
         disk_path = f"{settings.DIST_INDICES_PATH}/{self.id}.ix"
