@@ -387,12 +387,7 @@ class CloseMatchRun(dateModifiedModel):
                 cms = CloseMatchSet.objects.create(close_match_run=self)
                 photo_indices = min_memberships[str(membership_id)]
                 photographs = [embedding_photo_ids[i] for i in photo_indices]
-                photolist = [
-                    value
-                    for key, value in photograph.models.Photograph.objects.in_bulk(
-                        photographs
-                    ).items()
-                ]
+                photolist = photograph.models.Photograph.objects.in_bulk(photographs)
                 cosine_distances = list(
                     metrics.pairwise.cosine_distances(
                         X=embedding_matrix[[photo_indices[0]],],
@@ -402,11 +397,11 @@ class CloseMatchRun(dateModifiedModel):
                 cms_members = [
                     CloseMatchSetMembership(
                         close_match_set=cms,
-                        photograph=p,
+                        photograph=photolist[p],
                         core=True,
                         distance=cosine_distances[i],
                     )
-                    for i, p in enumerate(photolist)
+                    for i, p in enumerate(photographs)
                 ]
                 CloseMatchSetMembership.objects.bulk_create(cms_members)
                 # Find the sets that these pics belong to in the wider clusters, and add those photos to this set as well
@@ -430,12 +425,9 @@ class CloseMatchRun(dateModifiedModel):
                             additional_photographs = [
                                 embedding_photo_ids[i] for i in additional_photo_indices
                             ]
-                            additional_photolist = [
-                                value
-                                for key, value in photograph.models.Photograph.objects.in_bulk(
-                                    additional_photographs
-                                ).items()
-                            ]
+                            additional_photolist = photograph.models.Photograph.objects.in_bulk(
+                                additional_photographs
+                            )
                             new_cosine_distances = list(
                                 metrics.pairwise.cosine_distances(
                                     X=embedding_matrix[[photo_indices[0]],],
@@ -445,11 +437,11 @@ class CloseMatchRun(dateModifiedModel):
                             new_cms_members = [
                                 CloseMatchSetMembership(
                                     close_match_set=cms,
-                                    photograph=p,
+                                    photograph=additional_photolist[p],
                                     core=False,
                                     distance=new_cosine_distances[i],
                                 )
-                                for i, p in enumerate(additional_photolist)
+                                for i, p in enumerate(additional_photographs)
                             ]
                             CloseMatchSetMembership.objects.bulk_create(new_cms_members)
         print(
