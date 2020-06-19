@@ -196,9 +196,10 @@ export default {
     background_variant() {
       if (this.disable_buttons) {
         return "secondary";
-      } else {
-        return null;
+      } else if (this.close_match_set_membership.core) {
+        return "success";
       }
+      return null;
     },
     border_variant() {
       if (!!this.searched_photo) {

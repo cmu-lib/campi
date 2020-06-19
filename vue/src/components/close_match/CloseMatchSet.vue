@@ -28,16 +28,18 @@
       </b-container>
     </b-sidebar>
     <template v-slot:header>
-      <b-row class="px-2" flex align-h="between" align-v="center" v-if="!!close_match_set_state">
-        <span @click="collapsed_state=!collapsed_state">
-          <BIconCaretRightFill v-if="collapsed_state" />
-          <BIconCaretDownFill v-else />
-        </span>
-        <span>Match set {{ close_match_set.id }} ({{ close_match_set.n_unreviewed_images }} unreviewed images / {{ close_match_set.n_images }} total)</span>
-        <span
-          v-if="modifying_user"
-        >Reveiwed by {{ close_match_set_state.user_last_modified.username }} {{ from_now(close_match_set_state.last_updated) }}</span>
-        <b-col>
+      <b-row class="px-2" v-if="!!close_match_set_state">
+        <b-col cols="3">
+          <span @click="collapsed_state=!collapsed_state">
+            <BIconCaretRightFill v-if="collapsed_state" />
+            <BIconCaretDownFill v-else />
+          </span>
+          <span>Match set {{ close_match_set.id }} ({{ close_match_set.n_unreviewed_images }} unreviewed images / {{ close_match_set.n_images }} total)</span>
+          <span
+            v-if="modifying_user"
+          >Reveiwed by {{ close_match_set_state.user_last_modified.username }} {{ from_now(close_match_set_state.last_updated) }}</span>
+        </b-col>
+        <b-col cols="3">
           <b-form-checkbox
             v-model="show_other"
             name="check-button"
@@ -53,48 +55,63 @@
             title="Show photographs that have been marked excluded by an editor."
           >Show photos already excluded from match consideration</b-form-checkbox>
         </b-col>
-        <b-button-toolbar>
-          <b-button-group>
-            <b-button
-              variant="success"
-              size="sm"
-              @click="accept_all"
-              v-b-tooltip.hover
-              title="Mark every photo as accepted. If you haven't starred a photo, it will star the first accepted one in the set."
-            >
-              <BIconCheck2All class="mr-1" />Accept all
-            </b-button>
-            <b-button
-              variant="warning"
-              size="sm"
-              @click="reject_all"
-              v-b-tooltip.hover
-              title="Mark every photo as rejected. Rejected photos may appear in later match sets"
-            >
-              <BIconXOctagon class="mr-1" />Reject all
-            </b-button>
-            <b-button
-              variant="danger"
-              size="sm"
-              @click="exclude_all"
-              v-b-tooltip.hover
-              title="Mark every photo as excluded. Excluded photos will be removed from this and all other match sets."
-            >
-              <BIconExclamationOctagonFill class="mr-1" />Exclude All
-            </b-button>
-          </b-button-group>
-          <b-button
-            class="ml-2"
-            variant="primary"
-            size="sm"
-            @click="register_set"
-            v-b-tooltip.hover
-            title="Save your judgments to the server. Any photo left blank will be automatically marked as 'rejected'"
+        <b-col cols="2">
+          <b-form-group
+            :id="`membership-ordering-label-${close_match_set.id}`"
+            :label-for="`membership-ordering-{close_match_set.id}`"
+            label="Photo order"
           >
-            <BIconCloudUpload v-if="!uploading" class="mr-1" />
-            <b-spinner v-else small class="mr-1" />Save
-          </b-button>
-        </b-button-toolbar>
+            <b-form-select
+              :id="`membership-ordering-${close_match_set.id}`"
+              v-model="membership_ordering"
+              :options="ordering_options"
+            />
+          </b-form-group>
+        </b-col>
+        <b-col class="ml-auto" cols="4">
+          <b-button-toolbar>
+            <b-button-group>
+              <b-button
+                variant="success"
+                size="sm"
+                @click="accept_all"
+                v-b-tooltip.hover
+                title="Mark every photo as accepted. If you haven't starred a photo, it will star the first accepted one in the set."
+              >
+                <BIconCheck2All class="mr-1" />Accept all
+              </b-button>
+              <b-button
+                variant="warning"
+                size="sm"
+                @click="reject_all"
+                v-b-tooltip.hover
+                title="Mark every photo as rejected. Rejected photos may appear in later match sets"
+              >
+                <BIconXOctagon class="mr-1" />Reject all
+              </b-button>
+              <b-button
+                variant="danger"
+                size="sm"
+                @click="exclude_all"
+                v-b-tooltip.hover
+                title="Mark every photo as excluded. Excluded photos will be removed from this and all other match sets."
+              >
+                <BIconExclamationOctagonFill class="mr-1" />Exclude All
+              </b-button>
+            </b-button-group>
+            <b-button
+              class="ml-2"
+              variant="primary"
+              size="sm"
+              @click="register_set"
+              v-b-tooltip.hover
+              title="Save your judgments to the server. Any photo left blank will be automatically marked as 'rejected'"
+            >
+              <BIconCloudUpload v-if="!uploading" class="mr-1" />
+              <b-spinner v-else small class="mr-1" />Save
+            </b-button>
+          </b-button-toolbar>
+        </b-col>
       </b-row>
     </template>
     <b-row flex v-if="!!close_match_set_state & !collapsed_state">
@@ -183,10 +200,34 @@ export default {
       close_match_set_state: null,
       toast_response: null,
       toast_variant: null,
-      uploading: false
+      uploading: false,
+      membership_ordering: "distance"
     };
   },
   computed: {
+    ordering_options() {
+      return [
+        { value: "distance", text: "Visual similarity" },
+        {
+          value: function(x) {
+            return x.photograph.filename;
+          },
+          text: "Filename"
+        },
+        {
+          value: function(x) {
+            return x.photograph.directory.label;
+          },
+          text: "Directory name"
+        },
+        {
+          value: function(x) {
+            return x.photograph.job.label;
+          },
+          text: "Job name"
+        }
+      ];
+    },
     sidebar_title() {
       return `${this.sidebar_payload.class}: ${this.sidebar_payload.object.label}`;
     },
@@ -359,12 +400,14 @@ export default {
       );
     },
     update_state() {
+      console.log(this.membership_ordering);
       this.close_match_set_state = this.close_match_set;
       var excl = [];
       if (!this.show_excluded) excl.push("e");
-      // if (!this.show_other) excl.push("o");
-      this.close_match_set_state.memberships = this.close_match_set.memberships.filter(
-        m => !excl.includes(m.state)
+      if (!this.show_other) excl.push("o");
+      this.close_match_set_state.memberships = _.sortBy(
+        this.close_match_set.memberships.filter(m => !excl.includes(m.state)),
+        [this.membership_ordering, "id"]
       );
     }
   },
@@ -381,6 +424,9 @@ export default {
       this.update_state();
     },
     show_excluded() {
+      this.update_state();
+    },
+    membership_ordering() {
       this.update_state();
     }
   }
