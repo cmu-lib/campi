@@ -9,7 +9,7 @@
       :id="`sidebar-${close_match_set.id}`"
       v-model="show_sidebar"
       v-if="show_sidebar"
-      width="500px"
+      width="600px"
       right
     >
       <b-container>
@@ -17,11 +17,13 @@
         <p>Click on a photograph to add it to the close match set.</p>
         <PhotoGrid
           v-if="sidebar_payload.class=='job'"
+          :highlight_ids="all_photo_ids"
           :job="sidebar_payload.object"
           @photo_click="add_membership"
         />
         <PhotoGrid
           v-if="sidebar_payload.class=='directory'"
+          :highlight_ids="all_photo_ids"
           :directory="sidebar_payload.object"
           @photo_click="add_membership"
         />
@@ -58,7 +60,7 @@
         <b-col cols="2">
           <b-form-group
             :id="`membership-ordering-label-${close_match_set.id}`"
-            :label-for="`membership-ordering-{close_match_set.id}`"
+            :label-for="`membership-ordering-${close_match_set.id}`"
             label="Photo order"
           >
             <b-form-select
@@ -205,6 +207,9 @@ export default {
     };
   },
   computed: {
+    all_photo_ids() {
+      return this.close_match_set_state.memberships.map(m => m.photograph.id);
+    },
     ordering_options() {
       return [
         { value: "distance", text: "Visual similarity" },

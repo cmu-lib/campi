@@ -14,6 +14,8 @@
       <b-img
         lazy
         v-for="image in images.results"
+        class="m-1"
+        :class="{'highlighted': highlight_ids.includes(image.id)}"
         :key="image.id"
         :src="image.image.square"
         blank-width="150"
@@ -59,6 +61,12 @@ export default {
     per_page: {
       type: Number,
       default: 96
+    },
+    highlight_ids: {
+      type: Array,
+      default: function() {
+        return [];
+      }
     }
   },
   data() {
@@ -109,3 +117,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.highlighted {
+  outline: 3px orange solid;
+}
+</style>
