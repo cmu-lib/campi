@@ -33,27 +33,25 @@
           <BIconCaretDownFill v-else />
         </span>
         <span>Match set {{ close_match_set.id }} ({{ close_match_set.n_unreviewed_images }} unreviewed images / {{ close_match_set.n_images }} total)</span>
-        <span v-if="close_match_set.overlapping" class="info-badges">
-          <b-badge
-            size="lg"
-            class="mx-1"
-            variant="warning"
-            v-b-tooltip.hover
-            title="This set contains photos that may also appear in other sets."
-          >
-            <BIconConeStriped />
-          </b-badge>
-        </span>
         <span
           v-if="modifying_user"
         >Reveiwed by {{ close_match_set_state.user_last_modified.username }} {{ from_now(close_match_set_state.last_updated) }}</span>
-        <b-form-checkbox
-          v-model="show_invalid"
-          name="check-button"
-          switch
-          v-b-tooltip.hover
-          title="Only show photographs that have not yet been added to other sets."
-        >Show photos already in other sets</b-form-checkbox>
+        <b-col>
+          <b-form-checkbox
+            v-model="show_other"
+            name="check-button"
+            switch
+            v-b-tooltip.hover
+            title="Show photographs that have already been added to other sets."
+          >Show photos already in other sets</b-form-checkbox>
+          <b-form-checkbox
+            v-model="show_excluded"
+            name="check-button"
+            switch
+            v-b-tooltip.hover
+            title="Show photographs that have been marked excluded by an editor."
+          >Show photos already excluded from match consideration</b-form-checkbox>
+        </b-col>
         <b-button-toolbar>
           <b-button-group>
             <b-button
@@ -66,22 +64,22 @@
               <BIconCheck2All class="mr-1" />Accept all
             </b-button>
             <b-button
-              variant="danger"
+              variant="warning"
               size="sm"
               @click="reject_all"
               v-b-tooltip.hover
-              title="Mark every photo as rejected."
+              title="Mark every photo as rejected. Rejected photos may appear in later match sets"
             >
               <BIconXOctagon class="mr-1" />Reject all
             </b-button>
             <b-button
-              variant="warning"
+              variant="danger"
               size="sm"
-              @click="eliminate_all"
+              @click="exclude_all"
               v-b-tooltip.hover
-              title="Mark every photo as eliminated."
+              title="Mark every photo as excluded. Excluded photos will be removed from this and all other match sets."
             >
-              <BIconExclamationOctagonFill class="mr-1" />Eliminate All
+              <BIconExclamationOctagonFill class="mr-1" />Exclude All
             </b-button>
           </b-button-group>
           <b-button
@@ -100,20 +98,18 @@
     </template>
     <b-row flex v-if="!!close_match_set_state & !collapsed_state">
       <CloseMatchSetMembership
-        v-for="cmsm in filtered_memberships"
+        v-for="cmsm in close_match_set_state.memberships"
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
         :close_match_run="close_match_set_state.close_match_run"
         :close_match_set="close_match_set_state"
         :primary="close_match_set_state.representative_photograph"
         :searched_photo="searched_photo"
-        :eliminated="eliminated_photographs.includes(cmsm.photograph.id)"
         :show_sidebar="show_sidebar"
         class="m-2"
         @accept="accept"
         @reject="reject"
-        @eliminate="eliminate"
-        @uneliminate="uneliminate"
+        @exclude="exclude"
         @claim_primary="claim_primary"
         @cancel_primary="cancel_primary"
         @photo_search="photo_search"
@@ -138,7 +134,6 @@ import {
   BIconXOctagon,
   BIconExclamationOctagonFill,
   BIconCloudUpload,
-  BIconConeStriped,
   BIconCaretRightFill,
   BIconCaretDownFill
 } from "bootstrap-vue";
@@ -150,7 +145,6 @@ export default {
     BIconXOctagon,
     BIconCloudUpload,
     BIconExclamationOctagonFill,
-    BIconConeStriped,
     BIconCaretRightFill,
     BIconCaretDownFill,
     PhotoGrid,
@@ -173,26 +167,17 @@ export default {
   data() {
     return {
       show_sidebar: false,
-      show_invalid: false,
+      show_other: false,
+      show_excluded: false,
       sidebar_payload: null,
       collapsed_state: true,
       close_match_set_state: null,
-      eliminated_photographs: [],
       toast_response: null,
       toast_variant: null,
       uploading: false
     };
   },
   computed: {
-    filtered_memberships() {
-      if (this.show_invalid) {
-        return this.close_match_set_state.memberships;
-      } else {
-        return this.close_match_set_state.memberships.filter(
-          x => !["o", "e"].includes(x.state)
-        );
-      }
-    },
     sidebar_title() {
       return `${this.sidebar_payload.class}: ${this.sidebar_payload.object.label}`;
     },
@@ -219,23 +204,6 @@ export default {
     },
     match_set_header() {
       return "Match set " + this.close_match_set.id;
-    },
-    close_match_approval() {
-      var payload = {
-        accepted_memberships: [],
-        eliminated_photographs: [],
-        representative_photograph: null
-      };
-      if (!!this.close_match_set_state) {
-        payload.accepted_memberships = this.close_match_set_state.memberships
-          .filter(x => x.accepted)
-          .map(x => x.id);
-        payload.eliminated_photographs = this.eliminated_photographs;
-        if (!!this.close_match_set_state.representative_photograph) {
-          payload.representative_photograph = this.close_match_set_state.representative_photograph.id;
-        }
-      }
-      return payload;
     }
   },
   methods: {
@@ -254,61 +222,46 @@ export default {
     },
     accept(id) {
       const set_index = this.get_index(id);
-      this.close_match_set_state.memberships[set_index].accepted = true;
+      this.close_match_set_state.memberships[set_index].state = "a";
     },
     reject(id) {
       const set_index = this.get_index(id);
-      this.close_match_set_state.memberships[set_index].accepted = false;
+      this.close_match_set_state.memberships[set_index].state = "r";
     },
-    eliminate(photograph_id) {
-      this.eliminated_photographs.push(photograph_id);
-    },
-    uneliminate(photograph_id) {
-      this.eliminated_photographs = _.difference(this.eliminated_photographs, [
-        photograph_id
-      ]);
+    exclude(id) {
+      const set_index = this.get_index(id);
+      this.close_match_set_state.memberships[set_index].state = "e";
     },
     claim_primary(photograph) {
       this.close_match_set_state.representative_photograph = photograph;
     },
-    cancel_primary(photograph) {
-      if (!!this.close_match_set_state.representative_photograph) {
-        if (
-          photograph.id ==
-          this.close_match_set_state.representative_photograph.id
-        ) {
-          this.close_match_set_state.representative_photograph = null;
-        }
-      }
+    cancel_primary() {
+      this.close_match_set_state.representative_photograph = null;
     },
     accept_all() {
       this.close_match_set_state.memberships.map(x => {
-        if (!["o", "e"].includes(x.state)) {
-          x.accepted = true;
+        if (!["o"].includes(x.state)) {
+          x.state = "a";
         }
       });
-      this.eliminated_photographs = [];
       this.close_match_set_state.representative_photograph = this.close_match_set_state.memberships.filter(
-        x => x.accepted
+        x => x.state == "a"
       )[0].photograph;
     },
     reject_all() {
       this.close_match_set_state.representative_photograph = null;
-      this.eliminated_photographs = [];
       this.close_match_set_state.memberships.map(x => {
-        if (!["o", "e"].includes(x.state)) {
-          x.accepted = false;
+        if (!["o"].includes(x.state)) {
+          x.state = "r";
         }
       });
     },
-    eliminate_all() {
-      this.eliminated_photographs = this.close_match_set_state.memberships.map(
-        x => {
-          if (!["o"].includes(x.state)) {
-            return x.photograph.id;
-          }
+    exclude_all() {
+      this.close_match_set_state.memberships.map(x => {
+        if (!["o"].includes(x.state)) {
+          x.state = "e";
         }
-      );
+      });
       this.close_match_set_state.representative_photograph = null;
     },
     reject_remaining() {
@@ -319,12 +272,35 @@ export default {
     get_registration_toast(res) {
       return `${res.invalidations}`;
     },
+    get_close_match_approval() {
+      var payload = {
+        accepted_memberships: [],
+        rejected_memberships: [],
+        excluded_memberships: [],
+        representative_photograph: null
+      };
+      if (!!this.close_match_set_state) {
+        this.close_match_set_state.memberships.map(m => {
+          if (m.state == "a") {
+            payload.accepted_memberships.push(m.id);
+          } else if (m.state == "r") {
+            payload.rejected_memberships.push(m.id);
+          } else if (m.state == "e") {
+            payload.excluded_memberships.push(m.id);
+          }
+        });
+        if (!!this.close_match_set_state.representative_photograph) {
+          payload.representative_photograph = this.close_match_set_state.representative_photograph.id;
+        }
+      }
+      return payload;
+    },
     register_set() {
       this.uploading = true;
       this.reject_remaining();
       return HTTP.patch(
         "/close_match/set/" + this.close_match_set.id + "/approve/",
-        this.close_match_approval
+        this.get_close_match_approval()
       ).then(
         results => {
           this.uploading = false;
@@ -373,13 +349,30 @@ export default {
           this.$bvToast.show(`toast-${this.close_match_set.id}`);
         }
       );
+    },
+    update_state() {
+      this.close_match_set_state = this.close_match_set;
+      var excl = [];
+      if (!this.show_excluded) excl.push("e");
+      if (!this.show_other) excl.push("o");
+      this.close_match_set_state.memberships = this.close_match_set.memberships.filter(
+        m => !excl.includes(m.state)
+      );
     }
   },
   created() {
     this.collapsed_state = this.collapsed;
   },
   mounted() {
-    this.close_match_set_state = this.close_match_set;
+    this.update_state();
+  },
+  watch: {
+    show_other() {
+      this.update_state();
+    },
+    show_excluded() {
+      this.update_state();
+    }
   }
 };
 </script>

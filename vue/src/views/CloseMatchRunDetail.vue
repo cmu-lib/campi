@@ -65,9 +65,9 @@ export default {
       return HTTP.get("/close_match/set/", {
         params: {
           limit: 1,
-          invalid: false,
-          not_signed_off: true,
-          ordering: "-n_images",
+          redundant: false,
+          user_signed_off: false,
+          ordering: "-n_unreviewed_images",
           close_match_run: this.close_match_run_id
         }
       }).then(

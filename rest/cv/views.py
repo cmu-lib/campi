@@ -6,6 +6,7 @@ from django.db.models import (
     Exists,
     F,
     Q,
+    Value,
     Prefetch,
     OuterRef,
     ExpressionWrapper,
@@ -125,7 +126,10 @@ class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     ):
         close_match_run = self.get_object()
         useful_match_sets = close_match_run.close_match_sets.annotate(
-            n_approved=Count("memberships", filter=Q(memberships__accepted=True))
+            n_approved=Count(
+                "memberships",
+                filter=Q(memberships__state=models.CloseMatchSetMembership.ACCEPTED),
+            )
         ).filter(n_approved__gte=2, user_last_modified__isnull=False)
 
         all_memberships = (
@@ -176,9 +180,9 @@ class CloseMatchSetFilter(filters.FilterSet):
         queryset=models.CloseMatchRun.objects.all(),
         help_text="The run that created this match set",
     )
-    invalid = filters.BooleanFilter()
+    redundant = filters.BooleanFilter()
     overlapping = filters.BooleanFilter()
-    not_signed_off = filters.BooleanFilter(method="has_user_signed_off")
+    user_signed_off = filters.BooleanFilter(method="has_user_signed_off")
     memberships = filters.ModelChoiceFilter(
         queryset=photograph.models.Photograph.objects.all(),
         help_text="Photograph within this proposed match set",
@@ -187,7 +191,7 @@ class CloseMatchSetFilter(filters.FilterSet):
 
     def has_user_signed_off(self, queryset, name, value):
         if value:
-            return queryset.filter(user_last_modified__isnull=True)
+            return queryset.filter(user_last_modified__isnull=not value)
         else:
             return queryset
 
@@ -213,8 +217,19 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         )
         .annotate(
             n_images=Count("memberships"),
-            n_valid_images=Count("memberships", filter=Q(memberships__invalid=False)),
-            invalid=ExpressionWrapper(
+            n_unreviewed_images=Count(
+                "memberships",
+                filter=Q(
+                    memberships__state=models.CloseMatchSetMembership.NOT_REVIEWED
+                ),
+            ),
+            n_redundant_images=Count(
+                "memberships",
+                filter=Q(memberships__state=models.CloseMatchSetMembership.OTHER_SET)
+                | Q(memberships__state=models.CloseMatchSetMembership.EXCLUDED),
+            ),
+            n_valid_images=F("n_images") - F("n_redundant_images"),
+            redundant=ExpressionWrapper(
                 Q(n_valid_images__lte=1), output_field=BooleanField()
             ),
             overlapping=Exists(secondary_memberships),
@@ -223,7 +238,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
-    ordering_fields = ["last_updated", "n_images", "n_valid_images"]
+    ordering_fields = ["last_updated", "n_images", "n_unreviewed_images"]
 
     @transaction.atomic
     @action(detail=True, methods=["patch"])
@@ -235,12 +250,18 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         if raw_approval_data.is_valid():
             approval_data = raw_approval_data.validated_data
             # Set memberships to false, then updated selected ones
-            close_match_set.memberships.all().update(accepted=False)
-
+            updated_models = []
             for m in approval_data["accepted_memberships"]:
-                m.accepted = True
+                m.state = models.CloseMatchSetMembership.ACCEPTED
+                updated_models.append(m)
+            for m in approval_data["rejected_memberships"]:
+                m.state = models.CloseMatchSetMembership.REJECTED
+                updated_models.append(m)
+            for m in approval_data["excluded_memberships"]:
+                m.state = models.CloseMatchSetMembership.EXCLUDED
+                updated_models.append(m)
             models.CloseMatchSetMembership.objects.bulk_update(
-                approval_data["accepted_memberships"], ["accepted"]
+                updated_models, ["state"]
             )
 
             # Set representative photograph on set
@@ -252,54 +273,52 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             close_match_set.user_last_modified = request.user
             close_match_set.save()
 
-            # Once saved, mark invalid all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
+            # Mark as "already matched" all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
             accepted_photographs = photograph.models.Photograph.objects.filter(
-                close_match_memberships__in=close_match_set.memberships.filter(
-                    accepted=True
-                ).all()
+                close_match_memberships__in=approval_data["accepted_memberships"]
             ).distinct()
-            n_memberships_deleted = (
+            n_memberships_already_matched = (
                 models.CloseMatchSetMembership.objects.filter(
                     close_match_set__close_match_run=close_match_set.close_match_run,
                     close_match_set__user_last_modified__isnull=True,
                     photograph__in=accepted_photographs,
                 )
                 .all()
-                .update(invalid=True)
+                .update(state=models.CloseMatchSetMembership.OTHER_SET)
             )
 
-            # Mark invalid all memberships in this run with the invalidated photos
-            n_memberships_eliminated = (
+            # Mark as "excluded" all memberships in this run from the "excluded" memberships set
+            excluded_photographs = photograph.models.Photograph.objects.filter(
+                close_match_memberships__in=approval_data["excluded_memberships"]
+            )
+            n_memberships_excluded = (
                 models.CloseMatchSetMembership.objects.filter(
                     close_match_set__close_match_run=close_match_set.close_match_run,
-                    photograph__in=approval_data["eliminated_photographs"],
+                    photograph__in=excluded_photographs,
                 )
                 .all()
-                .update(invalid=True)
+                .update(state=models.CloseMatchSetMembership.EXCLUDED)
             )
 
-            # Mark invalid any sets that no longer have 2 or more photos, or where the seed photo was any of the accepted photos
+            # Mark as "already judged" any sets that no longer have 2 or more photos
             n_sets_too_small = (
                 models.CloseMatchSet.objects.annotate(
-                    n_memberships=Count(
+                    n_unreviewed_memberships=Count(
                         "memberships",
-                        filter=Q(memberships__invalid=False),
+                        filter=Q(
+                            memberships__state=models.CloseMatchSetMembership.NOT_REVIEWED
+                        ),
                         distinct=True,
                     )
                 )
                 .filter(
-                    n_memberships__lt=2, close_match_run=close_match_set.close_match_run
+                    n_unreviewed_memberships__lt=2,
+                    close_match_run=close_match_set.close_match_run,
                 )
                 .update(user_last_modified=request.user, last_updated=timezone.now())
             )
 
-            res = {
-                "invalidations": {
-                    "n_memberships_deleted": n_memberships_deleted,
-                    "n_memberships_eliminated": n_memberships_eliminated,
-                    "n_sets_too_small": n_sets_too_small,
-                }
-            }
+            res = {"invalidations": {"Redundant sets removed": n_sets_too_small}}
 
             return Response(res, status=status.HTTP_202_ACCEPTED)
         else:

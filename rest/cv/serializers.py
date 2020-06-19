@@ -70,15 +70,7 @@ class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
 class CloseMatchSetMembershipPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CloseMatchSetMembership
-        fields = [
-            "id",
-            "close_match_set",
-            "photograph",
-            "core",
-            "distance",
-            "accepted",
-            "invalid",
-        ]
+        fields = ["id", "close_match_set", "photograph", "core", "distance", "state"]
 
 
 class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
@@ -86,15 +78,7 @@ class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.CloseMatchSetMembership
-        fields = [
-            "id",
-            "close_match_set",
-            "photograph",
-            "core",
-            "distance",
-            "accepted",
-            "invalid",
-        ]
+        fields = ["id", "close_match_set", "photograph", "core", "distance", "state"]
 
 
 class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
@@ -107,7 +91,9 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
     invalid = serializers.BooleanField(read_only=True)
     overlapping = serializers.BooleanField(read_only=True)
     n_images = serializers.IntegerField(read_only=True)
-    n_valid_images = serializers.IntegerField(read_only=True)
+    n_unreviewed_images = serializers.IntegerField(read_only=True)
+    n_redundant_images = serializers.IntegerField(read_only=True)
+    redundant = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = models.CloseMatchSet
@@ -120,8 +106,10 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
             "last_updated",
             "invalid",
             "n_images",
-            "n_valid_images",
+            "n_unreviewed_images",
+            "n_redundant_images",
             "overlapping",
+            "redundant",
         ]
 
 
@@ -129,8 +117,11 @@ class CloseMatchSetApprovalSerializer(serializers.Serializer):
     accepted_memberships = serializers.PrimaryKeyRelatedField(
         queryset=models.CloseMatchSetMembership.objects.all(), many=True
     )
-    eliminated_photographs = serializers.PrimaryKeyRelatedField(
-        queryset=photograph.models.Photograph.objects.all(), many=True
+    rejected_memberships = serializers.PrimaryKeyRelatedField(
+        queryset=models.CloseMatchSetMembership.objects.all(), many=True
+    )
+    excluded_memberships = serializers.PrimaryKeyRelatedField(
+        queryset=models.CloseMatchSetMembership.objects.all(), many=True
     )
     representative_photograph = serializers.PrimaryKeyRelatedField(
         queryset=photograph.models.Photograph.objects.all(), many=False, allow_null=True

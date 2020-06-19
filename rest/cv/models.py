@@ -450,7 +450,6 @@ class CloseMatchRun(dateModifiedModel):
                                 for i, p in enumerate(additional_photolist)
                             ]
                             CloseMatchSetMembership.objects.bulk_create(new_cms_members)
-        self.tidy_clusters()
         print(
             self.close_match_sets.annotate(n_images=models.Count("memberships"))
             .order_by("-n_images")
@@ -477,7 +476,9 @@ class CloseMatchRun(dateModifiedModel):
             }
             if len(setnames) == 1:
                 print(setnames)
-                cms.memberships.filter(core=True).update(accepted=True)
+                cms.memberships.filter(core=True).update(
+                    state=CloseMatchSetMembership.ACCEPTED
+                )
                 cms.representative_photograph = (
                     cms.memberships.filter(core=True).first().photograph
                 )
@@ -486,14 +487,16 @@ class CloseMatchRun(dateModifiedModel):
 
                 accepted_photographs = photograph.models.Photograph.objects.filter(
                     close_match_memberships__close_match_set=cms,
-                    close_match_memberships__accepted=True,
+                    close_match_memberships__state=CloseMatchSetMembership.ACCEPTED,
                 ).distinct()
 
                 CloseMatchSetMembership.objects.filter(
                     close_match_set__close_match_run=self,
                     close_match_set__user_last_modified__isnull=True,
                     photograph__in=accepted_photographs,
-                ).exclude(accepted=True).all().update(invalid=True)
+                ).exclude(state=CloseMatchSetMembership.ACCEPTED).all().update(
+                    state=CloseMatchSetMembership.OTHER_SET
+                )
 
 
 class CloseMatchRunConsidered(models.Model):
@@ -533,6 +536,19 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
 
 
 class CloseMatchSetMembership(models.Model):
+    NOT_REVIEWED = "n"
+    ACCEPTED = "a"
+    REJECTED = "r"
+    OTHER_SET = "o"
+    EXCLUDED = "e"
+    MEMBERSHIP_STATE_CHOICES = [
+        (NOT_REVIEWED, "Not yet reviewed"),
+        (ACCEPTED, "Accepted"),
+        (REJECTED, "Rejected"),
+        (OTHER_SET, "Already matched in other set"),
+        (EXCLUDED, "Explicitly excluded from any consideration by an editor"),
+    ]
+
     close_match_set = models.ForeignKey(
         CloseMatchSet, on_delete=models.CASCADE, related_name="memberships"
     )
@@ -551,13 +567,14 @@ class CloseMatchSetMembership(models.Model):
         db_index=True,
         help_text="Is this membership part of the core cluster or added in the second pass?",
     )
-    accepted = models.NullBooleanField(
-        default=None, help_text="Has this membership been validated by an editor?"
-    )
-    invalid = models.BooleanField(
-        default=False,
+    state = models.CharField(
+        max_length=1,
+        blank=False,
+        null=False,
+        default=NOT_REVIEWED,
+        choices=MEMBERSHIP_STATE_CHOICES,
         db_index=True,
-        help_text="Has this member photo already been matched in another set?",
+        help_text="Status of this membership (e.g. accepted, rejected)",
     )
 
     class Meta:

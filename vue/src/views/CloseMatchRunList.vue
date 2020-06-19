@@ -25,19 +25,19 @@
       <b-row flex align-h="between" align-v="center" class="mx-2">
         <b-col cols="3">
           <b-form-checkbox
-            v-model="not_signed_off"
+            v-model="user_signed_off"
             name="check-button"
             switch
             v-b-tooltip.hover
             title="Only show sets that have not yet been reviewed by an editor."
           >Only show unreviewed sets</b-form-checkbox>
           <b-form-checkbox
-            v-model="show_valid"
+            v-model="show_redundant"
             name="check-button"
             switch
             v-b-tooltip.hover
-            title="Only show sets valid sets whose members haven't already been committed to another match set."
-          >See only valid sets</b-form-checkbox>
+            title="Display sets that have been made redundant because all of their photos have either been assigned to other sets, or been deliberately excluded from all matches by an editor."
+          >Display redundant sets</b-form-checkbox>
         </b-col>
         <b-form-group
           id="contain-photo"
@@ -75,7 +75,6 @@
             :close_match_set="cms"
             :collapsed="true"
             :searched_photo="photo_memberships"
-            :show_invalid="!show_valid"
             @set_submitted="set_submitted"
             @photo_search="photo_search"
           />
@@ -102,8 +101,8 @@ export default {
     return {
       loading: null,
       current_page: 1,
-      not_signed_off: false,
-      show_valid: false,
+      user_signed_off: false,
+      show_redundant: false,
       close_match_sets: null,
       close_match_set_count: 0,
       photo_memberships: null
@@ -114,7 +113,7 @@ export default {
       return 10;
     },
     set_count_type() {
-      if (this.not_signed_off) {
+      if (this.user_signed_off) {
         return "unapproved";
       } else {
         return "total";
@@ -129,12 +128,10 @@ export default {
         close_match_run: this.close_match_run_id,
         limit: this.per_page,
         offset: this.rest_page,
-        not_signed_off: this.not_signed_off,
-        memberships: this.photo_memberships
+        user_signed_off: this.user_signed_off,
+        memberships: this.photo_memberships,
+        redundant: this.show_redundant
       };
-      if (this.show_valid) {
-        payload["invalid"] = false;
-      }
       return payload;
     }
   },
@@ -176,7 +173,7 @@ export default {
         query: this.query_payload
       });
     },
-    not_signed_off() {
+    user_signed_off() {
       this.current_page = 1;
     }
   },
@@ -184,8 +181,8 @@ export default {
     if (!!this.$route.query.offset) {
       this.current_page = (this.$route.query.offset + 1) / this.per_page;
     }
-    if (!!this.$route.query.not_signed_off) {
-      this.not_signed_off = this.$route.query.not_signed_off;
+    if (!!this.$route.query.user_signed_off) {
+      this.user_signed_off = this.$route.query.user_signed_off;
     }
     if (!!this.$route.query.memberships) {
       this.photo_memberships = this.$route.query.memberships;

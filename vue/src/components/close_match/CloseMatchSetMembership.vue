@@ -28,11 +28,11 @@
           </b-button>
           <b-badge
             class="mx-1 align-self-center"
-            v-if="close_match_set_membership.invalid"
+            v-if="close_match_set_membership.state=='o'"
             variant="danger"
             v-b-tooltip.hover
-            title="This photo has already been reviewed and added to another match set by an editor and/or has been marked for elimination from all matches."
-          >Invalid</b-badge>
+            title="This photo has already been reviewed and added to another match set by an editor."
+          >Already in other set</b-badge>
         </b-button-toolbar>
         <b-button-toolbar>
           <b-button
@@ -49,9 +49,9 @@
           <b-button-group>
             <b-button
               :variant="accept_variant"
-              :disabled="close_match_set_membership.invalid"
+              :disabled="disable_buttons"
               size="sm"
-              :pressed="close_match_set_membership.accepted==true"
+              :pressed="close_match_set_membership.state=='a'"
               @click="accept"
               v-b-tooltip.hover
               title="Keep this photo in this match set (will remove it from any other unapproved set.)"
@@ -60,9 +60,9 @@
             </b-button>
             <b-button
               :variant="reject_variant"
-              :disabled="close_match_set_membership.invalid"
+              :disabled="disable_buttons"
               size="sm"
-              :pressed="close_match_set_membership.accepted==false"
+              :pressed="close_match_set_membership.state=='r'"
               @click="reject"
               v-b-tooltip.hover
               title="Reject this photo from the match set (it may still show up in later match sets.)"
@@ -70,39 +70,41 @@
               <BIconX />
             </b-button>
             <b-button
-              :variant="eliminate_variant"
-              :disabled="close_match_set_membership.invalid"
+              :variant="exclude_variant"
+              :disabled="disable_buttons"
               size="sm"
-              @click="toggle_eliminate"
-              :pressed="eliminated"
+              @click="exclude"
+              :pressed="close_match_set_membership.state=='e'"
               v-b-tooltip.hover
-              title="Eliminate this photo from this AND ALL OTHER MATCH SETS."
+              title="Exclude this photo from this AND ALL OTHER MATCH SETS."
             >
               <BIconExclamationOctagonFill />
             </b-button>
-            <b-button
-              v-if="is_primary"
-              :disabled="close_match_set_membership.invalid"
-              variant="secondary"
-              size="sm"
-              @click="cancel_primary"
-              v-b-tooltip.hover
-              title="Mark this as the representative photo of the match set."
-            >
-              <BIconStarFill variant="warning" />
-            </b-button>
-            <b-button
-              v-else
-              :disabled="close_match_set_membership.invalid"
-              variant="secondary"
-              size="sm"
-              @click="claim_primary"
-              v-b-tooltip.hover
-              title="Mark this as the representative photo of the match set."
-            >
-              <BIconStar />
-            </b-button>
           </b-button-group>
+          <b-button
+            class="mx-1"
+            v-if="is_primary"
+            :disabled="disable_buttons"
+            variant="secondary"
+            size="sm"
+            @click="cancel_primary"
+            v-b-tooltip.hover
+            title="Mark this as the representative photo of the match set."
+          >
+            <BIconStarFill variant="warning" />
+          </b-button>
+          <b-button
+            class="mx-1"
+            v-else
+            :disabled="disable_buttons"
+            variant="secondary"
+            size="sm"
+            @click="claim_primary"
+            v-b-tooltip.hover
+            title="Mark this as the representative photo of the match set."
+          >
+            <BIconStar />
+          </b-button>
         </b-button-toolbar>
       </b-row>
     </template>
@@ -179,10 +181,6 @@ export default {
       type: Number,
       default: 900
     },
-    eliminated: {
-      type: Boolean,
-      default: false
-    },
     show_sidebar: {
       type: Boolean,
       default: false
@@ -192,11 +190,14 @@ export default {
     return {};
   },
   computed: {
+    disable_buttons() {
+      return this.close_match_set_membership.state == "o";
+    },
     show_membership() {
-      return this.show_invalid | !this.close_match_set_membership.invalid;
+      return this.show_invalid | !this.disable_buttons;
     },
     background_variant() {
-      if (this.close_match_set_membership.invalid) {
+      if (this.disable_buttons) {
         return "secondary";
       } else {
         return null;
@@ -232,21 +233,21 @@ export default {
       return false;
     },
     accept_variant() {
-      if (this.close_match_set_membership.accepted == true) {
+      if (this.close_match_set_membership.state == "a") {
         return "success";
       } else {
         return "secondary";
       }
     },
-    eliminate_variant() {
-      if (this.eliminated) {
+    reject_variant() {
+      if (this.close_match_set_membership.state == "r") {
         return "warning";
       } else {
         return "secondary";
       }
     },
-    reject_variant() {
-      if (this.close_match_set_membership.accepted == false) {
+    exclude_variant() {
+      if (this.close_match_set_membership.state == "e") {
         return "danger";
       } else {
         return "secondary";
@@ -271,46 +272,20 @@ export default {
     },
     claim_primary() {
       // Emits a signal to the match set to take status as the representative photo
+      this.accept();
       this.$emit("claim_primary", this.close_match_set_membership.photograph);
     },
     cancel_primary() {
       this.$emit("cancel_primary", this.close_match_set_membership.photograph);
     },
-    toggle_eliminate() {
-      if (this.eliminated) {
-        this.$emit(
-          "uneliminate",
-          this.close_match_set_membership.photograph.id
-        );
-      } else {
-        this.$emit("eliminate", this.close_match_set_membership.photograph.id);
-      }
+    exclude() {
+      this.$emit("exclude", this.close_match_set_membership.id);
     },
     accept() {
-      if (this.eliminated) {
-        this.toggle_eliminate();
-      }
       this.$emit("accept", this.close_match_set_membership.id);
     },
     reject() {
-      this.cancel_primary();
       this.$emit("reject", this.close_match_set_membership.id);
-    }
-  },
-  watch: {
-    primary() {
-      if (this.primary == this.close_match_set_membership.photograph) {
-        this.accept();
-        if (this.eliminated) {
-          this.toggle_eliminate();
-        }
-      }
-    },
-    eliminated() {
-      if (this.eliminated) {
-        this.reject();
-        this.cancel_primary();
-      }
     }
   }
 };
