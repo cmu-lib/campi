@@ -32,7 +32,7 @@
           <BIconCaretRightFill v-if="collapsed_state" />
           <BIconCaretDownFill v-else />
         </span>
-        <span>Match set {{ close_match_set.id }} ({{ close_match_set.memberships.length }} images)</span>
+        <span>Match set {{ close_match_set.id }} ({{ close_match_set.n_unreviewed_images }} unreviewed images / {{ close_match_set.n_images }} total)</span>
         <span v-if="close_match_set.overlapping" class="info-badges">
           <b-badge
             size="lg"
@@ -100,14 +100,13 @@
     </template>
     <b-row flex v-if="!!close_match_set_state & !collapsed_state">
       <CloseMatchSetMembership
-        v-for="cmsm in close_match_set_state.memberships"
+        v-for="cmsm in filtered_memberships"
         :key="cmsm.id"
         :close_match_set_membership="cmsm"
         :close_match_run="close_match_set_state.close_match_run"
         :close_match_set="close_match_set_state"
         :primary="close_match_set_state.representative_photograph"
         :searched_photo="searched_photo"
-        :show_invalid="show_invalid"
         :eliminated="eliminated_photographs.includes(cmsm.photograph.id)"
         :show_sidebar="show_sidebar"
         class="m-2"
@@ -185,6 +184,15 @@ export default {
     };
   },
   computed: {
+    filtered_memberships() {
+      if (this.show_invalid) {
+        return this.close_match_set_state.memberships;
+      } else {
+        return this.close_match_set_state.memberships.filter(
+          x => !["o", "e"].includes(x.state)
+        );
+      }
+    },
     sidebar_title() {
       return `${this.sidebar_payload.class}: ${this.sidebar_payload.object.label}`;
     },
@@ -275,7 +283,7 @@ export default {
     },
     accept_all() {
       this.close_match_set_state.memberships.map(x => {
-        if (!x.invalid) {
+        if (!["o", "e"].includes(x.state)) {
           x.accepted = true;
         }
       });
@@ -288,7 +296,7 @@ export default {
       this.close_match_set_state.representative_photograph = null;
       this.eliminated_photographs = [];
       this.close_match_set_state.memberships.map(x => {
-        if (!x.invalid) {
+        if (!["o", "e"].includes(x.state)) {
           x.accepted = false;
         }
       });
@@ -296,7 +304,9 @@ export default {
     eliminate_all() {
       this.eliminated_photographs = this.close_match_set_state.memberships.map(
         x => {
-          return x.photograph.id;
+          if (!["o"].includes(x.state)) {
+            return x.photograph.id;
+          }
         }
       );
       this.close_match_set_state.representative_photograph = null;
@@ -340,8 +350,7 @@ export default {
         photograph: photograph.id,
         core: true,
         distance: 0,
-        accepted: true,
-        invalid: false
+        state: "a"
       }).then(
         results => {
           this.toast_variant = "success";
