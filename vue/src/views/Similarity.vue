@@ -5,38 +5,27 @@
       <PytorchModelMenu v-model="pytorch_model_id" />
       <AnnoyIdxMenu v-model="annoy_idx_id" :pytorch_model_id="pytorch_model_id" />
     </b-row>
-    <b-row>
-      <b-col cols="3">
-        <b-card header="Jobs" no-body>
-          <b-list-group flush v-if="!!jobs">
-            <b-list-group-item class="p-2" v-for="job in jobs" :key="job.id">{{ job.label }}</b-list-group-item>
+    <b-card no-body v-if="!!seed_image" header="Similarity results">
+      <div class="m-3">
+        <h4>Seed image</h4>
+        <PhotographListItem :photograph="seed_image" />
+      </div>
+      <b-overlay :show="!loaded">
+        <div v-if="!!nearest_neighbors">
+          <hr />
+          <h4 class="ml-3">50 Nearest Neighbors</h4>
+          <b-list-group>
+            <b-list-group-item
+              v-for="img in nearest_neighbors"
+              :key="img.id"
+              :variant="pic_variant(img)"
+            >
+              <PhotographListItem :photograph="img" />
+            </b-list-group-item>
           </b-list-group>
-        </b-card>
-      </b-col>
-      <b-col cols="9">
-        <b-card no-body v-if="!!seed_image" header="Similarity results">
-          <div class="m-3">
-            <h4>Seed image</h4>
-            <PhotographListItem :photograph="seed_image" />
-          </div>
-          <div v-if="!!nearest_neighbors">
-            <hr />
-            <h4 class="ml-3">50 Nearest Neighbors</h4>
-            <b-list-group>
-              <b-list-group-item
-                v-for="img in nearest_neighbors"
-                :key="img.id"
-                :variant="pic_variant(img)"
-              >
-                <b-overlay v-if="!!nearest_neighbors" :show="!loaded">
-                  <PhotographListItem :photograph="img" />
-                </b-overlay>
-              </b-list-group-item>
-            </b-list-group>
-          </div>
-        </b-card>
-      </b-col>
-    </b-row>
+        </div>
+      </b-overlay>
+    </b-card>
   </b-container>
 </template>
 
@@ -78,20 +67,6 @@ export default {
       }
       ids["n_neighbors"] = this.n_neighbors;
       return ids;
-    },
-    jobs() {
-      if (!!this.nearest_neighbors) {
-        var all_jobs = this.nearest_neighbors
-          .map(x => {
-            return x.job;
-          })
-          .filter(y => {
-            return !!y;
-          });
-        return _.uniqBy(all_jobs, "id");
-      } else {
-        return null;
-      }
     }
   },
   asyncComputed: {
