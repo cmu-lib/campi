@@ -31,7 +31,6 @@
 
 <script>
 import { HTTP } from "@/main";
-import _ from "lodash";
 import PytorchModelMenu from "@/components/PytorchModelMenu.vue";
 import AnnoyIdxMenu from "@/components/AnnoyIdxMenu.vue";
 import PhotographListItem from "@/components/PhotographListItem.vue";
