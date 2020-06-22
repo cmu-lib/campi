@@ -194,10 +194,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .set-review-window {
   position: relative;
   height: 70vh;
   overflow-y: auto;
+}
+
+.card .border-danger {
+  border-width: 4px;
 }
 </style>
