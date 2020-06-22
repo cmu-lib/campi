@@ -3,7 +3,11 @@
     <template v-slot:aside>
       <b-img-lazy :src="photograph.image.thumbnail" width="200" />
     </template>
-    <b-link :to="{name: 'Similarity', params: {id: photograph.id}, scrollBehavior: { x: 0, y: 0 }}">
+    <b-link
+      :to="{name: 'Similarity', params: {id: photograph.id}, scrollBehavior: { x: 0, y: 0 }}"
+      title="Click to set this image as the 'seed image'"
+      v-b-tooltip:hover
+    >
       <h6>{{ photograph.filename }}</h6>
     </b-link>
     <b-progress
