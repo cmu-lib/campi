@@ -1,7 +1,7 @@
 <template>
   <b-media>
     <template v-slot:aside>
-      <b-img :src="photograph.image.thumbnail" width="200" />
+      <b-img-lazy :src="photograph.image.thumbnail" width="200" />
     </template>
     <b-link :to="{name: 'Similarity', params: {id: photograph.id}, scrollBehavior: { x: 0, y: 0 }}">
       <h6>{{ photograph.filename }}</h6>
