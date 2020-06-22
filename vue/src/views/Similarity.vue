@@ -4,19 +4,6 @@
     <b-row flex align-h="around">
       <PytorchModelMenu v-model="pytorch_model_id" />
       <AnnoyIdxMenu v-model="annoy_idx_id" :pytorch_model_id="pytorch_model_id" />
-      <b-form-group
-        id="n_neighbor_help"
-        :label="'Number of neighbors to find: ' + this.n_neighbors"
-      >
-        <b-form-input
-          id="n_neighbor_input"
-          v-model="n_neighbors"
-          type="range"
-          min="9"
-          max="40"
-          debounce="1000"
-        />
-      </b-form-group>
     </b-row>
     <b-row>
       <b-col cols="3">
@@ -34,7 +21,7 @@
           </div>
           <div v-if="!!nearest_neighbors">
             <hr />
-            <h4 class="ml-3">Nearest Neighbors</h4>
+            <h4 class="ml-3">50 Nearest Neighbors</h4>
             <b-list-group>
               <b-list-group-item
                 v-for="img in nearest_neighbors"
@@ -76,7 +63,7 @@ export default {
     return {
       pytorch_model_id: null,
       annoy_idx_id: null,
-      n_neighbors: 20,
+      n_neighbors: 50,
       loaded: false
     };
   },
