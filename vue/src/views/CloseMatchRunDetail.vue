@@ -45,11 +45,12 @@ export default {
   },
   methods: {
     photo_search(id) {
-      this.$router.push({
+      const routeData = this.$router.resolve({
         name: "CloseMatchRunList",
         params: { id: this.close_match_run_id },
         query: { memberships: id }
       });
+      window.open(routeData.href, '_blank');
     },
     get_close_match_set() {
       return HTTP.get(`/close_match/set/${this.live_set_id}/`).then(
