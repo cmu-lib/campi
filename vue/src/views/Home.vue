@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <h1>CAMPI</h1>
+    <h1 class="my-3">CAMPi</h1>
     <h3>Computer-Aided Metadata (g)eneration for Photoarchives Initiative</h3>
     <p>A summer 2020 project by Carnegie Mellon Unviersity Archives and CMU Library Lab</p>
     <p>Project team:</p>
