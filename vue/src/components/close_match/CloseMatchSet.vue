@@ -353,6 +353,9 @@ export default {
         });
         if (!!this.close_match_set_state.representative_photograph) {
           payload.representative_photograph = this.close_match_set_state.representative_photograph.id;
+        } else if (payload.accepted_memberships.length > 1) {
+          payload.representative_photograph =
+            payload.accepted_memberships[0].photograph.id;
         }
       }
       return payload;
@@ -360,9 +363,18 @@ export default {
     register_set() {
       this.uploading = true;
       this.reject_remaining();
+      const payload = this.get_close_match_approval();
+      if (payload.accepted_memberships.length < 2) {
+        this.uploading = false;
+        this.toast_response =
+          "You must either accept 2 or more photos, or reject/exclude them all.";
+        this.toast_variant = "warning";
+        this.$bvToast.show(`toast-${this.close_match_set.id}`);
+        return null;
+      }
       return HTTP.patch(
         "/close_match/set/" + this.close_match_set.id + "/approve/",
-        this.get_close_match_approval()
+        payload
       ).then(
         results => {
           this.uploading = false;
