@@ -42,7 +42,7 @@
             size="sm"
             @click="photo_search"
             v-b-tooltip.hover
-            title="This photo may appear in other sets based on the way it was added to this set during automatic clustering. Click to search fo rany other sets it may be in."
+            title="This photo may appear in other sets based on the way it was added to this set during automatic clustering. Click to search for any other sets it MAY be in."
           >
             <BIconSearch />
           </b-button>
