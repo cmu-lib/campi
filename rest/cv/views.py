@@ -145,6 +145,7 @@ class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 "photograph__id",
                 "photograph__original_server_path",
                 "close_match_set__representative_photograph__id",
+                "close_match_set__has_duplicates",
                 "close_match_set__user_last_modified__username",
                 "close_match_set__last_updated",
             )
@@ -157,6 +158,7 @@ class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             "photograph_id",
             "set_id",
             "is_primary",
+            "has_duplicates",
             "approving_user",
             "date_approved",
         ]
@@ -169,6 +171,7 @@ class CloseMatchRunViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                     match["close_match_set__id"],
                     match["close_match_set__representative_photograph__id"]
                     == match["photograph__id"],
+                    match["close_match_set__has_duplicates"],
                     match["close_match_set__user_last_modified__username"],
                     match["close_match_set__last_updated"],
                 ]
