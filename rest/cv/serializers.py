@@ -112,6 +112,7 @@ class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
             "memberships",
             "user_last_modified",
             "last_updated",
+            "has_duplicates",
             "invalid",
             "n_images",
             "n_unreviewed_images",
@@ -132,5 +133,6 @@ class CloseMatchSetApprovalSerializer(serializers.Serializer):
         queryset=models.CloseMatchSetMembership.objects.all(), many=True
     )
     representative_photograph = serializers.PrimaryKeyRelatedField(
-        queryset=photograph.models.Photograph.objects.all(), many=False, allow_null=True
+        queryset=photograph.models.Photograph.objects.all(), many=False
     )
+    has_duplicates = serializers.BooleanField()

@@ -273,6 +273,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 
             # Tag this set with the user who has sent the approval notice
             close_match_set.user_last_modified = request.user
+            close_match_set.has_duplicates = approval_data["has_duplicates"]
             close_match_set.save()
 
             # Mark as "already matched" all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET

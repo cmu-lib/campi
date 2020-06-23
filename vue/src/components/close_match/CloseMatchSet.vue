@@ -113,6 +113,13 @@
               <b-spinner v-else small class="mr-1" />Save
             </b-button>
           </b-button-toolbar>
+          <b-row>
+            <b-form-checkbox
+              class="my-2"
+              v-model="close_match_set_state.has_duplicates"
+              name="has-duplicates-checkbox"
+            >Does this set contain duplicates / copy-negatives?</b-form-checkbox>
+          </b-row>
         </b-col>
       </b-row>
     </template>
@@ -331,7 +338,8 @@ export default {
         accepted_memberships: [],
         rejected_memberships: [],
         excluded_memberships: [],
-        representative_photograph: null
+        representative_photograph: null,
+        has_duplicates: this.close_match_set_state.has_duplicates
       };
       if (!!this.close_match_set_state) {
         this.close_match_set_state.memberships.map(m => {
@@ -405,7 +413,6 @@ export default {
       );
     },
     update_state() {
-      console.log(this.membership_ordering);
       this.close_match_set_state = this.close_match_set;
       var excl = [];
       if (!this.show_excluded) excl.push("e");

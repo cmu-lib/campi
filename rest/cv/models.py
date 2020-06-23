@@ -524,6 +524,10 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
         on_delete=models.CASCADE,
         related_name="representative_of_sets",
     )
+    has_duplicates = models.BooleanField(
+        default=False,
+        help_text="Does this set contain exact duplicates / copy-negatives?",
+    )
 
     class Meta:
         unique_together = ("close_match_run", "representative_photograph")
