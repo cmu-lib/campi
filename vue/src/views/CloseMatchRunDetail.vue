@@ -16,6 +16,7 @@
 <script>
 import { HTTP } from "@/main";
 import CloseMatchSet from "@/components/close_match/CloseMatchSet.vue";
+
 export default {
   name: "CloseMatchRunDetail",
   components: {
