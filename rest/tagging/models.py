@@ -6,7 +6,7 @@ import cv
 import campi
 
 
-class Tag(campi.models.labeledModel):
+class Tag(campi.models.uniqueLabledModel):
     def merge(self, child_tag):
         affected_tasks = (
             tagging.models.TaggingTask.objects.filter(applied_term=child_tag)
@@ -22,6 +22,9 @@ class Tag(campi.models.labeledModel):
         )
 
         return res
+
+    class Meta:
+        ordering = ["label"]
 
 
 class TaggingTask(campi.models.descriptionModel, campi.models.dateModifiedModel):

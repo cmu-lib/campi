@@ -5,6 +5,9 @@
       <b-navbar-nav v-if="logged_in">
         <b-nav-item :to="{name: 'Browse'}">Browse</b-nav-item>
         <b-nav-item :to="{name: 'CloseMatch'}">Close Matches</b-nav-item>
+        <b-nav-item-dropdown text="Tagging">
+          <b-dropdown-item :to="{name: 'Tags'}">Tag list</b-dropdown-item>
+        </b-nav-item-dropdown>
       </b-navbar-nav>
       <b-navbar-nav v-if="user" class="ml-auto">
         <b-nav-item-dropdown :text="user.username" right>

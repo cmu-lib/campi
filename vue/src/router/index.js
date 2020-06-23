@@ -8,6 +8,7 @@ import CloseMatch from "@/views/CloseMatch.vue"
 import CloseMatchRun from "@/views/CloseMatchRun.vue"
 import CloseMatchRunDetail from "@/views/CloseMatchRunDetail.vue"
 import CloseMatchRunList from "@/views/CloseMatchRunList.vue"
+import Tags from "@/views/Tags.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -68,6 +69,11 @@ const routes = [
         }
       }
     ]
+  },
+  {
+    name: "Tags",
+    path: "/tags",
+    component: Tags
   }
 ]
 
