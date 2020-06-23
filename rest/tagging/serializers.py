@@ -1,26 +1,30 @@
 from rest_framework import serializers
-import collection.models
-from rest_framework_recursive.fields import RecursiveField
+from tagging import models
+import campi
+import cv
+import photograph
 
 
-class CollectionListSerializer(serializers.HyperlinkedModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     class Meta:
-        model = collection.models.Collection
-        fields = ["id", "url", "label"]
+        model = models.Tag
+        fields = ["id", "label"]
 
 
-class CollectionParentSerializer(serializers.HyperlinkedModelSerializer):
-    parent_directory = RecursiveField()
-
-    class Meta:
-        model = collection.models.Collection
-        fields = ["id", "url", "label", "parent_directory"]
-
-
-class CollectionDetailSerializer(serializers.HyperlinkedModelSerializer):
-    parent_directory = CollectionParentSerializer()
-    child_directories = CollectionListSerializer(many=True)
+class TaggingTaskSerializer(serializers.ModelSerializer):
+    tag = TagSerializer()
+    pytorch_model = cv.serializers.PytorchModelListSerializer()
+    assigned_user = campi.serializers.UserSerializer()
 
     class Meta:
-        model = collection_models.Collection
-        fields = ["id", "url", "label", "parent_directory", "child_directories"]
+        model = models.TaggingTask
+        fields = ["id", "tag", "pytorch_model", "assigned_user"]
+
+
+class TaggingDecisionSerializer(serializers.ModelSerializer):
+    task = TaggingTaskSerializer()
+    photograph = photograph.serializers.PhotographListSerializer()
+
+    class Meta:
+        model = models.TaggingDecision
+        fields = ["id", "task", "photograph", "is_applicable"]

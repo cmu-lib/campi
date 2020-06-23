@@ -5,6 +5,7 @@ import photograph.views
 import collection.views
 import campi.views
 import cv.views
+import tagging.views
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -18,6 +19,9 @@ router.register(r"annoy_idx", cv.views.AnnoyIdxViewset)
 router.register(r"close_match/run", cv.views.CloseMatchRunViewset)
 router.register(r"close_match/set", cv.views.CloseMatchSetViewset)
 router.register(r"close_match/set_membership", cv.views.CloseMatchSetMembershipViewset)
+router.register(r"tagging/tag", tagging.views.TagViewset)
+router.register(r"tagging/task", tagging.views.TaggingTaskViewset)
+router.register(r"tagging/decision", tagging.views.TaggingDecisionViewset)
 
 schema_view = get_schema_view(
     openapi.Info(

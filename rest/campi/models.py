@@ -59,13 +59,19 @@ class sequentialModel(models.Model):
         ordering = ["sequence"]
 
 
-class dateModifiedModel(models.Model):
+class dateCreatedModel(models.Model):
     created_on = models.DateTimeField(
         auto_now_add=True,
         editable=False,
         db_index=True,
         help_text="Date created (automatically recorded)",
     )
+
+    class Meta:
+        abstract = True
+
+
+class dateModifiedModel(dateCreatedModel):
     last_updated = models.DateTimeField(
         auto_now=True,
         editable=False,

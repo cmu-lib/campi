@@ -19,7 +19,6 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     "photograph.apps.photographConfig",
     "collection.apps.collectionConfig",
-    "vocabulary.apps.vocabularyConfig",
     "cv.apps.cvConfig",
     "gcv.apps.gcvConfig",
     "tagging.apps.taggingConfig",
