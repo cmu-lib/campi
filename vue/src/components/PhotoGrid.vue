@@ -120,6 +120,6 @@ export default {
 
 <style scoped>
 .highlighted {
-  outline: 3px orange solid;
+  outline: 3px red solid;
 }
 </style>
