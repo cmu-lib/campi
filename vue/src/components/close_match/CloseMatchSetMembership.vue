@@ -209,7 +209,7 @@ export default {
       if (this.disable_buttons) {
         return "secondary";
       } else if (this.close_match_set_membership.core) {
-        return "success";
+        return "info";
       }
       return null;
     },
@@ -301,11 +301,25 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .info-badges {
   font-size: x-large;
 }
 .magnify {
   cursor: zoom-in;
+}
+
+.card {
+  .border-danger {
+    border-width: 4px !important;
+  }
+
+  .bg-info {
+    background-color: #b2ddfa !important;
+  }
+
+  .bg-secondary {
+    background-color: #cccccc !important;
+  }
 }
 </style>
