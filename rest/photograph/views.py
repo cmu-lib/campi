@@ -1,6 +1,4 @@
-from django import forms
-from django.shortcuts import get_object_or_404
-from django.db.models import Count
+from django.db.models import Count, Prefetch, OuterRef
 from django.db.models.functions import Extract
 from django.contrib.postgres.aggregates import ArrayAgg
 from rest_framework import viewsets
@@ -10,6 +8,7 @@ from photograph import serializers, models
 import collection
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
+import tagging.models
 
 
 class PhotographFilter(filters.FilterSet):
@@ -26,24 +25,20 @@ class PhotographFilter(filters.FilterSet):
     job_tag = filters.ModelChoiceFilter(
         queryset=collection.models.JobTag.objects.all(), field_name="job__tags"
     )
-
-    class Meta:
-        model = models.Photograph
-        fields = [
-            "directory",
-            "job",
-            "all_directories",
-            "date_taken_early",
-            "date_taken_late",
-            "digitized_date",
-            "job_tag",
-        ]
+    tags = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(), field_name="photograph_tags__tag"
+    )
 
 
 class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
+    ordered_tags = tagging.models.PhotographTag.objects.select_related(
+        "tag", "user_last_modified"
+    ).order_by("-last_updated")
     queryset = (
         models.Photograph.objects.select_related("directory", "job")
-        .prefetch_related("job__tags")
+        .prefetch_related(
+            "job__tags", Prefetch("photograph_tags", queryset=ordered_tags)
+        )
         .all()
     )
     ordering_fields = ["date_taken_early", "date_taken_late", "digitized_date"]

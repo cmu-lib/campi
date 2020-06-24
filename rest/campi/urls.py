@@ -22,6 +22,7 @@ router.register(r"close_match/set_membership", cv.views.CloseMatchSetMembershipV
 router.register(r"tagging/tag", tagging.views.TagViewset)
 router.register(r"tagging/task", tagging.views.TaggingTaskViewset)
 router.register(r"tagging/decision", tagging.views.TaggingDecisionViewset)
+router.register(r"tagging/photograph_tag", tagging.views.PhotographTagViewset)
 
 schema_view = get_schema_view(
     openapi.Info(

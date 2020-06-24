@@ -1,14 +1,16 @@
 from rest_framework import serializers
 from tagging import models
-import campi
-import cv
-import photograph
+import campi.serializers
+import cv.serializers
+import photograph.serializers
 
 
 class TagSerializer(serializers.ModelSerializer):
+    n_images = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = models.Tag
-        fields = ["id", "label"]
+        fields = ["id", "label", "n_images"]
 
 
 class TaggingTaskSerializer(serializers.ModelSerializer):
@@ -28,3 +30,9 @@ class TaggingDecisionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.TaggingDecision
         fields = ["id", "task", "photograph", "is_applicable"]
+
+
+class PhotographTagPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PhotographTag
+        fields = ["tag", "photograph"]

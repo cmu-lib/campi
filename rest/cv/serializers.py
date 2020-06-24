@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from cv import models
-import photograph.models
+import photograph.serializers
 from campi.serializers import UserSerializer
 from rest_framework.reverse import reverse
 
@@ -73,7 +73,7 @@ class CloseMatchSetMembershipPostSerializer(serializers.ModelSerializer):
         fields = ["id", "close_match_set", "photograph", "core", "state"]
 
 
-class CloseMatchSetMembershipSerializer(serializers.HyperlinkedModelSerializer):
+class CloseMatchSetMembershipSerializer(serializers.ModelSerializer):
     photograph = photograph.serializers.PhotographListSerializer(many=False)
 
     class Meta:
