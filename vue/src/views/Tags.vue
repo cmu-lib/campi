@@ -29,7 +29,13 @@
         >
           <span>{{ tag.label }}</span>
           <span>
-            <BIconXCircleFill variant="secondary" @click="delete_tag(tag)" />
+            <BIconXCircleFill variant="secondary" @click="$bvModal.show(`delete-tag-${tag.id}`)" />
+            <b-modal
+              :id="`delete-tag-${tag.id}`"
+              @ok="delete_tag(tag)"
+              ok-title="Delete"
+              ok-variant="danger"
+            >Delete "{{ tag.label}}"? It will be removed from every photo it is attached to and can't be undone.</b-modal>
           </span>
         </b-list-group-item>
       </b-list-group>
