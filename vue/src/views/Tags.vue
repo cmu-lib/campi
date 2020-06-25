@@ -29,6 +29,7 @@
         >
           <span>{{ tag.label }}</span>
           <span>
+            <b-badge class="mx-3">{{ tag.n_images }} photos</b-badge>
             <BIconXCircleFill variant="secondary" @click="$bvModal.show(`delete-tag-${tag.id}`)" />
             <b-modal
               :id="`delete-tag-${tag.id}`"
