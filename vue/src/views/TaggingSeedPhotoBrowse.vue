@@ -17,7 +17,10 @@ export default {
   },
   methods: {
     photo_click(photograph) {
-      console.log(photograph.id);
+      this.$router.push({
+        name: "TaggingExecution",
+        params: { task_id: this.task_id, seed_photo_id: photograph.id }
+      });
     }
   }
 };
