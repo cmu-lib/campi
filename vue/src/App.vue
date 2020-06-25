@@ -7,6 +7,7 @@
         <b-nav-item :to="{name: 'CloseMatch'}">Close Matches</b-nav-item>
         <b-nav-item-dropdown text="Tagging">
           <b-dropdown-item :to="{name: 'Tags'}">Tag list</b-dropdown-item>
+          <b-dropdown-item :to="{name: 'Tagging'}">Start tagging</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
       <b-navbar-nav v-if="user" class="ml-auto">
@@ -47,6 +48,8 @@ export default {
     user() {
       return HTTP.get("/current_user/").then(
         response => {
+          // Store the user to the root so other components can access it if needed (this is naughty, but it's the only global state we need in the app so far, so I'm doing it anyway.)
+          this.$root.user = response.data;
           return response.data;
         },
         error => {

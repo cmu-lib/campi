@@ -5,7 +5,7 @@ import tagging.models
 import campi.serializers
 
 
-class TagSerializer(serializers.ModelSerializer):
+class FlatTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = tagging.models.Tag
         fields = ["id", "label"]
@@ -13,7 +13,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class PhotographTagSerializer(serializers.ModelSerializer):
     user_last_modified = campi.serializers.UserSerializer()
-    tag = TagSerializer()
+    tag = FlatTagSerializer()
 
     class Meta:
         model = tagging.models.PhotographTag

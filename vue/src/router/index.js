@@ -9,6 +9,7 @@ import CloseMatchRun from "@/views/CloseMatchRun.vue"
 import CloseMatchRunDetail from "@/views/CloseMatchRunDetail.vue"
 import CloseMatchRunList from "@/views/CloseMatchRunList.vue"
 import Tags from "@/views/Tags.vue"
+import Tagging from "@/views/Tagging.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -74,38 +75,38 @@ const routes = [
     name: "Tags",
     path: "/tags",
     component: Tags,
+  },
+  {
+    name: "Tagging",
+    path: "/tagging",
+    component: Tagging,
+    // children: [
+    //   {
+    //     name: "TaggingTask",
+    //     path: ":task_id",
+    //     component: TaggingTask,
+    //     props: (route) => { tagging_task_id: Number(route.params.task_id) },
+    //     children: [
+    //       {
+    //         name: "TaggingSeedPhotoBrowse",
+    //         path: "browse",
+    //         component: Browse,
+    //         props: (route) => { tagging_task_id: Number(route.params.task_id) },
+    //       },
+    //       {
+    //         name: "TaggingExecution",
+    //         path: ":seed_photo_id",
+    //         props: (route) => {
+    //           return {
+    //             tagging_task_id: Number(route.params.task_id),
+    //             seed_photo_id: Number(route.params.seed_photo_id)
+    //           }
+    //         }
+    //       }
+    //     ]
+    //   }
+    // ]
   }
-  // {
-  //   name: "TaggingTaskSelect",
-  //   path: "/tagging",
-  //   component: TagSelect,
-  //   children: [
-  //     {
-  //       name: "TaggingTask",
-  //       path: ":task_id",
-  //       component: TaggingTask,
-  //       props: (route) => { tagging_task_id: Number(route.params.task_id) },
-  //       children: [
-  //         {
-  //           name: "TaggingSeedPhotoBrowse",
-  //           path: "browse",
-  //           component: Browse,
-  //           props: (route) => { tagging_task_id: Number(route.params.task_id) },
-  //         },
-  //         {
-  //           name: "TaggingExecution",
-  //           path: ":seed_photo_id",
-  //           props: (route) => {
-  //             return {
-  //               tagging_task_id: Number(route.params.task_id),
-  //               seed_photo_id: Number(route.params.seed_photo_id)
-  //             }
-  //           }
-  //         }
-  //       ]
-  //     }
-  //   ]
-  // }
 ]
 
 const router = new VueRouter({

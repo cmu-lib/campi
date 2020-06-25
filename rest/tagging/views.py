@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Prefetch
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
@@ -15,9 +15,14 @@ class TagFilter(filters.FilterSet):
 
 
 class TagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.Tag.objects.annotate(
-        n_images=Count("photograph_tags", distinct=True)
-    ).all()
+    tagging_tasks = models.TaggingTask.objects.prefetch_related(
+        "assigned_user", "pytorch_model", "tag"
+    )
+    queryset = (
+        models.Tag.objects.annotate(n_images=Count("photograph_tags", distinct=True))
+        .prefetch_related(Prefetch("tasks", queryset=tagging_tasks))
+        .all()
+    )
     serializer_class = serializers.TagSerializer
     filterset_class = TagFilter
     ordering = ["label", "n_images"]
