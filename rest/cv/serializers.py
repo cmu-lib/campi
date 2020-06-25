@@ -5,7 +5,7 @@ from campi.serializers import UserSerializer
 from rest_framework.reverse import reverse
 
 
-class PytorchModelListSerializer(serializers.HyperlinkedModelSerializer):
+class PytorchModelListSerializer(serializers.ModelSerializer):
     feature_matrix = serializers.SerializerMethodField()
 
     def get_feature_matrix(self, obj):
@@ -18,13 +18,13 @@ class PytorchModelListSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["id", "url", "label", "n_dimensions", "feature_matrix"]
 
 
-class AnnoyIdxFlatSerializer(serializers.HyperlinkedModelSerializer):
+class AnnoyIdxFlatSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AnnoyIdx
         fields = ["id", "url", "n_trees", "index_built"]
 
 
-class AnnoyIdxListSerializer(serializers.HyperlinkedModelSerializer):
+class AnnoyIdxListSerializer(serializers.ModelSerializer):
     n_images = serializers.IntegerField(read_only=True)
     pytorch_model = PytorchModelListSerializer()
 
@@ -40,7 +40,7 @@ class AnnoyIdxGetNNSerializer(serializers.Serializer):
     n_neighbors = serializers.IntegerField(required=True)
 
 
-class CloseMatchRunSerializer(serializers.HyperlinkedModelSerializer):
+class CloseMatchRunSerializer(serializers.ModelSerializer):
     pytorch_model = PytorchModelListSerializer(many=False)
     n_sets = serializers.IntegerField(read_only=True)
     n_complete = serializers.IntegerField(read_only=True)
@@ -89,7 +89,7 @@ class CloseMatchSetMembershipSerializer(serializers.ModelSerializer):
         ]
 
 
-class CloseMatchSetSerializer(serializers.HyperlinkedModelSerializer):
+class CloseMatchSetSerializer(serializers.ModelSerializer):
     close_match_run = CloseMatchRunSerializer(many=False)
     representative_photograph = photograph.serializers.PhotographListSerializer(
         many=False

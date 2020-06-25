@@ -35,4 +35,4 @@ class TaggingDecisionSerializer(serializers.ModelSerializer):
 class PhotographTagPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PhotographTag
-        fields = ["tag", "photograph"]
+        fields = ["id", "url", "tag", "photograph"]

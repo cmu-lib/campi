@@ -4,7 +4,7 @@ from photograph import models as photograph_models
 from rest_framework_recursive.fields import RecursiveField
 
 
-class DirectoryParentSerializer(serializers.HyperlinkedModelSerializer):
+class DirectoryParentSerializer(serializers.ModelSerializer):
     parent_directory = RecursiveField()
 
     class Meta:
@@ -12,7 +12,7 @@ class DirectoryParentSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["id", "url", "label", "parent_directory"]
 
 
-class DirectoryListSerializer(serializers.HyperlinkedModelSerializer):
+class DirectoryListSerializer(serializers.ModelSerializer):
     search_photographs = serializers.URLField(read_only=True)
     n_images = serializers.IntegerField(read_only=True)
     parent_directory = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -29,7 +29,7 @@ class DirectoryListSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class DirectoryDetailSerializer(serializers.HyperlinkedModelSerializer):
+class DirectoryDetailSerializer(serializers.ModelSerializer):
     parent_directory = DirectoryParentSerializer()
     child_directories = DirectoryListSerializer(many=True)
     search_photographs = serializers.URLField(read_only=True)
@@ -47,7 +47,7 @@ class DirectoryDetailSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class JobListSerializer(serializers.HyperlinkedModelSerializer):
+class JobListSerializer(serializers.ModelSerializer):
     n_images = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -64,7 +64,7 @@ class JobListSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class JobDetailSerializer(serializers.HyperlinkedModelSerializer):
+class JobDetailSerializer(serializers.ModelSerializer):
     n_images = serializers.IntegerField(read_only=True)
     tags = serializers.SlugRelatedField(read_only=True, slug_field="label", many=True)
 
@@ -83,7 +83,7 @@ class JobDetailSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class JobTagSerializer(serializers.HyperlinkedModelSerializer):
+class JobTagSerializer(serializers.ModelSerializer):
     n_jobs = serializers.IntegerField(read_only=True)
     n_images = serializers.IntegerField(read_only=True)
 

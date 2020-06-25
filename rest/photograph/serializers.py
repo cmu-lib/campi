@@ -20,7 +20,7 @@ class PhotographTagSerializer(serializers.ModelSerializer):
         fields = ["tag", "user_last_modified", "last_updated"]
 
 
-class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
+class PhotographDetailSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
     job = collection.serializers.JobDetailSerializer()
     tags = PhotographTagSerializer(many=True)
@@ -43,7 +43,7 @@ class PhotographDetailSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class PhotographListSerializer(serializers.HyperlinkedModelSerializer):
+class PhotographListSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryListSerializer()
     job = collection.serializers.JobListSerializer()
     photograph_tags = PhotographTagSerializer(many=True)
