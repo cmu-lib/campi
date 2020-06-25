@@ -1,5 +1,6 @@
 <template>
   <b-container>
+    <TaggingWorkflowNav />
     <p>Select a tag to work on from the dropdown. If you select a tag different from your already-checked-out tag, that tag will be checked back in and made available to other users</p>
     <TagSelectMenu v-model="selected_tag" />
     <PytorchModelMenu v-model="pytorch_model" />
@@ -9,11 +10,12 @@
 
 <script>
 // import { HTTP } from "@/main";
+import TaggingWorkflowNav from "@/components/tagging/TaggingWorkflowNav.vue";
 import TagSelectMenu from "@/components/tagging/TagSelectMenu.vue";
 import PytorchModelMenu from "@/components/PytorchModelMenu.vue";
 export default {
   name: "Tagging",
-  components: { TagSelectMenu, PytorchModelMenu },
+  components: { TagSelectMenu, PytorchModelMenu, TaggingWorkflowNav },
   data() {
     return {
       selected_tag: null,
