@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { HTTP } from "../main";
+import { HTTP } from "@/main";
 export default {
   name: "PhotoGrid",
   props: {

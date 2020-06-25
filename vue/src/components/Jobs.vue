@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { HTTP } from "../main";
+import { HTTP } from "@/main";
 // import _ from "lodash";
 import { BIconXSquare } from "bootstrap-vue";
 export default {

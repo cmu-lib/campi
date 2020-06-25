@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { HTTP } from "../main";
+import { HTTP } from "@/main";
 import { BIconXSquare } from "bootstrap-vue";
 export default {
   name: "JobTags",

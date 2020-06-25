@@ -154,7 +154,7 @@ import { HTTP } from "@/main";
 import moment from "moment";
 import CloseMatchSetMembership from "@/components/close_match/CloseMatchSetMembership.vue";
 import Nested from "@/components/Nested.vue";
-import PhotoGrid from "@/components/PhotoGrid.vue";
+import PhotoGrid from "@/components/browsing/PhotoGrid.vue";
 import _ from "lodash";
 import {
   BIconCheck2All,
