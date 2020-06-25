@@ -7,7 +7,7 @@
         <b-nav-item :to="{name: 'CloseMatch'}">Close Matches</b-nav-item>
         <b-nav-item-dropdown text="Tagging">
           <b-dropdown-item :to="{name: 'Tags'}">Tag list</b-dropdown-item>
-          <b-dropdown-item :to="{name: 'Tagging'}">Start tagging</b-dropdown-item>
+          <b-dropdown-item :to="{name: 'TaggingTagSelect'}">Start tagging</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
       <b-navbar-nav v-if="user" class="ml-auto">

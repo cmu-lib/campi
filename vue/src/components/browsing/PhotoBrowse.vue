@@ -109,7 +109,7 @@ export default {
   },
   watch: {
     state_ids() {
-      this.$router.push({ name: "Browse", query: this.state_ids });
+      this.$router.push({ query: this.state_ids });
     }
   },
   mounted() {

@@ -32,9 +32,10 @@ export default {
           options: this.tags
             .filter(
               tag =>
-                tag.tasks.filter(
-                  task => task.assigned_user.id == this.current_user.id
-                ).length >= 1
+                tag.tasks
+                  .filter(task => !!task.assigned_user)
+                  .filter(task => task.assigned_user.id == this.current_user.id)
+                  .length >= 1
             )
             .map(tag => {
               return { text: tag.label, value: tag };
@@ -53,10 +54,11 @@ export default {
         const taken_tags = {
           label: "Other users' tags",
           options: this.tags
+            .filter(task => !!task.assigned_user)
             .filter(
               tag =>
                 tag.tasks.every(
-                  task => task.assigned_user != this.current_user.id
+                  task => task.assigned_user.id != this.current_user.id
                 ).length >= 1
             )
             .map(tag => {

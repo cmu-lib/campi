@@ -17,9 +17,11 @@ export default {
   name: "TaggingWorkflowNav",
   computed: {
     nav_items() {
+      const rt = this.$route;
+
       var tagging_nav = {
         label: "1. Select tag",
-        to: { name: "Tagging" },
+        to: { name: "TaggingTagSelect" },
         disabled: true,
         active: false
       };
@@ -39,8 +41,7 @@ export default {
         active: false
       };
 
-      var rt = this.$route;
-      if (rt.name == "Tagging") {
+      if (rt.name == "TaggingTagSelect") {
         tagging_nav.active = true;
         tagging_nav.disabled = false;
       } else if (rt.name == "TaggingSeedPhotoBrowse") {

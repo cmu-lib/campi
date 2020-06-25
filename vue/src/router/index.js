@@ -10,6 +10,7 @@ import CloseMatchRunDetail from "@/views/CloseMatchRunDetail.vue"
 import CloseMatchRunList from "@/views/CloseMatchRunList.vue"
 import Tags from "@/views/Tags.vue"
 import Tagging from "@/views/Tagging.vue"
+import TaggingTagSelect from "@/views/TaggingTagSelect.vue"
 import TaggingSeedPhotoBrowse from "@/views/TaggingSeedPhotoBrowse.vue"
 Vue.use(VueRouter)
 
@@ -78,37 +79,41 @@ const routes = [
     component: Tags,
   },
   {
-    name: "Tagging",
     path: "/tagging",
     component: Tagging,
     children: [
+      {
+        name: "TaggingTagSelect",
+        path: "select",
+        component: TaggingTagSelect
+      },
       {
         name: "TaggingTask",
         path: ":task_id",
         props: (route) => {
           return { task_id: Number(route.params.task_id) }
         },
-        children: [
-          {
-            name: "TaggingSeedPhotoBrowse",
-            path: "browse",
-            component: TaggingSeedPhotoBrowse,
-            props: (route) => {
-              return { task_id: Number(route.params.task_id) }
-            },
-          }
-          //       {
-          //         name: "TaggingExecution",
-          //         path: ":seed_photo_id",
-          //         props: (route) => {
-          //           return {
-          //             tagging_task_id: Number(route.params.task_id),
-          //             seed_photo_id: Number(route.params.seed_photo_id)
-          //           }
-          //         }
-          //       }
-        ]
+      },
+      {
+        name: "TaggingSeedPhotoBrowse",
+        path: ":task_id/browse",
+        component: TaggingSeedPhotoBrowse,
+        props: (route) => {
+          return { task_id: Number(route.params.task_id) }
+        },
       }
+      //       {
+      //         name: "TaggingExecution",
+      //         path: ":seed_photo_id",
+      //         props: (route) => {
+      //           return {
+      //             tagging_task_id: Number(route.params.task_id),
+      //             seed_photo_id: Number(route.params.seed_photo_id)
+      //           }
+      //         }
+      //       }
+      // ]
+
     ]
   }
 ]
