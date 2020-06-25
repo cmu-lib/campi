@@ -33,6 +33,13 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         "assigned_user", "pytorch_model", "tag"
     )
     serializer_class = serializers.TaggingTaskSerializer
+    serializer_action_classes = {
+        "list": serializers.TaggingTaskSerializer,
+        "detail": serializers.TaggingTaskSerializer,
+        "create": serializers.TaggingTaskPostSerializer,
+        "update": serializers.TaggingTaskPostSerializer,
+        "partial_update": serializers.TaggingTaskPostSerializer,
+    }
 
 
 class TaggingDecisionViewset(GetSerializerClassMixin, viewsets.ModelViewSet):

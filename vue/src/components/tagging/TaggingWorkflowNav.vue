@@ -18,19 +18,19 @@ export default {
   computed: {
     nav_items() {
       var tagging_nav = {
-        label: "Select tag",
+        label: "1. Select tag",
         to: { name: "Tagging" },
         disabled: true,
         active: false
       };
       var seed_nav = {
-        label: "Choose seed photo",
+        label: "2. Choose seed photo",
         to: { name: "TaggingSeedPhotoBrowse", params: { tag: null } },
         disabled: true,
         active: false
       };
       var execution_nav = {
-        label: "Begin tagging",
+        label: "3. Begin tagging",
         to: {
           name: "TaggingExecution",
           params: { tag: null, seed_photo_id: null }

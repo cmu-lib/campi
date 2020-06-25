@@ -32,6 +32,12 @@ class FlatTaggingTaskSerializer(serializers.ModelSerializer):
         fields = ["id", "pytorch_model", "assigned_user"]
 
 
+class TaggingTaskPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TaggingTask
+        fields = ["id", "tag", "pytorch_model", "assigned_user"]
+
+
 class TagSerializer(serializers.ModelSerializer):
     n_images = serializers.IntegerField(read_only=True)
     tasks = FlatTaggingTaskSerializer(many=True)

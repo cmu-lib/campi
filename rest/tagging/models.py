@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -50,6 +50,15 @@ class TaggingTask(campi.models.dateCreatedModel):
     class Meta:
         unique_together = ("tag", "pytorch_model")
 
+    def save(self, *args, **kwargs):
+        res = super().save(*args, **kwargs)
+        # If this task has a user, null out assigned users on other tasks
+        if self.assigned_user is not None:
+            TaggingTask.objects.exclude(id=self.id).filter(
+                assigned_user=self.assigned_user
+            ).update(assigned_user=None)
+        return res
+
 
 class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedModel):
     photograph = models.ForeignKey(
@@ -71,6 +80,7 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
     class Meta:
         unique_together = ("photograph", "task")
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
         res = super().save(*args, **kwargs)
         # Create or update PhotographTag relationship if the editor decided the tag was applicable

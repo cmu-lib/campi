@@ -21,7 +21,7 @@ import { HTTP } from "@/main";
 export default {
   name: "TagSelectMenu",
   props: {
-    value: Number,
+    value: Object,
     default: null
   },
   computed: {
