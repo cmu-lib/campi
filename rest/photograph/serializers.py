@@ -23,7 +23,7 @@ class PhotographTagSerializer(serializers.ModelSerializer):
 class PhotographDetailSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
     job = collection.serializers.JobDetailSerializer()
-    tags = PhotographTagSerializer(many=True)
+    photograph_tags = PhotographTagSerializer(many=True)
 
     class Meta:
         model = models.Photograph
