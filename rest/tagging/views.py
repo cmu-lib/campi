@@ -3,9 +3,12 @@ from django.db.models import Count, Q, Prefetch
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from tagging import serializers, models
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
+import photograph
 
 
 class TagFilter(filters.FilterSet):
@@ -40,6 +43,35 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         "update": serializers.TaggingTaskPostSerializer,
         "partial_update": serializers.TaggingTaskPostSerializer,
     }
+
+    @action(detail=True, methods=["get"], name="Get the next set of nearest neighbors")
+    def get_nn(self, request, pk=None):
+        task = self.get_object()
+        photo_id = int(request.query_params["photograph"])
+        n_neighbors = int(request.query_params["n_neighbors"])
+        try:
+            seed_photo = photograph.models.Photograph.objects.get(id=photo_id)
+        except:
+            return Response(
+                {"error": f"No photograph exists with the id {photo_id}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+            # Has this task started yet?
+        if task.decisions.exists():
+            untagged_photos = photograph.models.Photograph.objects.exclude(
+                decisions__task=self
+            ).exclude(photograph_tags__tag=self.tag)
+            nn = task.pytorch_model.get_arbitrary_nn(
+                seed_photo, photo_queryset=untagged_photos, n_neighbors=n_neighbors
+            )
+        else:
+            nn = task.pytorch_model.get_nn(seed_photo, n_neighbors=n_neighbors)
+        serialized_neighbors = photograph.serializers.PhotographDistanceListSerializer(
+            photograph.views.prepare_photograph_qs(nn),
+            many=True,
+            context={"request": request},
+        ).data
+        return Response(serialized_neighbors, status.HTTP_200_OK)
 
 
 class TaggingDecisionViewset(GetSerializerClassMixin, viewsets.ModelViewSet):

@@ -39,7 +39,7 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
     def index_built(self):
         return self.annoy_idx_file is not None
 
-    def generate_index(self, embeddings_queryset, n_trees=20):
+    def generate_index(self, embeddings_queryset, n_trees=50):
         photo_ordered_embeddings = embeddings_queryset.order_by("photograph__id")
 
         photo_indices = list(
@@ -89,18 +89,12 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
             pic_index, n=n_neighbors, include_distances=True
         )
 
-        print(nn_distances)
-        print(nn_indices)
         distance_cases = [
             When(id=self.photo_indices[nn_indices[i]], then=d)
             for i, d in enumerate(nn_distances)
         ]
 
         # Annotate a queryset of photos with the distances, so we can return a queryset instead of a dict. More efficient to add on necessary select_related/prefetch_related before passing to a serializer
-
-        # nn_photos = photograph.models.Photograph.objects.in_bulk(
-        #     [self.photo_indices[i] for i in nn_indices]
-        # )
 
         nn_photos = (
             photograph.models.Photograph.objects.filter(
@@ -120,11 +114,40 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         embeddings_queryset = photo_queryset.embeddings.filter(
             pytorch_model=self, photograph__in=photo_queryset
         )
+
+        # Generate a custom index based on the specified queryset
         temp_idx = self.generate_index(embeddings_queryset)
 
         photo_indices = list(
             embeddings_queryset.values_list("photograph__id", flat=True)
         )
+
+        search_vector = self.embeddings.filter(photograph=photo)[0].array
+
+        nn_indices, nn_distances = temp_idx.get_nns_by_vector(
+            search_vector, n=n_neighbors, include_distances=True
+        )
+
+        distance_cases = [
+            When(id=photo_indices[nn_indices[i]], then=d)
+            for i, d in enumerate(nn_distances)
+        ]
+
+        # Annotate a queryset of photos with the distances, so we can return a queryset instead of a dict. More efficient to add on necessary select_related/prefetch_related before passing to a serializer
+
+        nn_photos = (
+            photograph.models.Photograph.objects.filter(
+                id__in=[self.photo_indices[i] for i in nn_indices]
+            )
+            .annotate(
+                distance=Case(
+                    *distance_cases, default=0, output_field=models.FloatField()
+                )
+            )
+            .order_by("distance")
+        )
+
+        return nn_photos
 
 
 class ColorInceptionV3(PyTorchModel):
