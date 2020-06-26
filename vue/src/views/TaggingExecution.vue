@@ -6,11 +6,12 @@
         <div v-if="!!sorted_photos">
           <b-row v-for="row in sorted_photos" :key="row.number">
             <b-col v-for="photograph in row.data" :key="photograph.id" cols="3">
-              <b-img :src="photograph.image.square" />
+              <b-img :src="photograph.image.square" @click="approve_photo(photograph.id)" />
               {{photograph.distance}}
             </b-col>
           </b-row>
         </div>
+        <b-button @click="load_more_photos">Get more photos...</b-button>
       </b-col>
       <b-col cols="6"></b-col>
     </b-row>
@@ -61,6 +62,17 @@ export default {
           console.log(error);
         }
       );
+    },
+    approve_photo(photograph_id) {
+      HTTP.post("tagging/decision/", {
+        task: this.task_id,
+        photograph: photograph_id,
+        is_applicable: true,
+        user_created: this.$root.user.id
+      });
+    },
+    load_more_photos() {
+      this.get_nn_set();
     }
   },
   mounted() {

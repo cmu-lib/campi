@@ -48,12 +48,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class TaggingDecisionSerializer(serializers.ModelSerializer):
-    task = TaggingTaskSerializer()
-    photograph = photograph.serializers.PhotographListSerializer()
-
     class Meta:
         model = models.TaggingDecision
-        fields = ["id", "task", "photograph", "is_applicable"]
+        fields = ["id", "task", "photograph", "is_applicable", "user_created"]
 
 
 class PhotographTagPostSerializer(serializers.ModelSerializer):

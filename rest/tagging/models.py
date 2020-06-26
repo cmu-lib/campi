@@ -87,7 +87,7 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
         if self.is_applicable:
             PhotographTag.objects.update_or_create(
                 photograph=self.photograph,
-                tag=self.task,
+                tag=self.task.tag,
                 defaults={
                     "user_last_modified": self.user_created,
                     "last_updated": timezone.now(),

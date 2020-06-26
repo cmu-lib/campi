@@ -59,8 +59,8 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             # Has this task started yet?
         if task.decisions.exists():
             untagged_photos = photograph.models.Photograph.objects.exclude(
-                decisions__task=self
-            ).exclude(photograph_tags__tag=self.tag)
+                decisions__task=task
+            ).exclude(photograph_tags__tag=task.tag)
             nn = task.pytorch_model.get_arbitrary_nn(
                 seed_photo, photo_queryset=untagged_photos, n_neighbors=n_neighbors
             )
@@ -75,15 +75,7 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 
 
 class TaggingDecisionViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.TaggingDecision.objects.prefetch_related(
-        "photograph",
-        "photograph__job",
-        "photograph__directory",
-        "task",
-        "task__assigned_user",
-        "task__pytorch_model",
-        "task__tag",
-    ).all()
+    queryset = models.TaggingDecision.objects.all()
     serializer_class = serializers.TaggingDecisionSerializer
 
 

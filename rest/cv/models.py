@@ -111,16 +111,13 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         return nn_photos
 
     def get_arbitrary_nn(self, photo, photo_queryset, n_neighbors=20):
-        embeddings_queryset = photo_queryset.embeddings.filter(
-            pytorch_model=self, photograph__in=photo_queryset
-        )
+        embeddings_queryset = self.embeddings.filter(photograph__in=photo_queryset)
 
         # Generate a custom index based on the specified queryset
-        temp_idx = self.generate_index(embeddings_queryset)
+        temp_idx_res = self.generate_index(embeddings_queryset)
 
-        photo_indices = list(
-            embeddings_queryset.values_list("photograph__id", flat=True)
-        )
+        temp_idx = temp_idx_res["index"]
+        photo_indices = temp_idx_res["photo_indices"]
 
         search_vector = self.embeddings.filter(photograph=photo)[0].array
 
