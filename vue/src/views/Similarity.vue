@@ -3,7 +3,6 @@
     <h2>Browse similarity</h2>
     <b-row flex align-h="around">
       <PytorchModelMenu v-model="pytorch_model_id" />
-      <AnnoyIdxMenu v-model="annoy_idx_id" :pytorch_model_id="pytorch_model_id" />
     </b-row>
     <b-card no-body v-if="!!seed_image" header="Similarity results">
       <div class="m-3">
@@ -32,13 +31,11 @@
 <script>
 import { HTTP } from "@/main";
 import PytorchModelMenu from "@/components/PytorchModelMenu.vue";
-import AnnoyIdxMenu from "@/components/AnnoyIdxMenu.vue";
 import PhotographListItem from "@/components/PhotographListItem.vue";
 export default {
   name: "Similarity",
   components: {
     PytorchModelMenu,
-    AnnoyIdxMenu,
     PhotographListItem
   },
   props: {
@@ -50,7 +47,6 @@ export default {
   data() {
     return {
       pytorch_model_id: null,
-      annoy_idx_id: null,
       n_neighbors: 50,
       loaded: false
     };
@@ -60,9 +56,6 @@ export default {
       var ids = {};
       if (!!this.pytorch_model_id) {
         ids["pytorch_model_id"] = this.pytorch_model_id;
-      }
-      if (!!this.annoy_idx_id) {
-        ids["annoy_idx_id"] = this.annoy_idx_id;
       }
       ids["n_neighbors"] = this.n_neighbors;
       return ids;
@@ -85,11 +78,14 @@ export default {
     },
     nearest_neighbors() {
       this.loaded = false;
-      if (!!this.annoy_idx_id) {
-        return HTTP.post("/annoy_idx/" + this.annoy_idx_id + "/get_nn/", {
-          photograph: this.seed_image.id,
-          n_neighbors: this.n_neighbors
-        }).then(
+      if (!!this.pytorch_model_id & !!this.seed_image_id) {
+        return HTTP.post(
+          "/pytorch_model/" + this.pytorch_model_id + "/get_nn/",
+          {
+            photograph: this.seed_image_id,
+            n_neighbors: this.n_neighbors
+          }
+        ).then(
           results => {
             this.loaded = true;
             return results.data.slice(1);

@@ -18,22 +18,7 @@ class PytorchModelListSerializer(serializers.ModelSerializer):
         fields = ["id", "url", "label", "n_dimensions", "feature_matrix"]
 
 
-class AnnoyIdxFlatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.AnnoyIdx
-        fields = ["id", "url", "n_trees", "index_built"]
-
-
-class AnnoyIdxListSerializer(serializers.ModelSerializer):
-    n_images = serializers.IntegerField(read_only=True)
-    pytorch_model = PytorchModelListSerializer()
-
-    class Meta:
-        model = models.AnnoyIdx
-        fields = ["id", "url", "pytorch_model", "n_trees", "n_images", "index_built"]
-
-
-class AnnoyIdxGetNNSerializer(serializers.Serializer):
+class PytorchModelGetNNSerializer(serializers.Serializer):
     photograph = serializers.PrimaryKeyRelatedField(
         queryset=photograph.models.Photograph.objects.all(), required=True
     )

@@ -64,3 +64,25 @@ class PhotographListSerializer(serializers.ModelSerializer):
             "job_sequence",
             "photograph_tags",
         ]
+
+
+class PhotographDistanceListSerializer(PhotographListSerializer):
+    distance = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = models.Photograph
+        fields = [
+            "id",
+            "url",
+            "label",
+            "image",
+            "filename",
+            "date_taken_early",
+            "date_taken_late",
+            "digitized_date",
+            "directory",
+            "job",
+            "job_sequence",
+            "photograph_tags",
+            "distance",
+        ]

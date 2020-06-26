@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Case, When
 from campi.models import (
     uniqueLabledModel,
     descriptionModel,
@@ -30,6 +30,101 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
     """
 
     n_dimensions = models.PositiveIntegerField()
+    annoy_idx_file = models.FilePathField(
+        path=settings.DIST_INDICES_PATH, unique=True, null=True, blank=True
+    )
+    photo_indices = ArrayField(models.PositiveIntegerField(), null=True)
+
+    @property
+    def index_built(self):
+        return self.annoy_idx_file is not None
+
+    def generate_index(self, embeddings_queryset, n_trees=20):
+        photo_ordered_embeddings = embeddings_queryset.order_by("photograph__id")
+
+        photo_indices = list(
+            photo_ordered_embeddings.values_list("photograph__id", flat=True)
+        )
+
+        ix = annoy.AnnoyIndex(f=self.n_dimensions, metric="angular")
+        for i, pic in enumerate(photo_ordered_embeddings):
+            if pic.array is not None:
+                ix.add_item(i, pic.array)
+            else:
+                ix.add_item(i, [0] * embed_dims)
+        print("Building index")
+        ix.build(n_trees=n_trees)
+
+        return {"index": ix, "photo_indices": photo_indices}
+
+    def store_index(self, n_trees=20, overwrite=False):
+        if self.index_built and not overwrite:
+            Exception(
+                f"Model '{self.label}' already has a built index. To overwrite, call generate_index(overwrite=True)"
+            )
+
+        annoy_res = self.generate_index(
+            n_trees=n_trees, embeddings_queryset=self.embeddings.all()
+        )
+        index_filename = f"{settings.DIST_INDICES_PATH}/{self.id}-{self.label}.ix"
+        annoy_res["index"].save(fn=index_filename)
+        print("storing photo indices")
+        self.annoy_idx_file = index_filename
+        self.photo_indices = annoy_res["photo_indices"]
+        self.save()
+
+    def get_nn(self, photo, n_neighbors=20):
+        """
+        Get n_neighbors approximate nearest neighbors
+        """
+
+        if self.index_built:
+            Exception("Index has not yet been generated")
+
+        # load index
+        ix = annoy.AnnoyIndex(self.n_dimensions, "angular")
+        ix.load(self.annoy_idx_file)
+        pic_index = self.photo_indices.index(photo.id)
+        nn_indices, nn_distances = ix.get_nns_by_item(
+            pic_index, n=n_neighbors, include_distances=True
+        )
+
+        print(nn_distances)
+        print(nn_indices)
+        distance_cases = [
+            When(id=self.photo_indices[nn_indices[i]], then=d)
+            for i, d in enumerate(nn_distances)
+        ]
+
+        # Annotate a queryset of photos with the distances, so we can return a queryset instead of a dict. More efficient to add on necessary select_related/prefetch_related before passing to a serializer
+
+        # nn_photos = photograph.models.Photograph.objects.in_bulk(
+        #     [self.photo_indices[i] for i in nn_indices]
+        # )
+
+        nn_photos = (
+            photograph.models.Photograph.objects.filter(
+                id__in=[self.photo_indices[i] for i in nn_indices]
+            )
+            .annotate(
+                distance=Case(
+                    *distance_cases, default=0, output_field=models.FloatField()
+                )
+            )
+            .order_by("distance")
+        )
+
+        return nn_photos
+
+    def get_arbitrary_nn(self, photo, photo_queryset, n_neighbors=20):
+        embeddings_queryset = photo_queryset.embeddings.filter(
+            pytorch_model=self, photograph__in=photo_queryset
+        )
+        temp_idx = self.generate_index(embeddings_queryset)
+
+        photo_indices = list(
+            embeddings_queryset.values_list("photograph__id", flat=True)
+        )
 
 
 class ColorInceptionV3(PyTorchModel):
@@ -224,85 +319,6 @@ class BitonalInceptionV3(PyTorchModel):
                 continue
 
 
-class AnnoyIdx(models.Model):
-    pytorch_model = models.ForeignKey(
-        PyTorchModel, on_delete=models.CASCADE, related_name="pytorch_model_ann_indices"
-    )
-    n_trees = models.PositiveIntegerField()
-    index_file = models.FilePathField(
-        path=settings.DIST_INDICES_PATH, unique=True, null=True, blank=True
-    )
-
-    @property
-    def index_built(self):
-        return self.index_file is not None
-
-    class Meta:
-        unique_together = ("pytorch_model", "n_trees")
-
-    @transaction.atomic
-    def generate_index(self, overwrite=False):
-        if self.index_file is None:
-            Exception(
-                "This model has not been calculated yet. Run build_embeddings_matrix() first"
-            )
-        if self.index_file is not None and not overwrite:
-            Exception(
-                f"Distance matrix '{self}' already has a built index at {self.index_file}. To overwrite, call generate_index(overwrite=True)"
-            )
-
-        print("Registering embedding ordering")
-        ordered_embeddings = self.pytorch_model.embeddings.all().order_by("id")
-        ies = []
-        for i, e in enumerate(ordered_embeddings):
-            ies.append(IndexEmbedding(annoy_idx=self, embedding=e, sequence=i))
-        IndexEmbedding.objects.bulk_create(ies)
-
-        # Generate matrix
-        disk_path = f"{settings.DIST_INDICES_PATH}/{self.id}.ix"
-        embed_dims = self.pytorch_model.n_dimensions
-        ix = annoy.AnnoyIndex(f=embed_dims, metric="angular")
-        ix.on_disk_build(disk_path)
-        for pic in tqdm(self.indexed_embeddings.all()):
-            if pic.embedding.array is not None:
-                ix.add_item(pic.sequence, pic.embedding.array)
-            else:
-                ix.add_item(pic.sequence, [0] * embed_dims)
-        print("Building index")
-        ix.build(n_trees=self.n_trees)
-
-        self.index_file = disk_path
-        self.save()
-
-    def get_nn(self, photo, n_neighbors=20):
-        """
-        Get n_neighbors approximate nearest neighbors
-        """
-
-        if self.index_file is None:
-            Exception("Index has not yet been generated")
-
-        # load index
-        ix = annoy.AnnoyIndex(self.pytorch_model.n_dimensions, "angular")
-        ix.load(self.index_file)
-        pic_index = (
-            self.indexed_embeddings.filter(embedding__photograph=photo).first().sequence
-        )
-        nn_indices, nn_distances = ix.get_nns_by_item(
-            pic_index, n=n_neighbors, include_distances=True
-        )
-
-        photographs = [
-            photograph.models.Photograph.objects.get(
-                embeddings__indexed_embeddings__annoy_idx=self,
-                embeddings__indexed_embeddings__sequence=i,
-            )
-            for i in nn_indices
-        ]
-
-        return {"photographs": photographs, "distances": nn_distances}
-
-
 class Embedding(models.Model):
     pytorch_model = models.ForeignKey(
         PyTorchModel, on_delete=models.CASCADE, related_name="embeddings"
@@ -317,18 +333,6 @@ class Embedding(models.Model):
     class Meta:
         unique_together = ("pytorch_model", "photograph")
         ordering = ["pytorch_model"]
-
-
-class IndexEmbedding(sequentialModel):
-    annoy_idx = models.ForeignKey(
-        AnnoyIdx, on_delete=models.CASCADE, related_name="indexed_embeddings"
-    )
-    embedding = models.ForeignKey(
-        Embedding, on_delete=models.CASCADE, related_name="indexed_embeddings"
-    )
-
-    class Meta:
-        unique_together = ("annoy_idx", "embedding", "sequence")
 
 
 class CloseMatchRun(dateModifiedModel):

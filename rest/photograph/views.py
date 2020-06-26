@@ -30,7 +30,22 @@ class PhotographFilter(filters.FilterSet):
     )
 
 
+def prepare_photograph_qs(qs):
+    ordered_tags = tagging.models.PhotographTag.objects.select_related(
+        "tag", "user_last_modified"
+    ).order_by("-last_updated")
+    qs = (
+        qs.select_related("directory", "job")
+        .prefetch_related(
+            "job__tags", Prefetch("photograph_tags", queryset=ordered_tags)
+        )
+        .all()
+    )
+    return qs
+
+
 class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = prepare_photograph_qs(models.Photograph.objects.all())
     ordered_tags = tagging.models.PhotographTag.objects.select_related(
         "tag", "user_last_modified"
     ).order_by("-last_updated")
