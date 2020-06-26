@@ -40,7 +40,7 @@ class TaggingTaskPostSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     n_images = serializers.IntegerField(read_only=True)
-    tasks = FlatTaggingTaskSerializer(many=True)
+    tasks = FlatTaggingTaskSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Tag
