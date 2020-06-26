@@ -30,3 +30,4 @@ class Command(BaseCommand):
         torch_model.save()
         allpics = photograph.models.Photograph.objects.all()
         torch_model.build_embeddings(allpics)
+        torch_model.store_index()
