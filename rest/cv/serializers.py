@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from cv import models
-import photograph.serializers
+from photograph.serializers import PhotographListSerializer
+import photograph.models
 from campi.serializers import UserSerializer
 from rest_framework.reverse import reverse
 
@@ -74,7 +75,7 @@ class CloseMatchSetMembershipPostSerializer(serializers.ModelSerializer):
 
 
 class CloseMatchSetMembershipSerializer(serializers.ModelSerializer):
-    photograph = photograph.serializers.PhotographListSerializer(many=False)
+    photograph = PhotographListSerializer(many=False)
 
     class Meta:
         model = models.CloseMatchSetMembership
@@ -91,9 +92,7 @@ class CloseMatchSetMembershipSerializer(serializers.ModelSerializer):
 
 class CloseMatchSetSerializer(serializers.ModelSerializer):
     close_match_run = CloseMatchRunSerializer(many=False)
-    representative_photograph = photograph.serializers.PhotographListSerializer(
-        many=False
-    )
+    representative_photograph = PhotographListSerializer(many=False)
     memberships = CloseMatchSetMembershipSerializer(many=True)
     user_last_modified = UserSerializer(many=False)
     invalid = serializers.BooleanField(read_only=True)
@@ -136,3 +135,13 @@ class CloseMatchSetApprovalSerializer(serializers.Serializer):
         queryset=photograph.models.Photograph.objects.all(), many=False
     )
     has_duplicates = serializers.BooleanField()
+
+
+class FullDistanceSerializer(serializers.ModelSerializer):
+    # photograph = PhotographListSerializer(many=False)
+    target_photograph = PhotographListSerializer(many=False)
+
+    class Meta:
+        model = models.FullDistance
+        fields = ["id", "url", "photograph", "target_photograph", "distance"]
+

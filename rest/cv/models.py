@@ -11,7 +11,7 @@ from campi.models import (
     dateModifiedModel,
     userModifiedModel,
 )
-import photograph
+from photograph.models import Photograph
 import annoy
 import pickle
 import torch
@@ -30,6 +30,33 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
     """
 
     n_dimensions = models.PositiveIntegerField()
+
+    def cache_distances(self, photograph):
+        source_embeddings = self.embeddings.filter(photograph=photograph)
+        target_embeddings = self.embeddings.order_by("id")
+        print("Getting target photos")
+        target_photos = Photograph.objects.in_bulk(
+            target_embeddings.values_list("photograph", flat=True)
+        )
+        target_keys = [k for k, v in target_photos.items()]
+
+        distances = metrics.pairwise.cosine_distances(
+            np.array(source_embeddings.values_list("array", flat=True)),
+            np.array(target_embeddings.values_list("array", flat=True)),
+        )
+
+        distance_cache_measures = [
+            FullDistance(
+                photograph=photograph,
+                target_photograph=target_photos[target_keys[i]],
+                pytorch_model=self,
+                distance=d,
+            )
+            for i, d in enumerate(distances[0,])
+        ]
+
+        n_created = FullDistance.objects.bulk_create(distance_cache_measures)
+        return n_created
 
 
 class ColorInceptionV3(PyTorchModel):
@@ -293,7 +320,7 @@ class AnnoyIdx(models.Model):
         )
 
         photographs = [
-            photograph.models.Photograph.objects.get(
+            Photograph.objects.get(
                 embeddings__indexed_embeddings__annoy_idx=self,
                 embeddings__indexed_embeddings__sequence=i,
             )
@@ -308,9 +335,7 @@ class Embedding(models.Model):
         PyTorchModel, on_delete=models.CASCADE, related_name="embeddings"
     )
     photograph = models.ForeignKey(
-        photograph.models.Photograph,
-        on_delete=models.CASCADE,
-        related_name="embeddings",
+        Photograph, on_delete=models.CASCADE, related_name="embeddings"
     )
     array = ArrayField(models.FloatField())
 
@@ -387,7 +412,7 @@ class CloseMatchRun(dateModifiedModel):
                 cms = CloseMatchSet.objects.create(close_match_run=self)
                 photo_indices = min_memberships[str(membership_id)]
                 photographs = [embedding_photo_ids[i] for i in photo_indices]
-                photolist = photograph.models.Photograph.objects.in_bulk(photographs)
+                photolist = Photograph.objects.in_bulk(photographs)
                 cosine_distances = list(
                     metrics.pairwise.cosine_distances(
                         X=embedding_matrix[[photo_indices[0]],],
@@ -425,7 +450,7 @@ class CloseMatchRun(dateModifiedModel):
                             additional_photographs = [
                                 embedding_photo_ids[i] for i in additional_photo_indices
                             ]
-                            additional_photolist = photograph.models.Photograph.objects.in_bulk(
+                            additional_photolist = Photograph.objects.in_bulk(
                                 additional_photographs
                             )
                             new_cosine_distances = list(
@@ -479,7 +504,7 @@ class CloseMatchRun(dateModifiedModel):
                 cms.user_last_modified = User.objects.first()
                 cms.save()
 
-                accepted_photographs = photograph.models.Photograph.objects.filter(
+                accepted_photographs = Photograph.objects.filter(
                     close_match_memberships__close_match_set=cms,
                     close_match_memberships__state=CloseMatchSetMembership.ACCEPTED,
                 ).distinct()
@@ -500,9 +525,7 @@ class CloseMatchRunConsidered(models.Model):
         related_name="considered_photo_membership",
     )
     photograph = models.ForeignKey(
-        photograph.models.Photograph,
-        on_delete=models.CASCADE,
-        related_name="considered_photo_membership",
+        Photograph, on_delete=models.CASCADE, related_name="considered_photo_membership"
     )
 
     class Meta:
@@ -514,12 +537,12 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
         CloseMatchRun, on_delete=models.CASCADE, related_name="close_match_sets"
     )
     photographs = models.ManyToManyField(
-        photograph.models.Photograph,
+        Photograph,
         through="CloseMatchSetMembership",
         through_fields=("close_match_set", "photograph"),
     )
     representative_photograph = models.ForeignKey(
-        photograph.models.Photograph,
+        Photograph,
         null=True,
         on_delete=models.CASCADE,
         related_name="representative_of_sets",
@@ -551,9 +574,7 @@ class CloseMatchSetMembership(models.Model):
         CloseMatchSet, on_delete=models.CASCADE, related_name="memberships"
     )
     photograph = models.ForeignKey(
-        photograph.models.Photograph,
-        on_delete=models.CASCADE,
-        related_name="close_match_memberships",
+        Photograph, on_delete=models.CASCADE, related_name="close_match_memberships"
     )
     distance = models.FloatField(
         null=True,
@@ -582,3 +603,20 @@ class CloseMatchSetMembership(models.Model):
 
     class Meta:
         unique_together = ("close_match_set", "photograph")
+
+
+class FullDistance(models.Model):
+    photograph = models.ForeignKey(
+        Photograph, on_delete=models.CASCADE, related_name="source_distances"
+    )
+    target_photograph = models.ForeignKey(
+        Photograph, on_delete=models.CASCADE, related_name="target_distances"
+    )
+    pytorch_model = models.ForeignKey(
+        PyTorchModel, on_delete=models.CASCADE, related_name="full_distances"
+    )
+    distance = models.FloatField(db_index=True)
+
+    class Meta:
+        unique_together = ("photograph", "target_photograph", "pytorch_model")
+        ordering = ["distance"]

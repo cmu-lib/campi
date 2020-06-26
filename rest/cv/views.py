@@ -22,6 +22,7 @@ from sklearn import metrics
 import numpy
 import photograph
 import collection
+import tagging
 import csv
 
 
@@ -66,6 +67,20 @@ class PytorchModelViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             writer.writerow([img.photograph.full_image] + img.array)
 
         return response
+
+    @action(detail=True, methods=["post"], name="Produce new cached models")
+    def cache_distances(self, request, pk=None):
+        pytorch_model = self.get_object()
+        photo_id = request.data["photograph"]
+        try:
+            photograph = photograph.models.Photograph.objects.get(id=photo_id)
+            n_created = pytorch_model.cache_distances(photograph)
+            return Response({"n_created": n_created}, status=status.HTTP_202_ACCEPTED)
+        except:
+            return Response(
+                {"error": f"Photograph with id {photo_id} does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class AnnoyIdxFilter(filters.FilterSet):
@@ -386,3 +401,39 @@ class CloseMatchSetMembershipViewset(GetSerializerClassMixin, viewsets.ModelView
                 membership_serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
 
+
+class FullDistanceFilter(filters.FilterSet):
+    photograph = filters.ModelChoiceFilter(
+        queryset=photograph.models.Photograph.objects.all()
+    )
+    task = filters.ModelChoiceFilter(
+        queryset=tagging.models.TaggingTask.objects.all(), method="skip_task"
+    )
+
+    def skip_task(self, queryset, name, value):
+        if value:
+            queryset.exclude(
+                target_photograph__decisions__exists=True,
+                target_photograph__photograph_tags__tag=value.tag,
+            )
+        else:
+            return queryset
+
+
+class FullDistanceViewset(viewsets.ModelViewSet):
+
+    queryset = (
+        models.FullDistance.objects.select_related(
+            "photograph",
+            "photograph__job",
+            "target_photograph",
+            "target_photograph__job",
+            "target_photograph__directory",
+        )
+        .prefetch_related(
+            "photograph__photograph_tags", "target_photograph__photograph_tags"
+        )
+        .order_by("distance")
+    )
+    filterset_class = FullDistanceFilter
+    serializer_class = serializers.FullDistanceSerializer

@@ -70,9 +70,8 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
     task = models.ForeignKey(
         TaggingTask, on_delete=models.CASCADE, related_name="decisions"
     )
-    is_applicable = models.NullBooleanField(
-        null=True,
-        default=None,
+    is_applicable = models.BooleanField(
+        default=False,
         db_index=True,
         help_text="Is the given tag applicable to this photograph?",
     )
