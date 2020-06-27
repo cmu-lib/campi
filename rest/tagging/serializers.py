@@ -33,6 +33,8 @@ class FlatTaggingTaskSerializer(serializers.ModelSerializer):
 
 
 class TaggingTaskPostSerializer(serializers.ModelSerializer):
+    assigned_user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = models.TaggingTask
         fields = ["id", "tag", "pytorch_model", "assigned_user"]
@@ -48,6 +50,10 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class TaggingDecisionSerializer(serializers.ModelSerializer):
+    user_created = campi.serializers.UserSerializer(
+        default=serializers.CurrentUserDefault()
+    )
+
     class Meta:
         model = models.TaggingDecision
         fields = ["id", "task", "photograph", "is_applicable", "user_created"]
