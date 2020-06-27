@@ -1,21 +1,45 @@
 <template>
   <b-row class="my-3" align-h="center">
-    <b-nav pills>
-      <b-nav-item
-        v-for="nav in nav_items"
-        :key="nav.label"
-        :active="nav.active"
-        :disabled="nav.disabled"
-        :to="nav.to"
-      >{{ nav.label }}</b-nav-item>
-    </b-nav>
+    <b-col cols="4"></b-col>
+    <b-col cols="4">
+      <b-nav pills>
+        <b-nav-item
+          v-for="nav in nav_items"
+          :key="nav.label"
+          :active="nav.active"
+          :disabled="nav.disabled"
+          :to="nav.to"
+        >{{ nav.label }}</b-nav-item>
+      </b-nav>
+    </b-col>
+    <b-col cols="4">
+      <b-row align-h="around">
+        <div v-if="!!task">
+          <h5>Tag:</h5>
+          <h5>
+            <b-badge>{{ task.tag.label }}</b-badge>
+          </h5>
+        </div>
+        <div v-if="!!seed_photo">
+          <h5>Seed photo:</h5>
+          <b-img :src="seed_photo.image.square" />
+        </div>
+      </b-row>
+    </b-col>
   </b-row>
 </template>
 
 <script>
+import { HTTP } from "@/main";
 export default {
   name: "TaggingWorkflowNav",
   computed: {
+    task_id() {
+      return this.$route.params.task_id;
+    },
+    seed_photo_id() {
+      return this.$route.params.seed_photo_id;
+    },
     nav_items() {
       const rt = this.$route;
 
@@ -27,7 +51,7 @@ export default {
       };
       var seed_nav = {
         label: "2. Choose seed photo",
-        to: { name: "TaggingSeedPhotoBrowse", params: { tag: null } },
+        to: { name: "TaggingSeedPhotoBrowse", params: { task_id: null } },
         disabled: true,
         active: false
       };
@@ -35,7 +59,7 @@ export default {
         label: "3. Begin tagging",
         to: {
           name: "TaggingExecution",
-          params: { tag: null, seed_photo_id: null }
+          params: { task_id: null, seed_photo_id: null }
         },
         disabled: true,
         active: false
@@ -48,17 +72,47 @@ export default {
         tagging_nav.disabled = false;
         seed_nav.active = true;
         seed_nav.disabled = false;
-        seed_nav.to.params.tag = rt.params.tag;
+        seed_nav.to.params.task_id = this.task_id;
       } else if (rt.name == "TaggingExecution") {
         tagging_nav.disabled = false;
         seed_nav.disabled = false;
         execution_nav.disabled = false;
         execution_nav.active = true;
-        execution_nav.to.params.tag = rt.params.tag;
-        execution_nav.to.params.seed_photo_id = rt.params.seed_photo_id;
+        execution_nav.to.params.task_id = this.task_id;
+        execution_nav.to.params.seed_photo_id = this.seed_photo_id;
       }
 
       return [tagging_nav, seed_nav, execution_nav];
+    }
+  },
+  asyncComputed: {
+    task() {
+      if (!!this.task_id) {
+        return HTTP.get(`/tagging/task/${this.task_id}/`).then(
+          response => {
+            return response.data;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
+      }
+    },
+    seed_photo() {
+      if (!!this.seed_photo_id) {
+        return HTTP.get(`/photograph/${this.seed_photo_id}/`).then(
+          response => {
+            return response.data;
+          },
+          error => {
+            console.log(error);
+          }
+        );
+      } else {
+        return null;
+      }
     }
   }
 };
