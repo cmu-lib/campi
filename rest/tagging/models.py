@@ -51,12 +51,12 @@ class TaggingTask(campi.models.dateCreatedModel):
         unique_together = ("tag", "pytorch_model")
 
     def save(self, *args, **kwargs):
-        res = super().save(*args, **kwargs)
         # If this task has a user, null out assigned users on other tasks
         if self.assigned_user is not None:
             TaggingTask.objects.exclude(id=self.id).filter(
                 assigned_user=self.assigned_user
             ).update(assigned_user=None)
+        res = super().save(*args, **kwargs)
         return res
 
 
@@ -82,7 +82,6 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
 
     @transaction.atomic
     def save(self, *args, **kwargs):
-        res = super().save(*args, **kwargs)
         # Create or update PhotographTag relationship if the editor decided the tag was applicable
         if self.is_applicable:
             PhotographTag.objects.update_or_create(
@@ -96,8 +95,9 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
         else:
             # If editor has decided it isn't applicable, remove any existing tag relationships
             PhotographTag.objects.filter(
-                photograph=self.photograph, tag=self.task
+                photograph=self.photograph, tag=self.task.tag
             ).all().delete()
+        res = super().save(*args, **kwargs)
         return res
 
 
