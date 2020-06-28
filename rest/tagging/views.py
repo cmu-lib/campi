@@ -61,8 +61,17 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             untagged_photos = photograph.models.Photograph.objects.exclude(
                 decisions__task=task
             ).exclude(photograph_tags__tag=task.tag)
+
+            tasked_photos = photograph.models.Photograph.objects.filter(
+                decisions__in=task.decisions.filter(is_applicable=True)
+            )
+
+            composite_vector = task.pytorch_model.get_summed_vector(tasked_photos)
+
             nn = task.pytorch_model.get_arbitrary_nn(
-                seed_photo, photo_queryset=untagged_photos, n_neighbors=n_neighbors
+                composite_vector,
+                photo_queryset=untagged_photos,
+                n_neighbors=n_neighbors,
             )
         else:
             nn = task.pytorch_model.get_nn(seed_photo, n_neighbors=n_neighbors)
