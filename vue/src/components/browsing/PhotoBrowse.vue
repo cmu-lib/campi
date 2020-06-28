@@ -51,10 +51,10 @@
 <script>
 import { HTTP } from "@/main";
 import PhotoGrid from "@/components/browsing/PhotoGrid.vue";
-import FacetPills from "@/components/FacetPills.vue";
-import Directories from "@/components/Directories.vue";
-import Jobs from "@/components/Jobs.vue";
-import JobTags from "@/components/JobTags.vue";
+import FacetPills from "@/components/browsing/FacetPills.vue";
+import Directories from "@/components/browsing/Directories.vue";
+import Jobs from "@/components/browsing/Jobs.vue";
+import JobTags from "@/components/browsing/JobTags.vue";
 export default {
   name: "PhotoBrowse",
   components: {
