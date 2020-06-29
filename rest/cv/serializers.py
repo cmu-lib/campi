@@ -118,6 +118,9 @@ class CloseMatchSetApprovalSerializer(serializers.Serializer):
         queryset=models.CloseMatchSetMembership.objects.all(), many=True
     )
     representative_photograph = serializers.PrimaryKeyRelatedField(
-        queryset=photograph.models.Photograph.objects.all(), many=False
+        queryset=photograph.models.Photograph.objects.all(),
+        many=False,
+        required=False,
+        allow_null=True,
     )
     has_duplicates = serializers.BooleanField()

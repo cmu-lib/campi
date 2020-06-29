@@ -364,7 +364,7 @@ export default {
       this.uploading = true;
       this.reject_remaining();
       const payload = this.get_close_match_approval();
-      if (payload.accepted_memberships.length < 2) {
+      if (payload.accepted_memberships.length == 1) {
         this.uploading = false;
         this.toast_response =
           "You must either accept 2 or more photos, or reject/exclude them all.";
