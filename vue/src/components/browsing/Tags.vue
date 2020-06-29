@@ -1,24 +1,24 @@
 <template>
-  <b-card class="my-2" header="Jobs">
+  <b-card class="my-2" header="Tags">
     <b-input-group class="my-2">
-      <b-input v-model="job_label_search" debounce="500" placeholder="Search job names..." />
-      <b-input-group-append v-if="job_label_search != ''">
-        <b-button variant="warning" size="sm" @click="job_label_search=''">
+      <b-input v-model="tag_label_search" debounce="500" placeholder="Search tag names..." />
+      <b-input-group-append v-if="tag_label_search != ''">
+        <b-button variant="warning" size="sm" @click="tag_label_search=''">
           <BIconXSquare />
         </b-button>
       </b-input-group-append>
     </b-input-group>
-    <b-list-group v-if="!!jobs">
+    <b-list-group v-if="!!tags">
       <b-list-group-item
-        v-for="job in jobs"
-        :key="job.id"
+        v-for="tag in tags"
+        :key="tag.id"
         class="d-flex justify-content-between align-items-center my-0 py-1 mr-0 pr-0"
       >
-        <span class="text-truncate" @click="select_job(job)">{{ job_display(job) }}</span>
-        <b-badge variant="info" class="ml-auto mr-1">{{ job.n_images }}</b-badge>
+        <span class="text-truncate" @click="select_tag(tag)">{{ tag.label }}</span>
+        <b-badge variant="info" class="ml-auto mr-1">{{ tag.n_images }}</b-badge>
       </b-list-group-item>
       <b-list-group-item
-        v-if="additional_jobs"
+        v-if="additional_tags"
         class="my-0 py-1 mr-0 pr-0"
         @click="show_more"
         variant="secondary"
@@ -32,7 +32,7 @@ import { HTTP } from "@/main";
 // import _ from "lodash";
 import { BIconXSquare } from "bootstrap-vue";
 export default {
-  name: "Jobs",
+  name: "Tags",
   components: {
     BIconXSquare
   },
@@ -56,17 +56,13 @@ export default {
     directory: {
       type: Object,
       default: null
-    },
-    tag: {
-      type: Object,
-      default: null
     }
   },
   data() {
     return {
       show_total: 10,
-      job_label_search: "",
-      additional_jobs: true
+      tag_label_search: "",
+      additional_tags: true
     };
   },
   computed: {
@@ -75,17 +71,14 @@ export default {
         ordering: "-n_images,label",
         limit: this.show_total
       };
-      if (this.job_label_search != "") {
-        payload["text"] = this.job_label_search;
+      if (this.tag_label_search != "") {
+        payload["text"] = this.tag_label_search;
       }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;
       }
       if (!!this.directory) {
         payload["directory"] = this.directory.id;
-      }
-      if (!!this.tag) {
-        payload["tag"] = this.tag.id;
       }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;
@@ -99,15 +92,15 @@ export default {
     }
   },
   asyncComputed: {
-    jobs() {
-      return HTTP.get("/job/", {
+    tags() {
+      return HTTP.get("/tagging/tag/", {
         params: this.query_payload
       }).then(
         results => {
           if (!!results.data.next) {
-            this.additional_jobs = true;
+            this.additional_tags = true;
           } else {
-            this.additional_jobs = false;
+            this.additional_tags = false;
           }
           return results.data.results;
         },
@@ -118,18 +111,11 @@ export default {
     }
   },
   methods: {
-    job_display(job) {
-      if (job.label != job.job_code) {
-        return job.label + " (" + job.job_code + ")";
-      } else {
-        return job.job_code;
-      }
-    },
     show_more() {
       this.show_total += this.page_size;
     },
-    select_job(job) {
-      this.$emit("input", job);
+    select_tag(tag) {
+      this.$emit("input", tag);
       window.scrollTo(0, 0);
     }
   }

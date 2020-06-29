@@ -2,16 +2,24 @@
   <b-container fluid>
     <b-row>
       <b-col cols="3">
+        <Tags
+          v-model="tag"
+          :directory="directory"
+          :job="job"
+          :digitized_date_range="digitized_date_range"
+        />
         <JobTags
           v-model="job_tag"
           :directory="directory"
           :job="job"
+          :tag="tag"
           :digitized_date_range="digitized_date_range"
         />
         <Jobs
           v-model="job"
           :job_tag="job_tag"
           :directory="directory"
+          :tag="tag"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />
@@ -19,6 +27,7 @@
           v-model="directory"
           :job_tag="job_tag"
           :job="job"
+          :tag="tag"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />
@@ -29,9 +38,11 @@
           :digitized_date_range="digitized_date_range"
           :job="job"
           :job_tag="job_tag"
+          :tag="tag"
           @clear_directory="directory=null"
           @clear_job="job=null"
           @clear_job_tag="job_tag=null"
+          @clear_tag="tag=null"
           @clear_date_range="reset_date()"
         />
         <PhotoGrid
@@ -39,6 +50,7 @@
           :directory="directory"
           :job="job"
           :job_tag="job_tag"
+          :tag="tag"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
           @photo_click="photo_click"
@@ -55,6 +67,7 @@ import FacetPills from "@/components/browsing/FacetPills.vue";
 import Directories from "@/components/browsing/Directories.vue";
 import Jobs from "@/components/browsing/Jobs.vue";
 import JobTags from "@/components/browsing/JobTags.vue";
+import Tags from "@/components/browsing/Tags.vue";
 export default {
   name: "PhotoBrowse",
   components: {
@@ -62,13 +75,15 @@ export default {
     FacetPills,
     Directories,
     Jobs,
-    JobTags
+    JobTags,
+    Tags
   },
   data() {
     return {
       directory: null,
       job: null,
       job_tag: null,
+      tag: null,
       digitized_date_range: [2016, 2020]
     };
   },
@@ -91,6 +106,9 @@ export default {
       }
       if (!!this.job_tag) {
         ids["job_tag"] = this.job_tag.id;
+      }
+      if (!!this.tag) {
+        ids["tag"] = this.tag.id;
       }
       return ids;
     },
@@ -139,6 +157,17 @@ export default {
       return HTTP.get("/job_tag/" + this.$route.query.job_tag + "/").then(
         results => {
           this.job_tag = results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
+
+    if (!!this.$route.query.tag) {
+      return HTTP.get("/tagging/tag/" + this.$route.query.tag + "/").then(
+        results => {
+          this.tag = results.data;
         },
         error => {
           console.log(error);

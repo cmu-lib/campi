@@ -9,11 +9,20 @@ from tagging import serializers, models
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
 import photograph
+import collection
 
 
 class TagFilter(filters.FilterSet):
     label = filters.CharFilter(
         help_text="tags with this text in their label", lookup_expr="icontains"
+    )
+    job = job = filters.ModelChoiceFilter(
+        queryset=collection.models.Job.objects.all(),
+        field_name="photograph_tags__photograph__job",
+    )
+    directory = job = filters.ModelChoiceFilter(
+        queryset=collection.models.Directory.objects.all(),
+        field_name="photograph_tags__photograph__directory",
     )
 
 

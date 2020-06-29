@@ -46,6 +46,10 @@ export default {
     job_tag: {
       type: Object,
       default: null
+    },
+    tag: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -70,6 +74,9 @@ export default {
       }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;
+      }
+      if (!!this.tag) {
+        payload["tag"] = this.tag.id;
       }
       return payload;
     }

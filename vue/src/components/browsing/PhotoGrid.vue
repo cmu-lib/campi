@@ -50,6 +50,10 @@ export default {
     job_tag: {
       default: null
     },
+    tag: {
+      type: Object,
+      default: null
+    },
     digitized_date_before: {
       type: Number,
       default: null
@@ -89,6 +93,9 @@ export default {
       }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;
+      }
+      if (!!this.tag) {
+        payload["tag"] = this.tag.id;
       }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;

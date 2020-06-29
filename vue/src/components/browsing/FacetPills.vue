@@ -1,5 +1,10 @@
 <template>
   <b-card class="my-2">
+    <b-button class="mx-1" v-if="!!tag" pill variant="warning" size="sm">
+      <BIconTag />
+      <span class="mx-2">{{ tag.label }}</span>
+      <BIconXCircle @click="$emit('clear_tag')" />
+    </b-button>
     <b-button class="mx-1" v-if="!!directory" pill variant="primary" size="sm">
       <BIconFolderFill />
       <span class="mx-2">{{ directory.label }}</span>
@@ -45,6 +50,7 @@ export default {
     directory: Object,
     job: Object,
     job_tag: Object,
+    tag: Object,
     digitized_date_range: Array
   },
   computed: {

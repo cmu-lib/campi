@@ -25,7 +25,7 @@ class PhotographFilter(filters.FilterSet):
     job_tag = filters.ModelChoiceFilter(
         queryset=collection.models.JobTag.objects.all(), field_name="job__tags"
     )
-    tags = filters.ModelChoiceFilter(
+    tag = filters.ModelChoiceFilter(
         queryset=tagging.models.Tag.objects.all(), field_name="photograph_tags__tag"
     )
 

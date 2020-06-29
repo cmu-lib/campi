@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from collection import serializers, models
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
+import tagging
 
 
 class DirectoryFilter(filters.FilterSet):
@@ -18,6 +19,10 @@ class DirectoryFilter(filters.FilterSet):
     job_tag = filters.ModelChoiceFilter(
         queryset=models.JobTag.objects.all(),
         field_name="immediate_photographs__job__tags",
+    )
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(),
+        field_name="immediate_photographs__photograph_tags__tag",
     )
     # digitized_date = filters.DateFromToRangeFilter(
     #     field_name="immediate_photographs__digitized_date", distinct=True
@@ -87,6 +92,10 @@ class JobFilter(filters.FilterSet):
     directory = filters.ModelChoiceFilter(
         queryset=models.Directory.objects.all(), field_name="photographs__directory"
     )
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(),
+        field_name="photographs__photograph_tags__tag",
+    )
 
     def search_text(self, queryset, name, value):
         if value != "":
@@ -123,6 +132,10 @@ class JobTagFilter(filters.FilterSet):
     )
     job = filters.ModelChoiceFilter(
         queryset=models.Job.objects.all(), field_name="jobs"
+    )
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(),
+        field_name="jobs__photographs__photograph_tags__tag",
     )
 
 
