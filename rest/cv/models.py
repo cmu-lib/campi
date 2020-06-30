@@ -526,22 +526,6 @@ class CloseMatchRun(dateModifiedModel):
                 )
 
 
-class CloseMatchRunConsidered(models.Model):
-    close_match_run = models.ForeignKey(
-        CloseMatchRun,
-        on_delete=models.CASCADE,
-        related_name="considered_photo_membership",
-    )
-    photograph = models.ForeignKey(
-        photograph.models.Photograph,
-        on_delete=models.CASCADE,
-        related_name="considered_photo_membership",
-    )
-
-    class Meta:
-        unique_together = ("close_match_run", "photograph")
-
-
 class CloseMatchSet(dateModifiedModel, userModifiedModel):
     close_match_run = models.ForeignKey(
         CloseMatchRun, on_delete=models.CASCADE, related_name="close_match_sets"
