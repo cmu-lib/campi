@@ -39,3 +39,5 @@ restore: wipe
 	docker-compose exec -T postgres psql -U app -d campi < data/bkp/bk.sql
 resetmigrations:
 	find rest -type f -regex ".*/migrations/[0-9].*" -exec rm {} \;
+dumptest:
+	docker-compose exec rest python manage.py dumpdata --indent 2 -e silk -e sessions -e contenttypes -e auth.permission -e auth.group -o campi/fixtures/test.json
