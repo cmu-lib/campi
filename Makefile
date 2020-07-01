@@ -29,6 +29,8 @@ blank: stop
 wipe: blank
 	docker-compose exec postgres psql -U app -d postgres -c 'CREATE DATABASE campi;'
 	$(MAKE) restart
+migrate: wipe
+	docker-compose exec rest python manage.py migrate
 dumpusers:
 	docker-compose exec rest python manage.py dumpdata --indent 2 auth authtoken -e auth.permission -o /vol/data/users.json
 restoreusers:
@@ -41,3 +43,5 @@ resetmigrations:
 	find rest -type f -regex ".*/migrations/[0-9].*" -exec rm {} \;
 dumptest:
 	docker-compose exec rest python manage.py dumpdata --indent 2 -e silk -e sessions -e contenttypes -e auth.permission -e auth.group -o campi/fixtures/test.json
+loadtest: migrate
+	docker-compose exec rest python manage.py loaddata campi/fixtures/test.json
