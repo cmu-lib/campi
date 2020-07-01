@@ -30,7 +30,7 @@ class Command(BaseCommand):
                             {"type": vision.enums.Feature.Type.CROP_HINTS},
                             {"type": vision.enums.Feature.Type.TEXT_DETECTION},
                             {"type": vision.enums.Feature.Type.SAFE_SEARCH_DETECTION},
-                            {"type": vision.enums.Feature.Type.WEB_DETECTION},
+                            {"type": vision.enums.Feature.Type.OBJECT_LOCALIZATION},
                         ],
                     }
                 )
