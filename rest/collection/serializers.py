@@ -13,26 +13,18 @@ class DirectoryParentSerializer(serializers.ModelSerializer):
 
 
 class DirectoryListSerializer(serializers.ModelSerializer):
-    search_photographs = serializers.URLField(read_only=True)
     n_images = serializers.IntegerField(read_only=True)
     parent_directory = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = collection_models.Directory
-        fields = [
-            "id",
-            "url",
-            "label",
-            "n_images",
-            "search_photographs",
-            "parent_directory",
-        ]
+        fields = ["id", "url", "label", "description", "n_images", "parent_directory"]
 
 
 class DirectoryDetailSerializer(serializers.ModelSerializer):
     parent_directory = DirectoryParentSerializer()
     child_directories = DirectoryListSerializer(many=True)
-    search_photographs = serializers.URLField(read_only=True)
+    n_images = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = collection_models.Directory
@@ -41,9 +33,9 @@ class DirectoryDetailSerializer(serializers.ModelSerializer):
             "url",
             "label",
             "description",
-            "search_photographs",
             "parent_directory",
             "child_directories",
+            "n_images",
         ]
 
 

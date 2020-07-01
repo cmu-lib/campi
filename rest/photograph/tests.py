@@ -37,7 +37,7 @@ class PhotographListView(TestCase):
             "digitized_date",
             "directory",
             "job",
-            "jog_sequence",
+            "job_sequence",
             "photograph_tags",
         ]:
             self.assertIn(k, res.data["results"][0])
@@ -59,9 +59,9 @@ class PhotographListView(TestCase):
             "digitized_date",
             "directory",
             "job",
-            "jog_sequence",
+            "job_sequence",
             "photograph_tags",
         ]:
-            self.assertIn(k, res.data["results"][0])
-        self.assertIn("full", res.data["results"][0]["image"])
-        self.assertIn("id", res.data["results"][0]["directory"])
+            self.assertIn(k, res.data)
+        self.assertIn("full", res.data["image"])
+        self.assertIn("id", res.data["directory"])
