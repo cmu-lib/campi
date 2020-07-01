@@ -71,11 +71,7 @@ class Photograph(
         return response
 
 
-class Annotation(
-    campi.models.dateModifiedModel,
-    campi.models.userCreatedModel,
-    campi.models.userModifiedModel,
-):
+class Annotation(models.Model):
     photograph = models.ForeignKey(
         Photograph, on_delete=models.CASCADE, related_name="annotations"
     )
@@ -113,3 +109,10 @@ class Annotation(
             render_string = f"{rw},{rh}"
 
         return f"{self.photograph.iiif_base}/{self.x_min},{self.width},{self.y_max},{self.height}/{render_string}/0/default.jpg"
+
+    class Meta:
+        abstract = True
+
+
+class FaceAnnotation(Annotation):
+    pass
