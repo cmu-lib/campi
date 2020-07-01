@@ -122,6 +122,8 @@ class IIIFModel(models.Model):
         editable=False,
         help_text="Base path for the image on the IIIF server",
     )
+    height = models.PositiveIntegerField(default=0)
+    width = models.PositiveIntegerField(default=0)
 
     @property
     def filename(self):
