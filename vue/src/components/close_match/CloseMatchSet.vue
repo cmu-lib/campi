@@ -354,8 +354,10 @@ export default {
         if (!!this.close_match_set_state.representative_photograph) {
           payload.representative_photograph = this.close_match_set_state.representative_photograph.id;
         } else if (payload.accepted_memberships.length > 1) {
-          payload.representative_photograph =
-            payload.accepted_memberships[0].photograph.id;
+          payload.representative_photograph = _.find(
+            this.close_match_set_state.memberships,
+            m => m.state == "a"
+          ).photograph.id;
         }
       }
       return payload;
