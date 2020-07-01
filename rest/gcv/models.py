@@ -1,14 +1,14 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+from picklefield.fields import PickledObjectField
 import photograph
-from campi.models import dateModifiedModel
+from campi.models import dateCreatedModel
 
 
-class GCVResponse(dateModifiedModel):
+class GCVResponse(dateCreatedModel):
     photograph = models.OneToOneField(
         photograph.models.Photograph,
         on_delete=models.CASCADE,
         related_name="gcv_response",
         help_text="Source photograph for this response",
     )
-    json = JSONField()
+    annotations = PickledObjectField(null=True)
