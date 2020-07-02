@@ -63,44 +63,24 @@ class DirectoryListView(TestCase):
         target_job = self.OBJ1.immediate_photographs.first().job
         res = self.client.get(self.ENDPOINT, data={"job": target_job.id})
         self.assertEqual(res.status_code, 200)
-        self.assertTrue(
-            any(
-                [
-                    any(
-                        [
-                            p.job.id == target_job.id
-                            for p in photograph.models.Photograph.objects.filter(
-                                directory__id=directory["id"], job__isnull=False
-                            )
-                        ]
-                    )
-                    for directory in res.data
-                ]
+        for directory in res.data:
+            self.assertTrue(
+                photograph.models.Photograph.objects.filter(
+                    directory__id=directory["id"], job=target_job
+                ).exists()
             )
-        )
 
     @as_auth()
     def test_job_tag_filter(self):
-        target_job = self.OBJ1.immediate_photographs.first().job
-        res = self.client.get(
-            self.ENDPOINT, data={"job_tag": target_job.tags.first().id}
-        )
+        target_job_tag = self.OBJ1.immediate_photographs.first().job.tags.first()
+        res = self.client.get(self.ENDPOINT, data={"job_tag": target_job_tag.id})
         self.assertEqual(res.status_code, 200)
-        self.assertTrue(
-            any(
-                [
-                    any(
-                        [
-                            p.job.id == target_job.id
-                            for p in photograph.models.Photograph.objects.filter(
-                                directory__id=directory["id"], job__isnull=False
-                            )
-                        ]
-                    )
-                    for directory in res.data
-                ]
+        for directory in res.data:
+            self.assertTrue(
+                photograph.models.Photograph.objects.filter(
+                    directory__id=directory["id"], job__tags=target_job_tag
+                ).exists()
             )
-        )
 
     @as_auth()
     def test_tag_filter(self):
@@ -112,22 +92,12 @@ class DirectoryListView(TestCase):
         )
         res = self.client.get(self.ENDPOINT, data={"tag": target_tag.id})
         self.assertEqual(res.status_code, 200)
-        self.assertTrue(
-            any(
-                [
-                    any(
-                        [
-                            p.job.id == target_job.id
-                            for p in photograph.models.Photograph.objects.filter(
-                                directory__id=directory["id"],
-                                photograph_tags__isnull=False,
-                            )
-                        ]
-                    )
-                    for directory in res.data
-                ]
+        for directory in res.data:
+            self.assertTrue(
+                photograph.models.Photograph.objects.filter(
+                    directory__id=directory["id"], photograph_tags__tag=target_tag
+                ).exists()
             )
-        )
 
 
 class JobListView(TestCase):
@@ -214,14 +184,9 @@ class JobListView(TestCase):
         self.assertEqual(res.status_code, 200)
         for d in res.data["results"]:
             self.assertTrue(
-                any(
-                    [
-                        tag.id in [t.tag.id for t in p.photograph_tags.all()]
-                        for p in photograph.models.Photograph.objects.filter(
-                            job__id=d["id"]
-                        ).all()
-                    ]
-                )
+                photograph.models.Photograph.objects.filter(
+                    job_id=d["id"], photograph_tags__tag=tag
+                ).exists()
             )
 
 
