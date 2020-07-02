@@ -22,6 +22,7 @@ from sklearn import metrics
 import numpy
 import photograph
 import collection
+import tagging
 import csv
 
 
@@ -179,11 +180,19 @@ class CloseMatchSetFilter(filters.FilterSet):
 
 
 class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
+    membership_photograph_tags = Prefetch(
+        "photograph__photograph_tags",
+        queryset=tagging.models.PhotographTag.objects.select_related("tag").order_by(
+            "-created_on"
+        ),
+    )
     memberships = Prefetch(
         "memberships",
         queryset=models.CloseMatchSetMembership.objects.select_related(
             "photograph", "photograph__directory", "photograph__job"
-        ).order_by("-core", "distance"),
+        )
+        .order_by("-core", "distance")
+        .prefetch_related(membership_photograph_tags),
     )
     secondary_memberships = models.CloseMatchSetMembership.objects.filter(
         close_match_set=OuterRef("pk"), core=False
