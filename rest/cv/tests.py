@@ -68,3 +68,62 @@ class PyTorchModelListView(TestCase):
             "distance",
         ]:
             self.assertIn(k, res.data[0])
+
+
+class CloseMatchRunListView(TestCase):
+    fixtures = ["campi/fixtures/test.json"]
+
+    ENDPOINT = reverse("closematchrun-list")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.OBJ1 = models.CloseMatchRun.objects.first()
+
+    @as_auth()
+    def test_get(self):
+        res = self.client.get(self.ENDPOINT)
+        self.assertEqual(res.status_code, 200)
+
+    def test_noaccess(self):
+        noaccess(self)
+
+    @as_auth()
+    def test_get(self):
+        res = self.client.get(self.ENDPOINT)
+        self.assertEqual(res.status_code, 200)
+        for k in [
+            "id",
+            "url",
+            "created_on",
+            "pytorch_model",
+            "cutoff_distance",
+            "exclude_future_distance",
+            "min_samples",
+            "n_sets",
+            "n_complete",
+            "download_matches",
+        ]:
+            self.assertIn(k, res.data["results"][0])
+
+    @as_auth()
+    def test_get_detail(self):
+        res = self.client.get(f"{self.ENDPOINT}{self.OBJ1.id}/")
+        self.assertEqual(res.status_code, 200)
+        for k in [
+            "id",
+            "url",
+            "created_on",
+            "pytorch_model",
+            "cutoff_distance",
+            "exclude_future_distance",
+            "min_samples",
+            "n_sets",
+            "n_complete",
+            "download_matches",
+        ]:
+            self.assertIn(k, res.data)
+
+    @as_auth()
+    def test_download_matches(self):
+        res = self.client.get(f"{self.ENDPOINT}{self.OBJ1.id}/download_matches/")
+        self.assertEqual(res.status_code, 200)
