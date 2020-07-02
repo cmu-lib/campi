@@ -121,6 +121,7 @@ class IIIFModel(models.Model):
         unique=True,
         editable=False,
         help_text="Base path for the image on the IIIF server",
+        db_index=True,
     )
     height = models.PositiveIntegerField(default=0)
     width = models.PositiveIntegerField(default=0)

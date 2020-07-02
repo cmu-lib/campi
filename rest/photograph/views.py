@@ -28,6 +28,7 @@ class PhotographFilter(filters.FilterSet):
     tag = filters.ModelChoiceFilter(
         queryset=tagging.models.Tag.objects.all(), field_name="photograph_tags__tag"
     )
+    image_path = filters.CharFilter(lookup="icontains")
 
 
 def prepare_photograph_qs(qs):
