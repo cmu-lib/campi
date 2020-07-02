@@ -81,7 +81,6 @@ class CloseMatchSetSerializer(serializers.ModelSerializer):
     )
     memberships = CloseMatchSetMembershipSerializer(many=True)
     user_last_modified = UserSerializer(many=False)
-    invalid = serializers.BooleanField(read_only=True)
     overlapping = serializers.BooleanField(read_only=True)
     n_images = serializers.IntegerField(read_only=True)
     n_unreviewed_images = serializers.IntegerField(read_only=True)
@@ -98,7 +97,6 @@ class CloseMatchSetSerializer(serializers.ModelSerializer):
             "user_last_modified",
             "last_updated",
             "has_duplicates",
-            "invalid",
             "n_images",
             "n_unreviewed_images",
             "n_redundant_images",
