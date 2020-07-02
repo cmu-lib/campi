@@ -197,7 +197,7 @@ class JobListView(TestCase):
     @as_auth()
     def test_directory_filter(self):
         directory = self.OBJ1.photographs.first().directory
-        res = self.client.get(self.ENDPOINT, data={"direcotry": directory.id})
+        res = self.client.get(self.ENDPOINT, data={"directory": directory.id})
         self.assertEqual(res.status_code, 200)
         self.assertIn(self.OBJ1.id, [d["id"] for d in res.data["results"]])
 
@@ -222,5 +222,69 @@ class JobListView(TestCase):
                         ).all()
                     ]
                 )
+            )
+
+
+class JobTagListView(TestCase):
+    fixtures = ["campi/fixtures/test.json"]
+
+    ENDPOINT = reverse("jobtag-list")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.OBJ1 = models.JobTag.objects.first()
+
+    @as_auth()
+    def test_get(self):
+        res = self.client.get(self.ENDPOINT)
+        self.assertEqual(res.status_code, 200)
+
+    def test_noaccess(self):
+        noaccess(self)
+
+    @as_auth()
+    def test_get(self):
+        res = self.client.get(self.ENDPOINT)
+        self.assertEqual(res.status_code, 200)
+        for k in ["id", "url", "label", "description", "n_jobs", "n_images"]:
+            self.assertIn(k, res.data["results"][0])
+
+    @as_auth()
+    def test_get_detail(self):
+        res = self.client.get(f"{self.ENDPOINT}{self.OBJ1.id}/")
+        self.assertEqual(res.status_code, 200)
+        for k in ["id", "url", "label", "description", "n_jobs", "n_images"]:
+            self.assertIn(k, res.data)
+
+    @as_auth()
+    def test_text_filter(self):
+        res = self.client.get(self.ENDPOINT, data={"label": self.OBJ1.label})
+        self.assertEqual(res.status_code, 200)
+        for d in res.data["results"]:
+            self.assertIn(self.OBJ1.label.lower(), d["label"].lower())
+
+    @as_auth()
+    def test_job_filter(self):
+        job = self.OBJ1.jobs.first()
+        res = self.client.get(self.ENDPOINT, data={"job": job.id})
+        self.assertEqual(res.status_code, 200)
+        for d in res.data["results"]:
+            self.assertIn(d["label"].lower(), job.label.lower())
+
+    @as_auth()
+    def test_directory_filter(self):
+        directory = (
+            photograph.models.Photograph.objects.filter(job__tags=self.OBJ1)
+            .first()
+            .directory
+        )
+
+        res = self.client.get(self.ENDPOINT, data={"directory": directory.id})
+        self.assertEqual(res.status_code, 200)
+        for d in res.data["results"]:
+            self.assertTrue(
+                photograph.models.Photograph.objects.filter(
+                    job__tags__id=d["id"], directory__id=directory.id
+                ).exists()
             )
 
