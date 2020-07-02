@@ -137,7 +137,7 @@ class JobListView(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.OBJ1 = models.Job.objects.first().id
+        cls.OBJ1 = models.Job.objects.first()
 
     @as_auth()
     def test_get(self):
@@ -165,7 +165,7 @@ class JobListView(TestCase):
 
     @as_auth()
     def test_get_detail(self):
-        res = self.client.get(f"{self.ENDPOINT}{self.OBJ1}/")
+        res = self.client.get(f"{self.ENDPOINT}{self.OBJ1.id}/")
         self.assertEqual(res.status_code, 200)
         for k in [
             "url",
@@ -178,3 +178,49 @@ class JobListView(TestCase):
             "date_end",
         ]:
             self.assertIn(k, res.data)
+
+    @as_auth()
+    def test_text_filter(self):
+        res = self.client.get(self.ENDPOINT, data={"text": self.OBJ1.label})
+        self.assertEqual(res.status_code, 200)
+        for d in res.data["results"]:
+            self.assertIn(self.OBJ1.label.lower(), d["label"].lower())
+
+    @as_auth()
+    def test_job_tag_filter(self):
+        job_tag = self.OBJ1.tags.first()
+        res = self.client.get(self.ENDPOINT, data={"job_tag": job_tag.id})
+        self.assertEqual(res.status_code, 200)
+        for d in res.data["results"]:
+            self.assertIn(job_tag.label.lower(), d["label"].lower())
+
+    @as_auth()
+    def test_directory_filter(self):
+        directory = self.OBJ1.photographs.first().directory
+        res = self.client.get(self.ENDPOINT, data={"direcotry": directory.id})
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(self.OBJ1.id, [d["id"] for d in res.data["results"]])
+
+    @as_auth()
+    def test_tag_filter(self):
+        tag = (
+            models.Job.objects.filter(photographs__photograph_tags__isnull=False)
+            .first()
+            .photographs.first()
+            .photograph_tags.first()
+            .tag
+        )
+        res = self.client.get(self.ENDPOINT, data={"tag": tag.id})
+        self.assertEqual(res.status_code, 200)
+        for d in res.data["results"]:
+            self.assertTrue(
+                any(
+                    [
+                        tag.id in [t.tag.id for t in p.photograph_tags.all()]
+                        for p in photograph.models.Photograph.objects.filter(
+                            job__id=d["id"]
+                        ).all()
+                    ]
+                )
+            )
+
