@@ -5,7 +5,7 @@ import tagging.models
 import campi.serializers
 
 
-class FlatTagSerializer(serializers.ModelSerializer):
+class PFlatTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = tagging.models.Tag
         fields = ["id", "label"]
@@ -13,7 +13,7 @@ class FlatTagSerializer(serializers.ModelSerializer):
 
 class PhotographTagSerializer(serializers.ModelSerializer):
     user_last_modified = campi.serializers.UserSerializer()
-    tag = FlatTagSerializer()
+    tag = PFlatTagSerializer()
 
     class Meta:
         model = tagging.models.PhotographTag
@@ -92,3 +92,29 @@ class PhotographDistanceListSerializer(PhotographListSerializer):
             "photograph_tags",
             "distance",
         ]
+
+
+class FaceAnnotationSerializer(serializers.ModelSerializer):
+    thumbnail = serializers.URLField(read_only=True)
+    photograph = PhotographListSerializer(read_only=True)
+
+    class Meta:
+        model = models.FaceAnnotation
+        fields = [
+            "id",
+            "photograph",
+            "detection_confidence",
+            "joy_likelihood",
+            "sorrow_likelihood",
+            "anger_likelihood",
+            "surprise_likelihood",
+            "under_exposed_likelihood",
+            "blurred_likelihood",
+            "headwear_likelihood",
+            "x",
+            "y",
+            "width",
+            "height",
+            "thumbnail",
+        ]
+

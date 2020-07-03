@@ -76,3 +76,27 @@ class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
             .annotate(n=Count("year"))
         )
         return Response(years_array)
+
+
+class FaceAnnotationFilter(filters.FilterSet):
+    photograph = filters.ModelChoiceFilter(queryset=models.Photograph.objects.all())
+    detection_confidence = filters.RangeFilter()
+
+
+class FaceAnnotationViewset(viewsets.ModelViewSet):
+    queryset = models.FaceAnnotation.objects.prefetch_related(
+        Prefetch("photograph", prepare_photograph_qs(models.Photograph.objects.all()))
+    ).all()
+    filterset_class = FaceAnnotationFilter
+    serializer_class = serializers.FaceAnnotationSerializer
+    ordering_fields = [
+        "photograph",
+        "detection_confidence",
+        "joy_likelihood",
+        "sorrow_likelihood",
+        "anger_likelihood",
+        "surprise_likelihood",
+        "under_exposed_likelihood",
+        "blurred_likelihood",
+        "headwear_likelihood",
+    ]

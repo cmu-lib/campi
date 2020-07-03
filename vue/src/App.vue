@@ -9,6 +9,9 @@
           <b-dropdown-item :to="{name: 'Tags'}">Tag list</b-dropdown-item>
           <b-dropdown-item :to="{name: 'TaggingTagSelect'}">Start tagging</b-dropdown-item>
         </b-nav-item-dropdown>
+        <b-nav-item-dropdown text="GCV">
+          <b-dropdown-item :to="{name: 'Faces'}">Face detection</b-dropdown-item>
+        </b-nav-item-dropdown>
       </b-navbar-nav>
       <b-navbar-nav v-if="user" class="ml-auto">
         <b-nav-item-dropdown :text="user.username" right>

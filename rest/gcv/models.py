@@ -3,6 +3,7 @@ from django.conf import settings
 from picklefield.fields import PickledObjectField
 import photograph.models
 from campi.models import dateCreatedModel
+from collections import namedtuple
 
 
 class GCVResponse(dateCreatedModel):
@@ -15,13 +16,10 @@ class GCVResponse(dateCreatedModel):
     annotations = PickledObjectField(null=True)
 
     def calc_transform_ratio(self):
-        long_side = (
-            self.photograph.height
-            if self.photograph.height >= self.photograph.width
-            else self.photograph.width
-        )
-
-        return long_side / settings.GOOGLE_SIZE
+        if self.photograph.height >= self.photograph.width:
+            return self.photograph.height / settings.GOOGLE_SIZE
+        else:
+            return self.photograph.width / settings.GOOGLE_SIZE
 
     def extract_faces(self):
         image_ratio = self.calc_transform_ratio()
@@ -49,6 +47,14 @@ class GCVResponse(dateCreatedModel):
                     y=transformed_y,
                     width=transformed_width,
                     height=transformed_height,
+                    detection_confidence=face.detection_confidence,
+                    joy_likelihood=face.joy_likelihood,
+                    sorrow_likelihood=face.sorrow_likelihood,
+                    anger_likelihood=face.anger_likelihood,
+                    surprise_likelihood=face.surprise_likelihood,
+                    under_exposed_likelihood=face.under_exposed_likelihood,
+                    blurred_likelihood=face.blurred_likelihood,
+                    headwear_likelihood=face.headwear_likelihood,
                 )
             )
         photograph.models.FaceAnnotation.objects.bulk_create(face_objects)

@@ -13,6 +13,7 @@ import Tagging from "@/views/Tagging.vue"
 import TaggingTagSelect from "@/views/TaggingTagSelect.vue"
 import TaggingSeedPhotoBrowse from "@/views/TaggingSeedPhotoBrowse.vue"
 import TaggingExecution from "@/views/TaggingExecution.vue"
+import Faces from "@/views/Faces.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -115,6 +116,11 @@ const routes = [
         }
       }
     ]
+  },
+  {
+    name: "Faces",
+    path: "/faces",
+    component: Faces
   }
 ]
 

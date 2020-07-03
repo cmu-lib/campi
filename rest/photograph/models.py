@@ -106,13 +106,24 @@ class Annotation(models.Model):
         if rendered_width is None and rendered_height is None:
             render_string = "full"
         else:
-            render_string = f"{rw},{rh}"
+            render_string = f"!{rw},{rh}"
 
-        return f"{self.photograph.iiif_base}/{self.x_min},{self.width},{self.y_max},{self.height}/{render_string}/0/default.jpg"
+        return f"{self.photograph.iiif_base}/{self.x},{self.y},{self.width},{self.height}/{render_string}/0/default.jpg"
+
+    @property
+    def thumbnail(self):
+        return self.image(rendered_height=300, rendered_width=300)
 
     class Meta:
         abstract = True
 
 
 class FaceAnnotation(Annotation):
-    pass
+    detection_confidence = models.FloatField(null=True, db_index=True)
+    joy_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+    sorrow_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+    anger_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+    surprise_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+    under_exposed_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+    blurred_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+    headwear_likelihood = models.PositiveIntegerField(null=True, db_index=True)
