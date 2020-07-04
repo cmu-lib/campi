@@ -58,3 +58,39 @@ class GCVResponse(dateCreatedModel):
                 )
             )
         photograph.models.FaceAnnotation.objects.bulk_create(face_objects)
+
+    def extract_objects(self):
+
+        located_objects = []
+        for obj in self.annotations.localized_object_annotations:
+            x_min = round(
+                obj.bounding_poly.normalized_vertices[0].x * self.photograph.width
+            )
+            x_max = round(
+                obj.bounding_poly.normalized_vertices[1].x * self.photograph.width
+            )
+            y_min = round(
+                obj.bounding_poly.normalized_vertices[0].y * self.photograph.height
+            )
+            y_max = round(
+                obj.bounding_poly.normalized_vertices[2].y * self.photograph.height
+            )
+
+            width = x_max - x_min
+            height = y_max - y_min
+
+            label_obj = photograph.models.ObjectAnnotationLabel.objects.get_or_create(
+                label=obj.name
+            )[0]
+            located_objects.append(
+                photograph.models.ObjectAnnotation(
+                    photograph=self.photograph,
+                    x=x_min,
+                    y=y_min,
+                    width=width,
+                    height=height,
+                    label=label_obj,
+                    score=obj.score,
+                )
+            )
+        photograph.models.ObjectAnnotation.objects.bulk_create(located_objects)

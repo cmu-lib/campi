@@ -73,7 +73,7 @@ class Photograph(
 
 class Annotation(models.Model):
     photograph = models.ForeignKey(
-        Photograph, on_delete=models.CASCADE, related_name="annotations"
+        Photograph, on_delete=models.CASCADE, related_name="%(class)s"
     )
     x = models.PositiveIntegerField(
         help_text="Number of pixels from the left side of the image"
@@ -127,3 +127,14 @@ class FaceAnnotation(Annotation):
     under_exposed_likelihood = models.PositiveIntegerField(null=True, db_index=True)
     blurred_likelihood = models.PositiveIntegerField(null=True, db_index=True)
     headwear_likelihood = models.PositiveIntegerField(null=True, db_index=True)
+
+
+class ObjectAnnotationLabel(campi.models.uniqueLabledModel):
+    pass
+
+
+class ObjectAnnotation(Annotation):
+    label = models.ForeignKey(
+        ObjectAnnotationLabel, on_delete=models.CASCADE, related_name="annotations"
+    )
+    score = models.FloatField()

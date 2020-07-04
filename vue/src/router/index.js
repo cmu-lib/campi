@@ -14,6 +14,7 @@ import TaggingTagSelect from "@/views/TaggingTagSelect.vue"
 import TaggingSeedPhotoBrowse from "@/views/TaggingSeedPhotoBrowse.vue"
 import TaggingExecution from "@/views/TaggingExecution.vue"
 import Faces from "@/views/Faces.vue"
+import Objects from "@/views/Objects.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -119,8 +120,13 @@ const routes = [
   },
   {
     name: "Faces",
-    path: "/faces",
+    path: "/gcv/faces",
     component: Faces
+  },
+  {
+    name: "Objects",
+    path: "/gcv/objects",
+    component: Objects
   }
 ]
 

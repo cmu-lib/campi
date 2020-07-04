@@ -100,3 +100,25 @@ class FaceAnnotationViewset(viewsets.ModelViewSet):
         "blurred_likelihood",
         "headwear_likelihood",
     ]
+
+
+class ObjectAnnotationFilter(filters.FilterSet):
+    photograph = filters.ModelChoiceFilter(queryset=models.Photograph.objects.all())
+    score = filters.RangeFilter()
+    label = filters.CharFilter(field_name="label__label", lookup_expr="icontains")
+
+
+class ObjectAnnotationViewset(viewsets.ModelViewSet):
+    queryset = (
+        models.ObjectAnnotation.objects.select_related("label")
+        .prefetch_related(
+            Prefetch(
+                "photograph", prepare_photograph_qs(models.Photograph.objects.all())
+            )
+        )
+        .all()
+    )
+    filterset_class = ObjectAnnotationFilter
+    serializer_class = serializers.ObjectAnnotationSerializer
+    ordering_fields = ["photograph", "score"]
+

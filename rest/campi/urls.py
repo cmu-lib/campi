@@ -23,6 +23,7 @@ router.register(r"tagging/task", tagging.views.TaggingTaskViewset)
 router.register(r"tagging/decision", tagging.views.TaggingDecisionViewset)
 router.register(r"tagging/photograph_tag", tagging.views.PhotographTagViewset)
 router.register(r"gcv/face_annotation", photograph.views.FaceAnnotationViewset)
+router.register(r"gcv/object_annotation", photograph.views.ObjectAnnotationViewset)
 
 schema_view = get_schema_view(
     openapi.Info(

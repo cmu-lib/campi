@@ -118,3 +118,23 @@ class FaceAnnotationSerializer(serializers.ModelSerializer):
             "thumbnail",
         ]
 
+
+class ObjectAnnotationSerializer(serializers.ModelSerializer):
+    thumbnail = serializers.URLField(read_only=True)
+    photograph = PhotographListSerializer(read_only=True)
+    label = serializers.SlugRelatedField(slug_field="label", read_only=True)
+
+    class Meta:
+        model = models.ObjectAnnotation
+        fields = [
+            "id",
+            "photograph",
+            "label",
+            "score",
+            "x",
+            "y",
+            "width",
+            "height",
+            "thumbnail",
+        ]
+
