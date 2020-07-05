@@ -20,10 +20,40 @@ class PhotographTagSerializer(serializers.ModelSerializer):
         fields = ["tag", "user_last_modified", "last_updated"]
 
 
+class FaceAnnotationFlatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FaceAnnotation
+        fields = [
+            "id",
+            "detection_confidence",
+            "joy_likelihood",
+            "sorrow_likelihood",
+            "anger_likelihood",
+            "surprise_likelihood",
+            "under_exposed_likelihood",
+            "blurred_likelihood",
+            "headwear_likelihood",
+            "x",
+            "y",
+            "width",
+            "height",
+        ]
+
+
+class ObjectAnnotationFlatSerializer(serializers.ModelSerializer):
+    label = serializers.SlugRelatedField(slug_field="label", read_only=True)
+
+    class Meta:
+        model = models.ObjectAnnotation
+        fields = ["id", "label", "score", "x", "y", "width", "height"]
+
+
 class PhotographDetailSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
     job = collection.serializers.JobDetailSerializer()
     photograph_tags = PhotographTagSerializer(many=True)
+    faceannotation = FaceAnnotationFlatSerializer(many=True)
+    objectannotation = ObjectAnnotationFlatSerializer(many=True)
 
     class Meta:
         model = models.Photograph
@@ -42,6 +72,8 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
             "job",
             "job_sequence",
             "photograph_tags",
+            "faceannotation",
+            "objectannotation",
         ]
 
 
@@ -137,4 +169,12 @@ class ObjectAnnotationSerializer(serializers.ModelSerializer):
             "height",
             "thumbnail",
         ]
+
+
+class ObjectAnnotationLabelSerializer(serializers.ModelSerializer):
+    n_annotations = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = models.ObjectAnnotationLabel
+        fields = ["id", "label", "n_annotations"]
 

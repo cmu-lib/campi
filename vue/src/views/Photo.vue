@@ -14,9 +14,16 @@
         :to="{name: 'Similarity', params: {id: image_data.id}}"
       >Find similar photos</b-button>
       <b-button size="sm" variant="primary" :href="image_data.image.full">Download full image</b-button>
+      <b-form-checkbox
+        v-model="show_annotations"
+        name="check-button"
+        switch
+        v-b-tooltip.hover
+        title="Show annotations of faces, objects, and text recognized from regions in this image."
+      >Show annotations</b-form-checkbox>
     </b-row>
     <b-row>
-      <IIIF :info_url="image_data.image.info" />
+      <IIIF :key="iiif_key" :info_url="image_data.image.info" :annotations="annotations" />
     </b-row>
   </div>
 </template>
@@ -33,7 +40,10 @@ export default {
     id: Number
   },
   data() {
-    return {};
+    return {
+      show_annotations: false,
+      iiif_key: 1
+    };
   },
   asyncComputed: {
     image_data() {
@@ -60,9 +70,37 @@ export default {
       };
       recursed_tree.push(terminal);
       return recursed_tree;
+    },
+    annotations() {
+      var anns = [];
+      if (!!this.image_data && this.show_annotations) {
+        this.image_data.faceannotation.map(f => {
+          var fann = this.pixels(f);
+          fann["className"] = "face-annotation";
+          fann["id"] = `face-${f.id}`;
+          fann["title"] = `face-${f.detection_confidence}`;
+          anns.push(fann);
+        });
+        this.image_data.objectannotation.map(o => {
+          var oann = this.pixels(o);
+          oann["className"] = "object-annotation";
+          oann["id"] = `object-${o.id}`;
+          oann["title"] = `object-${o.label}`;
+          anns.push(oann);
+        });
+      }
+      return anns;
     }
   },
   methods: {
+    pixels(annotation) {
+      return {
+        px: annotation.x,
+        py: annotation.y,
+        width: annotation.width,
+        height: annotation.height
+      };
+    },
     render_dtree: function(d_obj, dtree) {
       const payload = {
         to: { name: "Browse", query: { directory: d_obj.id } },
@@ -81,6 +119,12 @@ export default {
       } else {
         return job.job_code + " (no descriptive title)";
       }
+    }
+  },
+  watch: {
+    show_annotations() {
+      // HACKY Force IIIF component to update by incrementing its VNode key
+      this.iiif_key += 1;
     }
   }
 };

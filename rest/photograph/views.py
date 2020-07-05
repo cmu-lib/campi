@@ -120,5 +120,13 @@ class ObjectAnnotationViewset(viewsets.ModelViewSet):
     )
     filterset_class = ObjectAnnotationFilter
     serializer_class = serializers.ObjectAnnotationSerializer
-    ordering_fields = ["photograph", "score"]
+    ordering_fields = ["photograph", "score", "photograph__date_taken_early"]
+
+
+class ObjectAnnotationLabelViewset(viewsets.ModelViewSet):
+    queryset = models.ObjectAnnotationLabel.objects.order_by("label").annotate(
+        n_annotations=Count("annotations", distinct=True)
+    )
+    serializer_class = serializers.ObjectAnnotationLabelSerializer
+    pagination_class = None
 
