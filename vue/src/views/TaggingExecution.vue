@@ -11,13 +11,21 @@
                   :photograph="photograph"
                   :approved="accepted_photo_ids.includes(photograph.id)"
                   @toggle_photo="toggle_photo"
+                  @get_info="get_info"
                 />
               </b-col>
             </b-row>
           </div>
           <b-button @click="submit_choices">Get more photos...</b-button>
         </b-col>
-        <b-col cols="6"></b-col>
+        <b-col cols="6">
+          <PhotoDetail
+            :key="detail_photo_id + reset_counter"
+            v-if="!!detail_photo_id"
+            :photograph_id="detail_photo_id"
+            :available_tags="available_tags"
+          />
+        </b-col>
       </b-row>
     </b-overlay>
   </div>
@@ -27,9 +35,10 @@
 import { HTTP } from "@/main";
 import _ from "lodash";
 import PhotoSquare from "@/components/tagging/PhotoSquare.vue";
+import PhotoDetail from "@/components/tagging/PhotoDetail.vue";
 export default {
   name: "TaggingExecution",
-  components: { PhotoSquare },
+  components: { PhotoSquare, PhotoDetail },
   props: {
     task_id: {
       type: Number,
@@ -45,7 +54,10 @@ export default {
       nearest_neighbor_set: [],
       displayed_photos: [],
       photo_decisions: [],
-      loading: false
+      loading: false,
+      detail_photo_id: null,
+      reset_counter: 0,
+      available_tags: []
     };
   },
   computed: {
@@ -71,12 +83,10 @@ export default {
     },
     undecided_photo_ids() {
       // Photos that the user hasn't made a decision on yet. When a new set is scrolled up, any photos without a decision on them are decided FALSE
-      var diffs = _.difference(
+      return _.difference(
         this.displayed_photos.map(p => p.id),
         _.union(this.photo_decisions.map(d => d.photograph))
       );
-      console.log(diffs);
-      return diffs;
     }
   },
   methods: {
@@ -168,10 +178,30 @@ export default {
       } else {
         this.pop_neighbors();
       }
+      this.detail_photo_id = null;
+    },
+    get_info(photograph) {
+      this.detail_photo_id = photograph.id;
+    },
+    get_available_tags() {
+      HTTP.get("tagging/tag/").then(
+        response => {
+          this.available_tags = response.data.results;
+        },
+        error => {
+          console.log(error);
+        }
+      );
     }
   },
   mounted() {
+    this.get_available_tags();
     this.get_nn_set(this.pop_neighbors);
+  },
+  watch: {
+    photo_decisions() {
+      // this.reset_counter += 1;
+    }
   }
 };
 </script>
