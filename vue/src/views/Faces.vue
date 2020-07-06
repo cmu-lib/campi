@@ -3,12 +3,19 @@
     <b-row>
       <b-form-select :options="ordering_options" v-model="ordering" />
     </b-row>
+    <b-pagination
+      v-model="current_page"
+      v-if="faces.count>per_page"
+      :total-rows="faces.count"
+      :per-page="per_page"
+      class="mr-auto"
+    />
     <router-link
-      v-for="face in faces"
+      v-for="face in faces.results"
       :key="face.id"
       :to="{name: 'Photo', params: {id: face.photograph.id}}"
     >
-      <b-img class="m-3" :src="face.thumbnail" v-b-popover.hover.top="face_info(face)" />
+      <b-img-lazy class="m-3" :src="face.thumbnail" v-b-popover.hover.top="face_info(face)" />
     </router-link>
   </b-container>
 </template>
@@ -19,7 +26,9 @@ export default {
   name: "Faces",
   data() {
     return {
-      ordering: "-detection_confidence"
+      ordering: "-detection_confidence",
+      current_page: 1,
+      per_page: 100
     };
   },
   computed: {
@@ -50,15 +59,22 @@ export default {
           text: "Headwear"
         }
       ];
+    },
+    rest_page() {
+      return (this.current_page - 1) * this.per_page;
     }
   },
   asyncComputed: {
     faces() {
       return HTTP.get("/gcv/face_annotation/", {
-        params: { ordering: this.ordering }
+        params: {
+          ordering: this.ordering,
+          offset: this.rest_page,
+          limit: this.per_page
+        }
       }).then(
         response => {
-          return response.data.results;
+          return response.data;
         },
         error => {
           console.log(error);
