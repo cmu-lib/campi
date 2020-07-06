@@ -49,6 +49,10 @@ export default {
       type: Number,
       default: 10
     },
+    job: {
+      type: Object,
+      default: null
+    },
     job_tag: {
       type: Object,
       default: null
@@ -73,6 +77,9 @@ export default {
       };
       if (this.tag_label_search != "") {
         payload["text"] = this.tag_label_search;
+      }
+      if (!!this.job) {
+        payload["job"] = this.job.id;
       }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;

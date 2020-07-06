@@ -13,20 +13,52 @@ class DirectoryFilter(filters.FilterSet):
         help_text="Directories containing this text in their label",
         lookup_expr="icontains",
     )
-    job = filters.ModelChoiceFilter(
-        queryset=models.Job.objects.all(), field_name="immediate_photographs__job"
-    )
+    job = filters.ModelChoiceFilter(queryset=models.Job.objects.all(), method="by_job")
+
+    def by_job(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    models.Job.objects.filter(
+                        id=value.id, photographs__directory=OuterRef("pk")
+                    )
+                )
+            )
+
     job_tag = filters.ModelChoiceFilter(
-        queryset=models.JobTag.objects.all(),
-        field_name="immediate_photographs__job__tags",
+        queryset=models.JobTag.objects.all(), method="by_job_tag"
     )
+
+    def by_job_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    models.JobTag.objects.filter(
+                        id=value.id, jobs__photographs__directory=OuterRef("pk")
+                    )
+                )
+            )
+
     tag = filters.ModelChoiceFilter(
-        queryset=tagging.models.Tag.objects.all(),
-        field_name="immediate_photographs__photograph_tags__tag",
+        queryset=tagging.models.Tag.objects.all(), method="by_tag"
     )
-    # digitized_date = filters.DateFromToRangeFilter(
-    #     field_name="immediate_photographs__digitized_date", distinct=True
-    # )
+
+    def by_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    tagging.models.Tag.objects.filter(
+                        id=value.id,
+                        photograph_tags__photograph__directory=OuterRef("pk"),
+                    )
+                )
+            )
 
     is_top = filters.BooleanFilter(method="filter_is_top")
 
@@ -86,16 +118,6 @@ class JobFilter(filters.FilterSet):
         help_text="Jobs containing this text in their label or job ID number",
         method="search_text",
     )
-    job_tag = filters.ModelMultipleChoiceFilter(
-        queryset=models.JobTag.objects.all(), field_name="tags"
-    )
-    directory = filters.ModelChoiceFilter(
-        queryset=models.Directory.objects.all(), field_name="photographs__directory"
-    )
-    tag = filters.ModelChoiceFilter(
-        queryset=tagging.models.Tag.objects.all(),
-        field_name="photographs__photograph_tags__tag",
-    )
 
     def search_text(self, queryset, name, value):
         if value != "":
@@ -104,6 +126,42 @@ class JobFilter(filters.FilterSet):
             )
         else:
             return queryset
+
+    job_tag = filters.ModelChoiceFilter(
+        queryset=models.JobTag.objects.all(), field_name="tags"
+    )
+    directory = filters.ModelChoiceFilter(
+        queryset=models.Directory.objects.all(), method="by_directory"
+    )
+
+    def by_directory(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    models.Directory.objects.filter(
+                        id=value.id, immediate_photographs__job=OuterRef("pk")
+                    )
+                )
+            )
+
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(),
+        field_name="photographs__photograph_tags__tag",
+    )
+
+    def by_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    tagging.models.Tag.objects.filter(
+                        id=value.id, photograph_tags__photograph__job=OuterRef("pk")
+                    )
+                )
+            )
 
 
 class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
@@ -129,12 +187,6 @@ class JobTagFilter(filters.FilterSet):
     directory = filters.ModelChoiceFilter(
         queryset=models.Directory.objects.all(), method="by_directory"
     )
-    job = filters.ModelChoiceFilter(
-        queryset=models.Job.objects.all(), field_name="jobs"
-    )
-    tag = filters.ModelChoiceFilter(
-        queryset=tagging.models.Tag.objects.all(), method="by_tag"
-    )
 
     def by_directory(self, queryset, name, value):
         if value is None:
@@ -147,6 +199,13 @@ class JobTagFilter(filters.FilterSet):
                     )
                 )
             )
+
+    job = filters.ModelChoiceFilter(
+        queryset=models.Job.objects.all(), field_name="jobs"
+    )
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(), method="by_tag"
+    )
 
     def by_tag(self, queryset, name, value):
         if value is None:

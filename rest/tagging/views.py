@@ -16,14 +16,56 @@ class TagFilter(filters.FilterSet):
     label = filters.CharFilter(
         help_text="tags with this text in their label", lookup_expr="icontains"
     )
-    job = job = filters.ModelChoiceFilter(
-        queryset=collection.models.Job.objects.all(),
-        field_name="photograph_tags__photograph__job",
+    job = filters.ModelChoiceFilter(
+        queryset=collection.models.Job.objects.all(), method="by_job"
     )
-    directory = job = filters.ModelChoiceFilter(
+
+    def by_job(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.Job.objects.filter(
+                        id=value.id, photographs__photograph_tags__tag=OuterRef("pk")
+                    )
+                )
+            )
+
+    job_tag = filters.ModelChoiceFilter(
+        queryset=collection.models.JobTag.objects.all(), method="by_job_tag"
+    )
+
+    def by_job_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.JobTag.objects.filter(
+                        id=value.id,
+                        jobs__photographs__photograph_tags__tag=OuterRef("pk"),
+                    )
+                )
+            )
+
+    directory = filters.ModelChoiceFilter(
         queryset=collection.models.Directory.objects.all(),
         field_name="photograph_tags__photograph__directory",
     )
+
+    def by_directory(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.Directory.objects.filter(
+                        id=value.id,
+                        immediate_photographs__photograph_tags__tag=OuterRef("pk"),
+                    )
+                )
+            )
 
 
 class TagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):

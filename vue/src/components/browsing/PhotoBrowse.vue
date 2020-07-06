@@ -6,6 +6,7 @@
           v-model="tag"
           :directory="directory"
           :job="job"
+          :job_tag="job_tag"
           :digitized_date_range="digitized_date_range"
         />
         <JobTags
