@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Count, Q, BooleanField, ExpressionWrapper
+from django.db.models import Count, Q, BooleanField, ExpressionWrapper, Exists, OuterRef
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from collection import serializers, models
@@ -127,16 +127,39 @@ class JobTagFilter(filters.FilterSet):
         lookup_expr="icontains",
     )
     directory = filters.ModelChoiceFilter(
-        queryset=models.Directory.objects.all(),
-        field_name="jobs__photographs__directory",
+        queryset=models.Directory.objects.all(), method="by_directory"
     )
     job = filters.ModelChoiceFilter(
         queryset=models.Job.objects.all(), field_name="jobs"
     )
     tag = filters.ModelChoiceFilter(
-        queryset=tagging.models.Tag.objects.all(),
-        field_name="jobs__photographs__photograph_tags__tag",
+        queryset=tagging.models.Tag.objects.all(), method="by_tag"
     )
+
+    def by_directory(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    models.Directory.objects.filter(
+                        id=value.id, immediate_photographs__job__tags=OuterRef("pk")
+                    )
+                )
+            )
+
+    def by_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    tagging.models.Tag.objects.filter(
+                        id=value.id,
+                        photograph_tags__photograph__job__tags=OuterRef("pk"),
+                    )
+                )
+            )
 
 
 class JobTagViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
