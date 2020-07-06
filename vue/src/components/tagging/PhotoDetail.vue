@@ -30,6 +30,7 @@
 
 <script>
 import { HTTP } from "@/main";
+import _ from "lodash";
 import { BIconCamera, BIconFolderFill } from "bootstrap-vue";
 export default {
   name: "PhotoDetail",
@@ -60,6 +61,13 @@ export default {
           value: t.id
         };
       });
+    },
+    new_tags() {
+      // Tags to be added that aren't already attached to this photograph
+      return _.difference(
+        this.selected_tags,
+        this.photograph.photograph_tags.map(t => t.tag.id)
+      );
     }
   },
   methods: {
@@ -77,9 +85,8 @@ export default {
       );
     },
     register_selected_tags() {
-      console.log(this.selected_tags);
       Promise.all(
-        this.selected_tags.map(tag =>
+        this.new_tags.map(tag =>
           HTTP.post("tagging/photograph_tag/", {
             tag: tag,
             photograph: this.photograph.id
