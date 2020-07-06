@@ -108,17 +108,3 @@ class TaggingDecisionViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 class PhotographTagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.PhotographTag.objects.all()
     serializer_class = serializers.PhotographTagPostSerializer
-
-    @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        photograph_tag_serializer = self.get_serializer_class()(data=request.data)
-        if photograph_tag_serializer.is_valid():
-            obj = photograph_tag_serializer.save()
-            obj.user_last_edited = request.user
-            obj.save()
-            return Response(None, status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                photograph_tag_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
-

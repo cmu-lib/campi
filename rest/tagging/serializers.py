@@ -60,6 +60,10 @@ class TaggingDecisionSerializer(serializers.ModelSerializer):
 
 
 class PhotographTagPostSerializer(serializers.ModelSerializer):
+    user_last_modified = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
     class Meta:
         model = models.PhotographTag
-        fields = ["id", "url", "tag", "photograph"]
+        fields = ["id", "url", "tag", "photograph", "user_last_modified"]
