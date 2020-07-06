@@ -92,9 +92,17 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         return Response(serialized_neighbors, status.HTTP_200_OK)
 
 
+class TaggingDecisionFilterset(filters.FilterSet):
+    task = filters.ModelChoiceFilter(queryset=models.TaggingTask.objects.all())
+    photograph = filters.ModelChoiceFilter(
+        queryset=photograph.models.Photograph.objects.all()
+    )
+
+
 class TaggingDecisionViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.TaggingDecision.objects.all()
     serializer_class = serializers.TaggingDecisionSerializer
+    filterset_class = TaggingDecisionFilterset
 
 
 class PhotographTagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):

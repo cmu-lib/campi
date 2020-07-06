@@ -22,7 +22,7 @@
         </div>
         <div v-if="!!seed_photo">
           <h5>Seed photo:</h5>
-          <b-img :src="seed_photo.image.square" />
+          <b-img :src="seed_photo.image.square" width="100" />
         </div>
       </b-row>
     </b-col>

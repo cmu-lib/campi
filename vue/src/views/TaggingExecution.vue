@@ -1,6 +1,5 @@
 <template>
   <div>
-    <p>Now let's get tagging with task {{ task_id }} on seed photo {{ seed_photo_id }}</p>
     <p v-if="loading">Loading new results - this may take a few seconds...</p>
     <b-overlay :show="loading">
       <b-row>
@@ -8,13 +7,14 @@
           <div v-if="!!sorted_photos">
             <b-row v-for="row in sorted_photos" :key="row.number">
               <b-col v-for="photograph in row.data" :key="photograph.id" cols="3">
-                <b-img :src="photograph.image.square" @click="approve_photo(photograph)" />
-                <p>{{ photograph.id }}-{{ photograph.distance }}</p>
+                <PhotoSquare
+                  :photograph="photograph"
+                  :approved="accepted_photo_ids.includes(photograph.id)"
+                  @toggle_photo="toggle_photo"
+                />
               </b-col>
             </b-row>
           </div>
-          {{ accepted_neighbors }}
-          {{ unaccepted_photos }}
           <b-button @click="submit_choices">Get more photos...</b-button>
         </b-col>
         <b-col cols="6"></b-col>
@@ -26,8 +26,10 @@
 <script>
 import { HTTP } from "@/main";
 import _ from "lodash";
+import PhotoSquare from "@/components/tagging/PhotoSquare.vue";
 export default {
   name: "TaggingExecution",
+  components: { PhotoSquare },
   props: {
     task_id: {
       type: Number,
@@ -40,28 +42,38 @@ export default {
   },
   data() {
     return {
-      nearest_neighbors: [],
-      current_neighbors: [],
-      accepted_neighbors: [],
+      nearest_neighbor_set: [],
+      displayed_photos: [],
+      photo_decisions: [],
       loading: false
     };
   },
   computed: {
+    decided_photo_ids() {
+      return this.photo_decisions.map(d => d.photograph);
+    },
+    accepted_photo_ids() {
+      return this.photo_decisions
+        .filter(d => d.is_applicable == true)
+        .map(d => d.photograph);
+    },
     sorted_photos() {
-      if (this.current_neighbors.length > 0) {
+      // Structure the photos into a 9x9 grid
+      if (this.displayed_photos.length > 0) {
         return [
-          { number: 0, data: this.current_neighbors.slice(0, 3) },
-          { number: 1, data: this.current_neighbors.slice(3, 6) },
-          { number: 2, data: this.current_neighbors.slice(6, 9) }
+          { number: 0, data: this.displayed_photos.slice(0, 3) },
+          { number: 1, data: this.displayed_photos.slice(3, 6) },
+          { number: 2, data: this.displayed_photos.slice(6, 9) }
         ];
       } else {
         return null;
       }
     },
-    unaccepted_photos() {
+    undecided_photo_ids() {
+      // Photos that the user hasn't made a decision on yet. When a new set is scrolled up, any photos without a decision on them are decided FALSE
       var diffs = _.difference(
-        this.current_neighbors.map(p => p.id),
-        this.accepted_neighbors
+        this.displayed_photos.map(p => p.id),
+        _.union(this.photo_decisions.map(d => d.photograph))
       );
       console.log(diffs);
       return diffs;
@@ -69,11 +81,10 @@ export default {
   },
   methods: {
     pop_neighbors() {
-      this.current_neighbors = this.nearest_neighbors.slice(0, 9);
-      this.nearest_neighbors = this.nearest_neighbors.slice(
-        9,
-        this.nearest_neighbors.length
-      );
+      // Get up to nine photographs from the downloaded set
+      this.displayed_photos = this.nearest_neighbor_set.slice(0, 9);
+      // Remove those 9 from the nearest neighbor queue
+      this.nearest_neighbor_set = this.nearest_neighbor_set.slice(9);
     },
     get_nn_set(func = null) {
       this.loading = true;
@@ -81,9 +92,10 @@ export default {
         params: { photograph: this.seed_photo_id, n_neighbors: 90 }
       }).then(
         response => {
-          this.nearest_neighbors = response.data;
+          this.nearest_neighbor_set = response.data;
           this.loading = false;
           if (!!func) {
+            // An additional function to run once a new set of photos has been loaded
             func();
           }
         },
@@ -93,18 +105,51 @@ export default {
         }
       );
     },
-    approve_photo(photograph) {
+    toggle_photo(photograph) {
+      if (this.decided_photo_ids.includes(photograph.id)) {
+        // Get the associated photo decision and reverse it
+        const photo_decision = _.find(this.photo_decisions, {
+          photograph: photograph.id
+        });
+        this.update_decision(photo_decision.id, !photo_decision.is_applicable);
+      } else {
+        this.create_decision(photograph.id, true);
+      }
+    },
+    update_decision(decision_id, value) {
+      HTTP.patch(`tagging/decision/${decision_id}/`, {
+        is_applicable: value
+      }).then(
+        response => {
+          const decision_index = _.findIndex(this.photo_decisions, {
+            id: decision_id
+          });
+          this.photo_decisions.splice([decision_index], 1);
+          this.photo_decisions.push(response.data);
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    },
+    create_decision(photograph_id, value) {
       HTTP.post("tagging/decision/", {
         task: this.task_id,
-        photograph: photograph.id,
-        is_applicable: true
-      }).then(response => {
-        this.accepted_neighbors.push(response.data.photograph);
-      });
+        photograph: photograph_id,
+        is_applicable: value
+      }).then(
+        response => {
+          // Add the decision (whether True or False) to the local tracking array
+          this.photo_decisions.push(response.data);
+        },
+        error => {
+          console.log(error);
+        }
+      );
     },
     submit_choices() {
       Promise.all(
-        this.unaccepted_photos.map(id =>
+        this.undecided_photo_ids.map(id =>
           HTTP.post("tagging/decision/", {
             task: this.task_id,
             photograph: id,
@@ -113,12 +158,12 @@ export default {
         )
       ).then(onfulfilled => {
         console.log(onfulfilled);
-        this.accepted_neighbors = [];
+        this.photo_decisions = [];
         this.load_more_photos();
       });
     },
     load_more_photos() {
-      if (this.nearest_neighbors.length == 0) {
+      if (this.nearest_neighbor_set.length == 0) {
         this.get_nn_set(this.pop_neighbors);
       } else {
         this.pop_neighbors();
