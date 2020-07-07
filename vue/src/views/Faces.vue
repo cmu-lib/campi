@@ -1,22 +1,38 @@
 <template >
   <b-container fluid v-if="!!faces">
-    <b-row>
-      <b-form-select :options="ordering_options" v-model="ordering" @input="reset_page" />
+    <b-row align-h="center">
+      <b-form-group
+        id="ordering-help"
+        label-for="ordering"
+        label="Ordering"
+        description="Ordering by other than 'Face detection confidence' will filter the photoset to photos that score at least a 2 ('possible') on the selected feature scale."
+      >
+        <b-form-select
+          id="ordering"
+          :options="ordering_options"
+          v-model="ordering"
+          @input="reset_page"
+        />
+      </b-form-group>
     </b-row>
-    <b-pagination
-      v-model="current_page"
-      v-if="faces.count>per_page"
-      :total-rows="faces.count"
-      :per-page="per_page"
-      class="mr-auto"
-    />
-    <router-link
-      v-for="face in faces.results"
-      :key="face.id"
-      :to="{name: 'Photo', params: {id: face.photograph.id}}"
-    >
-      <b-img-lazy class="m-3" :src="face.thumbnail" v-b-popover.hover.top="face_info(face)" />
-    </router-link>
+    <b-row align-h="center">
+      <b-pagination
+        v-model="current_page"
+        v-if="faces.count>per_page"
+        :total-rows="faces.count"
+        :per-page="per_page"
+      />
+      <span class="ml-3">{{ faces.count }} results</span>
+    </b-row>
+    <b-row align-h="between">
+      <router-link
+        v-for="face in faces.results"
+        :key="face.id"
+        :to="{name: 'Photo', params: {id: face.photograph.id}}"
+      >
+        <b-img-lazy class="m-3" :src="face.thumbnail" v-b-popover.hover.top="face_info(face)" />
+      </router-link>
+    </b-row>
   </b-container>
 </template>
 
@@ -51,7 +67,7 @@ export default {
           text: "Anger"
         },
         {
-          value: "-surprise_lieklihood",
+          value: "-surprise_likelihood",
           text: "Surprise"
         },
         {
@@ -64,7 +80,12 @@ export default {
       return (this.current_page - 1) * this.per_page;
     },
     core_state() {
-      return { ordering: this.ordering };
+      var payload = { ordering: this.ordering };
+      if (this.ordering != "-detection_confidence") {
+        const qstring = this.ordering.substr(1);
+        payload[qstring] = 2;
+      }
+      return payload;
     },
     search_state() {
       var payload = this.core_state;

@@ -81,6 +81,11 @@ class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
 class FaceAnnotationFilter(filters.FilterSet):
     photograph = filters.ModelChoiceFilter(queryset=models.Photograph.objects.all())
     detection_confidence = filters.RangeFilter()
+    joy_likelihood = filters.NumberFilter(lookup_expr="gte")
+    sorrow_likelihood = filters.NumberFilter(lookup_expr="gte")
+    anger_likelihood = filters.NumberFilter(lookup_expr="gte")
+    surprise_likelihood = filters.NumberFilter(lookup_expr="gte")
+    headwear_likelihood = filters.NumberFilter(lookup_expr="gte")
 
 
 class FaceAnnotationViewset(viewsets.ModelViewSet):
