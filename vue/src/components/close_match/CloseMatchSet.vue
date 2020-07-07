@@ -38,7 +38,7 @@
           </span>
           <span>Match set {{ close_match_set.id }} ({{ close_match_set.n_unreviewed_images }} unreviewed images / {{ close_match_set.n_images }} total)</span>
           <span
-            v-if="modifying_user"
+            v-if="!!modifying_user"
           >Reveiwed by {{ close_match_set_state.user_last_modified.username }} {{ from_now(close_match_set_state.last_updated) }}</span>
         </b-col>
         <b-col cols="3">
@@ -259,7 +259,9 @@ export default {
     },
     modifying_user() {
       if (!!this.close_match_set_state) {
-        return this.close_match_set_state.user_last_modified;
+        if (!!this.close_match_set_state.user_last_modified) {
+          return this.close_match_set_state.user_last_modified;
+        }
       }
       return null;
     },
@@ -274,7 +276,11 @@ export default {
       output = Array.isArray(o) ? [] : {};
       for (key in o) {
         v = o[key];
-        output[key] = typeof v === "object" ? this.copy(v) : v;
+        if (!!v) {
+          output[key] = typeof v === "object" ? this.copy(v) : v;
+        } else {
+          output[key] = null;
+        }
       }
       return output;
     },
