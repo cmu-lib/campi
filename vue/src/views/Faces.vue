@@ -1,7 +1,7 @@
 <template >
   <b-container fluid v-if="!!faces">
     <b-row>
-      <b-form-select :options="ordering_options" v-model="ordering" />
+      <b-form-select :options="ordering_options" v-model="ordering" @input="reset_page" />
     </b-row>
     <b-pagination
       v-model="current_page"
@@ -28,7 +28,7 @@ export default {
     return {
       ordering: "-detection_confidence",
       current_page: 1,
-      per_page: 100
+      per_page: 50
     };
   },
   computed: {
@@ -62,16 +62,21 @@ export default {
     },
     rest_page() {
       return (this.current_page - 1) * this.per_page;
+    },
+    core_state() {
+      return { ordering: this.ordering };
+    },
+    search_state() {
+      var payload = this.core_state;
+      payload.offset = this.rest_page;
+      payload.limit = this.per_page;
+      return payload;
     }
   },
   asyncComputed: {
     faces() {
       return HTTP.get("/gcv/face_annotation/", {
-        params: {
-          ordering: this.ordering,
-          offset: this.rest_page,
-          limit: this.per_page
-        }
+        params: this.search_state
       }).then(
         response => {
           return response.data;
@@ -83,6 +88,9 @@ export default {
     }
   },
   methods: {
+    reset_page() {
+      this.current_page = 1;
+    },
     face_info(face) {
       return `
       joy: ${face.joy_likelihood}
@@ -91,6 +99,19 @@ export default {
       surprise_likelihood: ${face.surprise_likelihood}
       headwear_likelihood = ${face.headwear_likelihood}
       `;
+    }
+  },
+  watch: {
+    search_state() {
+      this.$router.push({ query: this.search_state });
+    }
+  },
+  created() {
+    if (!!this.$route.query.ordering) {
+      this.ordering = this.$route.query.ordering;
+    }
+    if (!!this.$route.query.offset) {
+      this.current_page = Number(this.$route.query.offset) / this.per_page + 1;
     }
   }
 };
