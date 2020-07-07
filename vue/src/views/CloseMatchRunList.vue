@@ -25,7 +25,7 @@
       <b-row flex align-h="between" align-v="center" class="mx-2">
         <b-col cols="3">
           <b-form-checkbox
-            v-model="user_signed_off"
+            v-model="unreviewed"
             name="check-button"
             switch
             v-b-tooltip.hover
@@ -103,7 +103,7 @@ export default {
     return {
       loading: null,
       current_page: 1,
-      user_signed_off: false,
+      unreviewed: null,
       show_redundant: false,
       close_match_sets: null,
       close_match_set_count: 0,
@@ -115,7 +115,7 @@ export default {
       return 10;
     },
     set_count_type() {
-      if (this.user_signed_off) {
+      if (this.unreviewed) {
         return "unapproved";
       } else {
         return "total";
@@ -130,7 +130,7 @@ export default {
         close_match_run: this.close_match_run_id,
         limit: this.per_page,
         offset: this.rest_page,
-        user_signed_off: this.user_signed_off,
+        unreviewed: this.unreviewed,
         memberships: this.photo_memberships,
         redundant: this.show_redundant
       };
@@ -175,7 +175,7 @@ export default {
         query: this.query_payload
       });
     },
-    user_signed_off() {
+    unreviewed() {
       this.current_page = 1;
     }
   },
@@ -183,8 +183,8 @@ export default {
     if (!!this.$route.query.offset) {
       this.current_page = (this.$route.query.offset + 1) / this.per_page;
     }
-    if (!!this.$route.query.user_signed_off) {
-      this.user_signed_off = Boolean(this.$route.query.user_signed_off);
+    if (!!this.$route.query.unreviewed) {
+      this.unreviewed = Boolean(this.$route.query.unreviewed);
     }
     if (!!this.$route.query.memberships) {
       this.photo_memberships = this.$route.query.memberships;

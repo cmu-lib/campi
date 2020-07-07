@@ -165,18 +165,14 @@ class CloseMatchSetFilter(filters.FilterSet):
     )
     redundant = filters.BooleanFilter()
     overlapping = filters.BooleanFilter()
-    user_signed_off = filters.BooleanFilter(method="has_user_signed_off")
+    unreviewed = filters.BooleanFilter(
+        field_name="user_last_modified", lookup_expr="isnull"
+    )
     memberships = filters.ModelChoiceFilter(
         queryset=photograph.models.Photograph.objects.all(),
         help_text="Photograph within this proposed match set",
         field_name="memberships__photograph",
     )
-
-    def has_user_signed_off(self, queryset, name, value):
-        if value:
-            return queryset.filter(user_last_modified__isnull=not value)
-        else:
-            return queryset
 
 
 class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
