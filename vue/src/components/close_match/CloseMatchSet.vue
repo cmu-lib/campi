@@ -441,7 +441,6 @@ export default {
       var excl = [];
       if (!this.show_excluded) excl.push("e");
       if (!this.show_other) excl.push("o");
-      console.log(excl);
       this.close_match_set_state.memberships = _.sortBy(
         this.close_match_set.memberships.filter(m => !excl.includes(m.state)),
         [this.membership_ordering, "id"]
