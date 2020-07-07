@@ -376,6 +376,9 @@ export default {
           ).photograph.id;
         }
       }
+      if (payload.has_duplicates == null) {
+        payload.has_duplicates = false;
+      }
       return payload;
     },
     register_set() {
