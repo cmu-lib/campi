@@ -5,16 +5,22 @@
       <b-row>
         <b-col cols="6">
           <div v-if="!!sorted_photos">
-            <b-row v-for="row in sorted_photos" :key="row.number">
-              <b-col v-for="photograph in row.data" :key="photograph.id" cols="3">
-                <PhotoSquare
-                  :photograph="photograph"
-                  :approved="accepted_photo_ids.includes(photograph.id)"
-                  @toggle_photo="toggle_photo"
-                  @get_info="get_info"
-                />
-              </b-col>
-            </b-row>
+            <b-card header="Photos for consideration" no-body>
+              <b-list-group flush>
+                <b-list-group-item v-for="row in sorted_photos" :key="row.number">
+                  <b-row align-h="between" align-v="center">
+                    <PhotoSquare
+                      v-for="photograph in row.data"
+                      :key="photograph.id"
+                      :photograph="photograph"
+                      :approved="accepted_photo_ids.includes(photograph.id)"
+                      @toggle_photo="toggle_photo"
+                      @get_info="get_info"
+                    />
+                  </b-row>
+                </b-list-group-item>
+              </b-list-group>
+            </b-card>
           </div>
           <b-button @click="submit_choices">Get more photos...</b-button>
         </b-col>

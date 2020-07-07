@@ -1,22 +1,19 @@
 <template>
   <div class="m-3">
-    <b-img :src="photograph.image.square" :class="{'approved': approved}" />
+    <b-img :src="photograph.image.square" :class="{'approved': approved}" @click="get_info" />
     <div class="photo-square-buttons">
       <b-button class="mx-2" variant="success" size="sm" @click="toggle_photo" :pressed="approved">
         <BIconCheck2 />
-      </b-button>
-      <b-button class="mx-2" variant="info" size="sm" @click="get_info">
-        <BIconInfoCircleFill />
       </b-button>
     </div>
   </div>
 </template>
 
 <script>
-import { BIconCheck2, BIconInfoCircleFill } from "bootstrap-vue";
+import { BIconCheck2 } from "bootstrap-vue";
 export default {
   name: "PhotoSquare",
-  components: { BIconCheck2, BIconInfoCircleFill },
+  components: { BIconCheck2 },
   props: {
     photograph: {
       type: Object,
