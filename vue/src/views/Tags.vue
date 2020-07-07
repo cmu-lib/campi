@@ -27,7 +27,15 @@
           :key="tag.id"
           class="d-flex justify-content-between align-items-center"
         >
-          <span>{{ tag.label }}</span>
+          <span>
+            <BIconPencil @click="tag_edit_init(tag)" />
+            {{ tag.label }}
+          </span>
+          <b-modal :id="`edit-tag-${tag.id}`" @ok="edit_tag(tag)">
+            <b-form-group label="Edit tag label" id="tag-label-edit-info">
+              <b-form-input id="tag-label-edit" v-model="tag_edit_label" />
+            </b-form-group>
+          </b-modal>
           <span>
             <b-badge class="mx-3">{{ tag.n_images }} photos</b-badge>
             <BIconXCircleFill variant="secondary" @click="$bvModal.show(`delete-tag-${tag.id}`)" />
@@ -46,14 +54,15 @@
 
 <script>
 import { HTTP } from "@/main";
-import { BIconXCircleFill } from "bootstrap-vue";
+import { BIconXCircleFill, BIconPencil } from "bootstrap-vue";
 export default {
   name: "Tags",
-  components: { BIconXCircleFill },
+  components: { BIconXCircleFill, BIconPencil },
   data() {
     return {
       tags: [],
       new_tag_label: null,
+      tag_edit_label: null,
       tag_ordering: "label"
     };
   },
@@ -82,6 +91,10 @@ export default {
         }
       );
     },
+    tag_edit_init(tag) {
+      this.tag_edit_label = tag.label;
+      this.$bvModal.show(`edit-tag-${tag.id}`);
+    },
     create_tag() {
       HTTP.post("/tagging/tag/", { label: this.new_tag_label }).then(
         results => {
@@ -90,11 +103,31 @@ export default {
           this.new_tag_label = null;
         },
         error => {
-          this.$bvToast.toast(error.data, {
+          this.$bvToast.toast(error.response.data.label, {
             title: "Error",
             variant: "danger"
           });
           this.new_tag_label = null;
+        }
+      );
+    },
+    edit_tag(tag) {
+      HTTP.patch(`/tagging/tag/${tag.id}/`, {
+        label: this.tag_edit_label
+      }).then(
+        results => {
+          this.$bvToast.toast(results.status, {
+            title: `"${tag.label}" updated`,
+            variant: "success"
+          });
+          this.get_tags();
+        },
+        error => {
+          this.$bvToast.toast(error.response.data.label, {
+            title: "Error",
+            variant: "danger"
+          });
+          this.tag_edit_label = null;
         }
       );
     },
