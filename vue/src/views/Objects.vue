@@ -1,8 +1,8 @@
 <template>
-  <b-container fluid>
+  <b-container fluid v-if="!!objects">
     <b-row>
-      <b-form-select :options="ordering_options" v-model="ordering" />
-      <b-form-select v-if="!!labels" :options="labels" v-model="label" />
+      <b-form-select :options="ordering_options" v-model="ordering" @input="reset_page" />
+      <b-form-select v-if="!!labels" :options="labels" v-model="label" @input="reset_page" />
     </b-row>
     <b-pagination
       v-model="current_page"
@@ -51,15 +51,17 @@ export default {
         }
       ];
     },
-    search_state() {
-      var payload = {
-        ordering: this.ordering,
-        offset: this.rest_page,
-        limit: this.per_page
-      };
+    core_state() {
+      var payload = { ordering: this.ordering };
       if (!!this.label) {
         payload["label"] = this.label;
       }
+      return payload;
+    },
+    search_state() {
+      var payload = this.core_state;
+      payload.offset = this.rest_page;
+      payload.limit = this.per_page;
       return payload;
     },
     rest_page() {
@@ -95,16 +97,15 @@ export default {
       );
     }
   },
+  methods: {
+    reset_page() {
+      this.current_page = 1;
+    }
+  },
   watch: {
     search_state() {
       this.$router.push({ query: this.search_state });
     }
-    // ordering() {
-    //   this.current_page = 1;
-    // },
-    // label() {
-    //   this.current_page = 1;
-    // }
   },
   created() {
     if (!!this.$route.query.ordering) {
