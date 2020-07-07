@@ -1,28 +1,57 @@
 <template>
   <b-container fluid v-if="!!objects">
-    <b-row>
-      <b-form-select :options="ordering_options" v-model="ordering" @input="reset_page" />
-      <b-form-select v-if="!!labels" :options="labels" v-model="label" @input="reset_page" />
+    <b-container class="mt-3">
+      <p>Results from Google Cloud Vision API's "object localization" feature, which tries to identify generic types of objects/products within pictures and draw boxes around them.</p>
+    </b-container>
+    <b-row class="mt-3" align-h="around">
+      <b-form-group id="ordering-help" label-for="ordering" label="Ordering">
+        <b-form-select
+          id="ordering"
+          :options="ordering_options"
+          v-model="ordering"
+          @input="reset_page"
+        />
+      </b-form-group>
+      <b-form-group id="labels-help" label-for="labels" label="Localized object label">
+        <b-form-select
+          id="labels"
+          v-if="!!labels"
+          :options="labels"
+          v-model="label"
+          @input="reset_page"
+        />
+      </b-form-group>
     </b-row>
-    <b-pagination
-      v-model="current_page"
-      v-if="objects.count>per_page"
-      :total-rows="objects.count"
-      :per-page="per_page"
-      class="mr-auto"
-    />
-    <router-link
-      v-for="obj in objects.results"
-      :key="obj.id"
-      :to="{name: 'Photo', params: {id: obj.photograph.id}}"
-    >
-      <b-img
-        class="m-3"
-        :src="obj.thumbnail"
-        v-b-tooltip.hover
-        :title="`${obj.id} - ${obj.label}`"
+    <b-row align-h="center">
+      <b-pagination
+        v-model="current_page"
+        v-if="objects.count>per_page"
+        :total-rows="objects.count"
+        :per-page="per_page"
       />
-    </router-link>
+    </b-row>
+    <b-row align-h="between">
+      <router-link
+        v-for="obj in objects.results"
+        :key="obj.id"
+        :to="{name: 'Photo', params: {id: obj.photograph.id}}"
+      >
+        <b-img
+          class="m-3"
+          :src="obj.thumbnail"
+          v-b-tooltip.hover
+          :title="`${obj.id} - ${obj.label} - ${obj.score.toFixed(3)}`"
+        />
+      </router-link>
+    </b-row>
+    <b-row align-h="center">
+      <b-pagination
+        v-model="current_page"
+        v-if="objects.count>per_page"
+        :total-rows="objects.count"
+        :per-page="per_page"
+      />
+    </b-row>
   </b-container>
 </template>
 
@@ -35,7 +64,7 @@ export default {
       ordering: "-score",
       label: null,
       current_page: 1,
-      per_page: 100
+      per_page: 50
     };
   },
   computed: {
