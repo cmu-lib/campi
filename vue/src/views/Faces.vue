@@ -1,5 +1,5 @@
 <template >
-  <b-container fluid>
+  <b-container fluid v-if="!!faces">
     <b-row>
       <b-form-select :options="ordering_options" v-model="ordering" />
     </b-row>
