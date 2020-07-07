@@ -184,7 +184,7 @@ export default {
       this.current_page = (this.$route.query.offset + 1) / this.per_page;
     }
     if (!!this.$route.query.user_signed_off) {
-      this.user_signed_off = this.$route.query.user_signed_off;
+      this.user_signed_off = Boolean(this.$route.query.user_signed_off);
     }
     if (!!this.$route.query.memberships) {
       this.photo_memberships = this.$route.query.memberships;

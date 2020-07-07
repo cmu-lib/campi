@@ -268,6 +268,16 @@ export default {
     }
   },
   methods: {
+    copy(o) {
+      // Produce a deep copy of the close match set data from the server into a new object stored and modified localy
+      var output, v, key;
+      output = Array.isArray(o) ? [] : {};
+      for (key in o) {
+        v = o[key];
+        output[key] = typeof v === "object" ? this.copy(v) : v;
+      }
+      return output;
+    },
     activate_sidebar(payload) {
       this.sidebar_payload = payload;
       this.show_sidebar = true;
@@ -427,10 +437,11 @@ export default {
       );
     },
     update_state() {
-      this.close_match_set_state = this.close_match_set;
+      this.close_match_set_state = this.copy(this.close_match_set);
       var excl = [];
       if (!this.show_excluded) excl.push("e");
       if (!this.show_other) excl.push("o");
+      console.log(excl);
       this.close_match_set_state.memberships = _.sortBy(
         this.close_match_set.memberships.filter(m => !excl.includes(m.state)),
         [this.membership_ordering, "id"]
