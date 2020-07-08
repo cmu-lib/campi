@@ -37,8 +37,9 @@ export default {
       );
       if (existing_tasks.length == 1) {
         // If a task has already been registered with this tag/model combo, PATCH it to assign the current user
-        HTTP.patch(`tagging/task/${existing_tasks[0].id}/`, {
-          assigned_user: this.$root.user.id
+        HTTP.put(`tagging/task/${existing_tasks[0].id}/`, {
+          tag: this.selected_tag.id,
+          pytorch_model: this.pytorch_model
         }).then(
           response => {
             this.$router.push({
