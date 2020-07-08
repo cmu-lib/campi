@@ -58,3 +58,33 @@ class TagListView(TestCase):
             self.assertIn(k, res.data)
         self.assertEquals("foo", res.data["label"])
 
+    @as_auth()
+    def test_label_filter(self):
+        res = self.client.get(self.ENDPOINT, data={"label": self.OBJ1.label})
+        self.assertEqual(res.status_code, 200)
+        for tag in res.data["results"]:
+            self.assertIn(self.OBJ1.label.lower(), tag["label"].lower())
+
+    @as_auth()
+    def test_job_filter(self):
+        target_job = self.OBJ1.photograph_tags.first().photograph.job
+        res = self.client.get(self.ENDPOINT, data={"job": target_job.id})
+        self.assertEqual(res.status_code, 200)
+        for tag in res.data["results"]:
+            self.assertTrue(
+                photograph.models.Photograph.objects.filter(
+                    photograph_tags__tag=tag["id"], job=target_job
+                ).exists()
+            )
+
+    @as_auth()
+    def test_job_tag_filter(self):
+        target_job_tag = self.OBJ1.photograph_tags.first().photograph.job.tags.first()
+        res = self.client.get(self.ENDPOINT, data={"job_tag": target_job_tag.id})
+        self.assertEqual(res.status_code, 200)
+        for tag in res.data["results"]:
+            self.assertTrue(
+                photograph.models.Photograph.objects.filter(
+                    photograph_tags__tag=tag["id"], job__tags=target_job_tag
+                ).exists()
+            )
