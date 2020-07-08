@@ -231,3 +231,83 @@ class PhotographTagListView(TestCase):
             new_task_obj.data["photograph_tags"][0]["user_last_modified"]["username"],
         )
 
+
+class TaggingDecisionListView(TestCase):
+    fixtures = ["campi/fixtures/test.json"]
+
+    ENDPOINT = reverse("taggingdecision-list")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.OBJ1 = models.TaggingDecision.objects.last()
+        cls.PHOTO1 = photograph.models.Photograph.objects.exclude(
+            decisions__task=cls.OBJ1.task
+        ).first()
+
+    def test_noaccess(self):
+        noaccess(self)
+
+    @as_auth()
+    def test_get(self):
+        res = self.client.get(self.ENDPOINT)
+        self.assertEqual(res.status_code, 200)
+        for k in ["id", "task", "photograph", "is_applicable"]:
+            self.assertIn(k, res.data["results"][0])
+
+    @as_auth()
+    def test_post_no(self):
+        res_no = self.client.post(
+            self.ENDPOINT,
+            {
+                "task": self.OBJ1.task.id,
+                "photograph": self.PHOTO1.id,
+                "is_applicable": False,
+            },
+        )
+        self.assertEqual(res_no.status_code, 201)
+        self.assertNotIn(
+            self.OBJ1.task.tag.id,
+            self.PHOTO1.photograph_tags.all().values_list("tag__id", flat=True),
+        )
+
+    @as_auth()
+    def test_post_yes(self):
+        res_yes = self.client.post(
+            self.ENDPOINT,
+            {
+                "task": self.OBJ1.task.id,
+                "photograph": self.PHOTO1.id,
+                "is_applicable": True,
+            },
+        )
+        self.assertEqual(res_yes.status_code, 201)
+        self.assertIn(
+            self.OBJ1.task.tag.id,
+            self.PHOTO1.photograph_tags.all().values_list("tag__id", flat=True),
+        )
+        self.assertEqual(
+            "root",
+            self.PHOTO1.photograph_tags.filter(tag=self.OBJ1.task.tag)
+            .first()
+            .user_last_modified.username,
+        )
+
+    @as_auth()
+    def test_patch(self):
+        res_yes = self.client.post(
+            self.ENDPOINT,
+            {
+                "task": self.OBJ1.task.id,
+                "photograph": self.PHOTO1.id,
+                "is_applicable": True,
+            },
+        )
+        self.assertEqual(res_yes.status_code, 201)
+        res_no = self.client.patch(
+            f"{self.ENDPOINT}{res_yes.data['id']}/", {"is_applicable": False}
+        )
+        self.assertEqual(res_no.status_code, 200)
+        self.assertNotIn(
+            self.OBJ1.task.tag.id,
+            self.PHOTO1.photograph_tags.all().values_list("tag__id", flat=True),
+        )
