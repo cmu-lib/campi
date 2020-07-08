@@ -150,3 +150,37 @@ class TaggingTaskListView(TestCase):
         self.assertEqual(res.status_code, 200)
         put_res = self.client.get(f"{self.ENDPOINT}{self.OBJ1.id}/")
         self.assertEqual("bob", put_res.data["assigned_user"]["username"])
+
+    @as_auth()
+    def test_get_nn(self):
+        res = self.client.get(
+            f"{self.ENDPOINT}{self.OBJ1.id}/get_nn/",
+            {
+                "photograph": photograph.models.Photograph.objects.first().id,
+                "n_neighbors": 10,
+            },
+        )
+        self.assertEquals(res.status_code, 200)
+        already_tagged_photos = photograph.models.Photograph.objects.filter(
+            photograph_tags__tag=self.OBJ1.tag
+        ).values_list("id", flat=True)
+        for k in [
+            "id",
+            "url",
+            "label",
+            "image",
+            "filename",
+            "height",
+            "width",
+            "date_taken_early",
+            "date_taken_late",
+            "digitized_date",
+            "directory",
+            "job",
+            "job_sequence",
+            "photograph_tags",
+            "distance",
+        ]:
+            self.assertIn(k, res.data[0])
+        for photo in res.data:
+            self.assertNotIn(photo["id"], already_tagged_photos)
