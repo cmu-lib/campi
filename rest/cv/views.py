@@ -176,6 +176,12 @@ class CloseMatchSetFilter(filters.FilterSet):
 
 
 class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
+    representative_photograph_tags = Prefetch(
+        "representative_photograph__photograph_tags",
+        queryset=tagging.models.PhotographTag.objects.select_related("tag").order_by(
+            "-created_on"
+        ),
+    )
     membership_photograph_tags = Prefetch(
         "photograph__photograph_tags",
         queryset=tagging.models.PhotographTag.objects.select_related("tag").order_by(
@@ -221,7 +227,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             ),
             overlapping=Exists(secondary_memberships),
         )
-        .prefetch_related(memberships)
+        .prefetch_related(memberships, representative_photograph_tags)
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
