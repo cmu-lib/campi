@@ -210,10 +210,10 @@ class CloseMatchSetListView(TestCase):
 
     @as_auth()
     def test_user_signed_off(self):
-        res = self.client.get(f"{self.ENDPOINT}", {"user_signed_off": True})
+        res = self.client.get(f"{self.ENDPOINT}", {"unreviewed": True})
         self.assertEqual(res.status_code, 200)
         for s in res.data["results"]:
-            self.assertIsNotNone(s["user_last_modified"])
+            self.assertIsNone(s["user_last_modified"])
 
     @as_auth()
     def test_memberships(self):
