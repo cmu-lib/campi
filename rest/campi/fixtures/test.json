@@ -1070,6 +1070,13 @@
   }
 },
 {
+  "model": "tagging.tag",
+  "pk": 15,
+  "fields": {
+    "label": "statues"
+  }
+},
+{
   "model": "auth.user",
   "pk": 5,
   "fields": {
