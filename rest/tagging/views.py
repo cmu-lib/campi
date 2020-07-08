@@ -83,7 +83,7 @@ class TagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 
 
 class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.TaggingTask.objects.prefetch_related(
+    queryset = models.TaggingTask.objects.select_related(
         "assigned_user", "pytorch_model", "tag"
     )
     serializer_class = serializers.TaggingTaskSerializer
