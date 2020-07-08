@@ -52,7 +52,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
                 ix.add_item(i, pic.array)
             else:
                 ix.add_item(i, [0] * embed_dims)
-        print("Building index")
         ix.build(n_trees=n_trees)
 
         return {"index": ix, "photo_indices": photo_indices}
@@ -68,7 +67,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         )
         index_filename = f"{settings.DIST_INDICES_PATH}/{self.id}-{self.label}.ix"
         annoy_res["index"].save(fn=index_filename)
-        print("storing photo indices")
         self.annoy_idx_file = index_filename
         self.photo_indices = annoy_res["photo_indices"]
         self.save()
@@ -122,8 +120,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         nn_indices, nn_distances = temp_idx.get_nns_by_vector(
             vector, n=n_neighbors, include_distances=True
         )
-        print(nn_indices)
-        print(nn_distances)
 
         distance_cases = [
             When(id=photo_indices[nn_indices[i]], then=d)
@@ -477,11 +473,6 @@ class CloseMatchRun(dateModifiedModel):
                                 for i, p in enumerate(additional_photographs)
                             ]
                             CloseMatchSetMembership.objects.bulk_create(new_cms_members)
-        print(
-            self.close_match_sets.annotate(n_images=models.Count("memberships"))
-            .order_by("-n_images")
-            .values_list("n_images")
-        )
 
     def tidy_clusters(self):
         """
@@ -502,7 +493,6 @@ class CloseMatchRun(dateModifiedModel):
                 m.photograph.filename for m in cms.memberships.filter(core=True).all()
             }
             if len(setnames) == 1:
-                print(setnames)
                 cms.memberships.filter(core=True).update(
                     state=CloseMatchSetMembership.ACCEPTED
                 )
