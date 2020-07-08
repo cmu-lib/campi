@@ -184,3 +184,50 @@ class TaggingTaskListView(TestCase):
             self.assertIn(k, res.data[0])
         for photo in res.data:
             self.assertNotIn(photo["id"], already_tagged_photos)
+
+
+class PhotographTagListView(TestCase):
+    fixtures = ["campi/fixtures/test.json"]
+
+    ENDPOINT = reverse("photographtag-list")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.OBJ1 = models.PhotographTag.objects.first()
+
+    def test_noaccess(self):
+        noaccess(self)
+
+    @as_auth()
+    def test_get(self):
+        res = self.client.get(self.ENDPOINT)
+        self.assertEqual(res.status_code, 200)
+        for k in ["id", "url", "tag", "photograph"]:
+            self.assertIn(k, res.data["results"][0])
+
+    @as_auth()
+    def test_post(self):
+        bad_res = self.client.post(
+            f"{self.ENDPOINT}",
+            {"tag": self.OBJ1.tag.id, "photograph": self.OBJ1.photograph.id},
+        )
+        self.assertEqual(bad_res.status_code, 400)
+        newtag = models.Tag.objects.exclude(
+            photograph_tags__photograph=self.OBJ1.photograph
+        ).first()
+        new_tag_res = self.client.post(
+            f"{self.ENDPOINT}",
+            {"tag": newtag.id, "photograph": self.OBJ1.photograph.id},
+        )
+        self.assertEqual(new_tag_res.status_code, 201)
+        for k in ["id", "url", "tag", "photograph"]:
+            self.assertIn(k, new_tag_res.data)
+        # Check that the photograph now has this tag assigned by this user
+        new_task_obj = self.client.get(
+            f"{reverse('photograph-list')}{new_tag_res.data['photograph']}/"
+        )
+        self.assertEqual(
+            "root",
+            new_task_obj.data["photograph_tags"][0]["user_last_modified"]["username"],
+        )
+
