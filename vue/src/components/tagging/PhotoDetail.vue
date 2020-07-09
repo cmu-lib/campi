@@ -22,6 +22,7 @@
       </b-badge>
     </b-row>
     <b-row>
+      <b-button variant="warning" @click="$emit('new_seed_photo', photograph)">Use as seed photo</b-button>
       <b-button variant="primary" v-b-modal.add-tag>Add tag</b-button>
       <b-badge
         variant="warning"

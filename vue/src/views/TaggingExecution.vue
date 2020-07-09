@@ -32,6 +32,7 @@
             :available_tags="available_tags"
             :task_tag="task.tag"
             @new_tagged_photo="remove_photo"
+            @new_seed_photo="new_seed_photo"
           />
         </b-col>
       </b-row>
@@ -101,6 +102,13 @@ export default {
     }
   },
   methods: {
+    new_seed_photo(photograph) {
+      this.$router.push({
+        name: "TaggingExecution",
+        params: { task_id: this.task_id, seed_photo_id: photograph.id }
+      });
+      this.get_nn_set();
+    },
     pop_neighbors() {
       // Remove those 9 from the nearest neighbor queue
       this.nearest_neighbor_set.splice(0, 9);
