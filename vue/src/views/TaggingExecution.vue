@@ -60,7 +60,6 @@ export default {
     return {
       task: null,
       nearest_neighbor_set: [],
-      displayed_photos: [],
       photo_decisions: [],
       loading: false,
       detail_photo_id: null,
@@ -76,6 +75,9 @@ export default {
       return this.photo_decisions
         .filter(d => d.is_applicable == true)
         .map(d => d.photograph);
+    },
+    displayed_photos() {
+      return this.nearest_neighbor_set.slice(0, 9);
     },
     sorted_photos() {
       // Structure the photos into a 9x9 grid
@@ -99,8 +101,6 @@ export default {
   },
   methods: {
     pop_neighbors() {
-      // Get up to nine photographs from the downloaded set
-      this.displayed_photos = this.nearest_neighbor_set.slice(0, 9);
       // Remove those 9 from the nearest neighbor queue
       this.nearest_neighbor_set = this.nearest_neighbor_set.slice(9);
     },
