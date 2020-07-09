@@ -27,9 +27,10 @@
         <b-col cols="6">
           <PhotoDetail
             :key="detail_photo_id + reset_counter"
-            v-if="!!detail_photo_id"
+            v-if="!!detail_photo_id & !!task"
             :photograph_id="detail_photo_id"
             :available_tags="available_tags"
+            :task_tag="task.tag"
           />
         </b-col>
       </b-row>
@@ -57,6 +58,7 @@ export default {
   },
   data() {
     return {
+      task: null,
       nearest_neighbor_set: [],
       displayed_photos: [],
       photo_decisions: [],
@@ -198,10 +200,21 @@ export default {
           console.log(error);
         }
       );
+    },
+    get_task() {
+      HTTP.get(`tagging/task/${this.task_id}/`).then(
+        response => {
+          this.task = response.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
     }
   },
   mounted() {
     this.get_available_tags();
+    this.get_task();
     this.get_nn_set(this.pop_neighbors);
   },
   watch: {

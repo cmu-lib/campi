@@ -5,11 +5,18 @@
     </b-row>
     <b-row align-v="center" align-h="between">
       <span>{{ photograph.filename }}</span>
-      <b-badge variant="primary">
+      <b-badge
+        variant="primary"
+        @click="activate_sidebar({class: 'directory', object: photograph.directory})"
+      >
         <BIconFolderFill />
         {{ photograph.directory.label }}
       </b-badge>
-      <b-badge variant="info" v-if="photograph.job">
+      <b-badge
+        variant="info"
+        v-if="photograph.job"
+        @click="activate_sidebar({class: 'job', object: photograph.job})"
+      >
         <BIconCamera />
         {{ photograph.job.label }}
       </b-badge>
@@ -25,18 +32,41 @@
     <b-modal id="add-tag" title="Add tag(s) to photograph" @ok="register_selected_tags">
       <b-form-select v-model="selected_tags" :options="tag_choices" multiple />
     </b-modal>
+    <b-sidebar :id="`sidebar`" v-model="show_sidebar" v-if="show_sidebar" width="600px" right>
+      <b-container>
+        <h3>{{ sidebar_title }}</h3>
+        <p>Click on a photograph to tag it with "{{ task_tag.label }}".</p>
+        <b-button @click="register_whole_grid">Add "{{ task_tag.label }}" to all photos on this page</b-button>
+        <PhotoGrid
+          v-if="sidebar_payload.class=='job'"
+          :highlight_ids="tagged_grid_photos"
+          :job="sidebar_payload.object"
+          @photo_click="toggle_tag_from_grid"
+          @images="set_images"
+        />
+        <PhotoGrid
+          v-if="sidebar_payload.class=='directory'"
+          :highlight_ids="tagged_grid_photos"
+          :directory="sidebar_payload.object"
+          @photo_click="toggle_tag_from_grid"
+          @images="set_images"
+        />
+      </b-container>
+    </b-sidebar>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "@/main";
+import PhotoGrid from "@/components/browsing/PhotoGrid.vue";
 import _ from "lodash";
 import { BIconCamera, BIconFolderFill } from "bootstrap-vue";
 export default {
   name: "PhotoDetail",
   components: {
     BIconCamera,
-    BIconFolderFill
+    BIconFolderFill,
+    PhotoGrid
   },
   props: {
     photograph_id: {
@@ -45,12 +75,19 @@ export default {
     },
     available_tags: {
       type: Array
+    },
+    task_tag: {
+      type: Object,
+      default: null
     }
   },
   data() {
     return {
       photograph: null,
-      selected_tags: []
+      selected_tags: [],
+      show_sidebar: false,
+      sidebar_payload: {},
+      sidebar_grid_state: []
     };
   },
   computed: {
@@ -68,9 +105,33 @@ export default {
         this.selected_tags,
         this.photograph.photograph_tags.map(t => t.tag.id)
       );
+    },
+    sidebar_title() {
+      return `${this.sidebar_payload.class}: ${this.sidebar_payload.object.label}`;
+    },
+    tagged_grid_photos() {
+      if (!!this.task_tag) {
+        return this.sidebar_grid_state
+          .filter(p =>
+            p.photograph_tags
+              .map(t => t.tag.id)
+              .some(t => t == this.task_tag.id)
+          )
+          .map(p => p.id);
+      } else {
+        return [];
+      }
     }
   },
   methods: {
+    set_images(payload) {
+      console.log("Setting images");
+      this.sidebar_grid_state = payload;
+    },
+    activate_sidebar(payload) {
+      this.sidebar_payload = payload;
+      this.show_sidebar = true;
+    },
     get_photograph() {
       HTTP.get(`photograph/${this.photograph_id}/`).then(
         response => {
@@ -84,18 +145,67 @@ export default {
         }
       );
     },
+    toggle_tag_from_grid(photograph) {
+      if (photograph.photograph_tags.some(t => t.tag.id == this.task_tag.id)) {
+        this.remove_tag(photograph.id, this.task_tag.id);
+      } else {
+        this.add_tag(photograph.id, this.task_tag.id);
+      }
+    },
+    add_tag(photograph_id, tag_id) {
+      HTTP.post("tagging/photograph_tag/", {
+        tag: tag_id,
+        photograph: photograph_id
+      }).then(
+        response => {
+          const image_index = _.findIndex(this.sidebar_grid_state, {
+            id: photograph_id
+          });
+          this.sidebar_grid_state[image_index].photograph_tags.push({
+            id: response.data.id,
+            tag: { id: response.data.tag }
+          });
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    },
+    remove_tag(photograph_id, tag_id) {
+      const image_index = _.findIndex(this.sidebar_grid_state, {
+        id: photograph_id
+      });
+      console.log(`Image index: ${image_index}`);
+      const photograph_tag_index = _.findIndex(
+        this.sidebar_grid_state[image_index].photograph_tags,
+        pt => pt.tag.id == tag_id
+      );
+      console.log(`phototag index: ${photograph_tag_index}`);
+      const photograph_tag_id = this.sidebar_grid_state[image_index]
+        .photograph_tags[photograph_tag_index].id;
+      HTTP.delete(`tagging/photograph_tag/${photograph_tag_id}/`).then(
+        response => {
+          console.log(response);
+          this.sidebar_grid_state[image_index].photograph_tags.splice(
+            photograph_tag_index,
+            1
+          );
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    },
     register_selected_tags() {
       Promise.all(
-        this.new_tags.map(tag =>
-          HTTP.post("tagging/photograph_tag/", {
-            tag: tag,
-            photograph: this.photograph.id
-          })
-        )
+        this.new_tags.map(tag => this.add_tag(this.photograph.id, tag))
       ).then(onfulfilled => {
         this.get_photograph();
         console.log(onfulfilled);
       });
+    },
+    register_whole_grid() {
+      return null;
     }
   },
   mounted() {

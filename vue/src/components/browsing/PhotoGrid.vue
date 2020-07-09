@@ -121,6 +121,11 @@ export default {
     rest_page() {
       return (this.current_page - 1) * this.per_page;
     }
+  },
+  watch: {
+    images() {
+      this.$emit("images", this.images.results);
+    }
   }
 };
 </script>
