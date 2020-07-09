@@ -175,6 +175,7 @@ export default {
             id: response.data.id,
             tag: { id: response.data.tag }
           });
+          this.$emit("new_tagged_photo", this.sidebar_grid_state[image_index]);
         },
         error => {
           console.log(error);

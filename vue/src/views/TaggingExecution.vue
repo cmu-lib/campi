@@ -31,6 +31,7 @@
             :photograph_id="detail_photo_id"
             :available_tags="available_tags"
             :task_tag="task.tag"
+            @new_tagged_photo="remove_photo"
           />
         </b-col>
       </b-row>
@@ -102,7 +103,18 @@ export default {
   methods: {
     pop_neighbors() {
       // Remove those 9 from the nearest neighbor queue
-      this.nearest_neighbor_set = this.nearest_neighbor_set.slice(9);
+      this.nearest_neighbor_set.splice(0, 9);
+    },
+    remove_photo(photograph) {
+      console.log(photograph);
+      const photo_index = _.findIndex(this.nearest_neighbor_set, {
+        id: photograph.id
+      });
+      if (photo_index > -1) {
+        console.log(photo_index);
+        console.log(this.nearest_neighbor_set[photo_index]);
+        this.nearest_neighbor_set.splice(photo_index, 1);
+      }
     },
     get_nn_set(func = null) {
       this.loading = true;
@@ -182,7 +194,7 @@ export default {
     },
     load_more_photos() {
       if (this.nearest_neighbor_set.length == 0) {
-        this.get_nn_set(this.pop_neighbors);
+        this.get_nn_set(); //this.pop_neighbors
       } else {
         this.pop_neighbors();
       }
@@ -215,7 +227,7 @@ export default {
   mounted() {
     this.get_available_tags();
     this.get_task();
-    this.get_nn_set(this.pop_neighbors);
+    this.get_nn_set();
   },
   watch: {
     photo_decisions() {
