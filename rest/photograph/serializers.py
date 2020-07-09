@@ -17,7 +17,7 @@ class PhotographTagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = tagging.models.PhotographTag
-        fields = ["tag", "user_last_modified", "last_updated"]
+        fields = ["id", "tag", "user_last_modified", "last_updated"]
 
 
 class FaceAnnotationFlatSerializer(serializers.ModelSerializer):

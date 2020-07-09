@@ -45,6 +45,7 @@ class PhotographListView(TestCase):
             self.assertIn(k, res.data["results"][0])
         self.assertIn("full", res.data["results"][0]["image"])
         self.assertIn("id", res.data["results"][0]["directory"])
+        self.assertIn("id", res.data["results"][0]["photograph_tags"][0])
 
     @as_auth()
     def test_get_detail(self):
