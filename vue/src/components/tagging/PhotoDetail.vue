@@ -36,7 +36,10 @@
       <b-container>
         <h3>{{ sidebar_title }}</h3>
         <p>Click on a photograph to tag it with "{{ task_tag.label }}".</p>
-        <b-button @click="register_whole_grid">Add "{{ task_tag.label }}" to all photos on this page</b-button>
+        <b-button @click="register_whole_grid">
+          Add "{{ task_tag.label }}" to all photos on this page
+          <b-spinner v-if="requests_processing" small class="mr-1" />
+        </b-button>
         <PhotoGrid
           v-if="sidebar_payload.class=='job'"
           :highlight_ids="tagged_grid_photos"
@@ -87,7 +90,8 @@ export default {
       selected_tags: [],
       show_sidebar: false,
       sidebar_payload: {},
-      sidebar_grid_state: []
+      sidebar_grid_state: [],
+      requests_processing: false
     };
   },
   computed: {
@@ -121,6 +125,12 @@ export default {
       } else {
         return [];
       }
+    },
+    untagged_grid_photos() {
+      return _.difference(
+        this.sidebar_grid_state.map(p => p.id),
+        this.tagged_grid_photos
+      );
     }
   },
   methods: {
@@ -205,7 +215,16 @@ export default {
       });
     },
     register_whole_grid() {
-      return null;
+      this.requests_processing = true;
+      Promise.allSettled(
+        this.untagged_grid_photos.map(pid =>
+          this.add_tag(pid, this.task_tag.id)
+        )
+      ).then(onfulfilled => {
+        this.requests_processing = false;
+        this.get_photograph();
+        console.log(onfulfilled);
+      });
     }
   },
   mounted() {
