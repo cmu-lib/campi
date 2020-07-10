@@ -45,26 +45,37 @@ def prepare_photograph_qs(qs):
     return qs
 
 
-class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = prepare_photograph_qs(models.Photograph.objects.all())
+def prepare_photograph_detail_qs(qs):
+    object_annotations = models.ObjectAnnotation.objects.select_related("label").all()
     ordered_tags = tagging.models.PhotographTag.objects.select_related(
         "tag", "user_last_modified"
     ).order_by("-last_updated")
-    queryset = (
-        models.Photograph.objects.select_related("directory", "job")
+    qs = (
+        qs.select_related("directory", "job")
         .prefetch_related(
-            "job__tags", Prefetch("photograph_tags", queryset=ordered_tags)
+            "job__tags",
+            Prefetch("photograph_tags", queryset=ordered_tags),
+            Prefetch("objectannotation", queryset=object_annotations),
+            "faceannotation",
         )
         .all()
     )
+    return qs
+
+
+class PhotographViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
+    queryset = prepare_photograph_qs(models.Photograph.objects.all())
     ordering_fields = ["date_taken_early", "date_taken_late", "digitized_date"]
     filterset_class = PhotographFilter
     serializer_class = serializers.PhotographDetailSerializer
     serializer_action_classes = {
         "list": serializers.PhotographListSerializer,
-        "detail": serializers.PhotographDetailSerializer,
+        "retrieve": serializers.PhotographDetailSerializer,
     }
-    queryset_action_classes = {"list": queryset, "detail": queryset}
+    queryset_action_classes = {
+        "list": queryset,
+        "retrieve": prepare_photograph_detail_qs(models.Photograph.objects.all()),
+    }
 
     @action(detail=False, methods=["get"], name="Get range of years")
     def digitized_date_range(self, request):
