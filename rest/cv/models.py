@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Count, Q, Case, When
+from django.utils import timezone
 from campi.models import (
     uniqueLabledModel,
     descriptionModel,
