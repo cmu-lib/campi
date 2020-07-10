@@ -143,6 +143,9 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
 
         return nn_photos
 
+    def get_photo_embeddings(self, photo_id):
+        return self.embeddings.get(photograph__id=photo_id).array
+
     def get_summed_vector(self, photo_queryset):
         """
         Sums the embedding vectors from a photo queryset for use in an vector-based ANN search
@@ -150,6 +153,22 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         embeddings = self.embeddings.filter(photograph__in=photo_queryset)
         embedding_matrix = np.array(embeddings.values_list("array", flat=True))
         summed_vector = np.sum(embedding_matrix, axis=0)
+        return summed_vector
+
+    def vector_diff(self, vector1, vector2):
+        """
+        Returns vector1 - vector2
+        """
+        vec_arr = np.array([vector1, vector2])
+        diffed_vector = np.diff(vec_arr, axis=0)
+        return diffed_vector
+
+    def get_weighted_vector(self, photo_queryset, photo_id, weight=10):
+        composite_vector = self.get_summed_vector(photo_queryset)
+        seed_vector = self.get_photo_embeddings(photo_id)
+        weighted_seed_vector = [e * weight for e in seed_vector]
+        vec_arr = np.array([composite_vector, weighted_seed_vector])
+        summed_vector = np.sum(vec_arr, axis=0)
         return summed_vector
 
 

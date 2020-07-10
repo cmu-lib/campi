@@ -117,14 +117,18 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 decisions__in=task.decisions.filter(is_applicable=True)
             )
 
+            rejected_photos = photograph.models.Photograph.objects.filter(
+                decisions__in=task.decisions.filter(is_applicable=False)
+            )
+
             if tasked_photos.exists():
                 # If there have been any approved photos, create a new vector from their embeddings
-                composite_vector = task.pytorch_model.get_summed_vector(tasked_photos)
+                composite_vector = task.pytorch_model.get_weighted_vector(
+                    tasked_photos, photo_id
+                )
             else:
                 # If none of the reviewed photos have yet been accepted, then stick to the original seed photo vector
-                composite_vector = task.pytorch_model.embeddings.get(
-                    photograph__id=photo_id
-                ).array
+                composite_vector = task.pytorch_model.get_photo_embeddings(photo_id)
 
             nn = task.pytorch_model.get_arbitrary_nn(
                 composite_vector,
