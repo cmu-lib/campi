@@ -539,6 +539,81 @@ class CloseMatchSet(dateModifiedModel, userModifiedModel):
     class Meta:
         unique_together = ("close_match_run", "representative_photograph")
 
+    def approve(
+        self,
+        accepted_memberships,
+        rejected_memberships,
+        excluded_memberships,
+        representative_photograph,
+        has_duplicates,
+        user,
+    ):
+        updated_models = []
+        for m in accepted_memberships:
+            m.state = CloseMatchSetMembership.ACCEPTED
+            updated_models.append(m)
+        for m in rejected_memberships:
+            m.state = CloseMatchSetMembership.REJECTED
+            updated_models.append(m)
+        for m in excluded_memberships:
+            m.state = CloseMatchSetMembership.EXCLUDED
+            updated_models.append(m)
+        CloseMatchSetMembership.objects.bulk_update(updated_models, ["state"])
+
+        # Set representative photograph on set
+        self.representative_photograph = representative_photograph
+
+        # Tag this set with the user who has sent the approval notice
+        self.user_last_modified = user
+        self.has_duplicates = has_duplicates
+        self.save()
+
+        # Mark as "already matched" all accepted photos from other memberships THAT HAVEN'T BEEN ACCEPTED YET
+        accepted_photographs = photograph.models.Photograph.objects.filter(
+            close_match_memberships__in=accepted_memberships
+        ).distinct()
+        n_memberships_already_matched = (
+            CloseMatchSetMembership.objects.filter(
+                close_match_set__close_match_run=self.close_match_run,
+                close_match_set__user_last_modified__isnull=True,
+                photograph__in=accepted_photographs,
+            )
+            .all()
+            .update(state=CloseMatchSetMembership.OTHER_SET)
+        )
+
+        # Mark as "excluded" all memberships in this run from the "excluded" memberships set
+        excluded_photographs = photograph.models.Photograph.objects.filter(
+            close_match_memberships__in=excluded_memberships
+        )
+        n_memberships_excluded = (
+            CloseMatchSetMembership.objects.filter(
+                close_match_set__close_match_run=self.close_match_run,
+                photograph__in=excluded_photographs,
+            )
+            .all()
+            .update(state=CloseMatchSetMembership.EXCLUDED)
+        )
+
+        # Mark as "already judged" any sets that no longer have 2 or more photos
+        n_sets_too_small = (
+            CloseMatchSet.objects.annotate(
+                n_unreviewed_memberships=Count(
+                    "memberships",
+                    filter=Q(memberships__state=CloseMatchSetMembership.NOT_REVIEWED),
+                    distinct=True,
+                )
+            )
+            .filter(
+                n_unreviewed_memberships__lt=2,
+                close_match_run=self.close_match_run,
+                user_last_modified__isnull=True,
+            )
+            .update(user_last_modified=user, last_updated=timezone.now())
+        )
+
+        return {"invalidations": {"Redundant sets removed": n_sets_too_small}}
+
 
 class CloseMatchSetMembership(models.Model):
     NOT_REVIEWED = "n"
