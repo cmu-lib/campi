@@ -70,6 +70,20 @@ class Photograph(
         self.add_all_parent_directories()
         return response
 
+    def get_close_matches(self):
+        if self.close_match_memberships.filter(state="a").exists():
+            other_photo_ids = (
+                self.close_match_memberships.filter(state="a")
+                .first()
+                .close_match_set.memberships.exclude(photograph=self)
+                .all()
+                .values_list("photograph__id", flat=True)
+            )
+            other_photos = Photograph.objects.filter(id__in=other_photo_ids)
+            return other_photos
+        else:
+            return None
+
 
 class Annotation(models.Model):
     photograph = models.ForeignKey(

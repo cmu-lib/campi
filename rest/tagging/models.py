@@ -84,19 +84,19 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
     def save(self, *args, **kwargs):
         # Create or update PhotographTag relationship if the editor decided the tag was applicable
         if self.is_applicable:
-            PhotographTag.objects.update_or_create(
-                photograph=self.photograph,
-                tag=self.task.tag,
-                defaults={
-                    "user_last_modified": self.user_created,
-                    "last_updated": timezone.now(),
-                },
-            )
+            pt = PhotographTag.objects.get_or_create(
+                photograph=self.photograph, tag=self.task.tag
+            )[0]
+            pt.user_last_modified = self.user_created
+            pt.last_update = timezone.now()
+            pt.save()
         else:
             # If editor has decided it isn't applicable, remove any existing tag relationships
-            PhotographTag.objects.filter(
+            to_be_removed = PhotographTag.objects.filter(
                 photograph=self.photograph, tag=self.task.tag
-            ).all().delete()
+            ).all()
+            for pt in to_be_removed:
+                pt.delete()
         res = super().save(*args, **kwargs)
         return res
 
@@ -117,3 +117,32 @@ class PhotographTag(campi.models.dateModifiedModel, campi.models.userModifiedMod
 
     class Meta:
         unique_together = ("photograph", "tag")
+
+    def save(self, *args, **kwargs):
+        """
+        Any photos in a close match set with this one also get tagged
+        """
+        other_photos = self.photograph.get_close_matches()
+        if other_photos is not None:
+            new_photo_tags = [
+                PhotographTag(
+                    photograph=p,
+                    tag=self.tag,
+                    last_updated=timezone.now(),
+                    user_last_modified=self.user_last_modified,
+                )
+                for p in other_photos
+            ]
+            PhotographTag.objects.bulk_create(new_photo_tags, ignore_conflicts=True)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """
+        Any photos in a close match set with this one also get untagged
+        """
+        other_photos = self.photograph.get_close_matches()
+        if other_photos is not None:
+            PhotographTag.objects.filter(
+                photograph__in=other_photos, tag=self.tag
+            ).delete()
+        super().delete(*args, **kwargs)
