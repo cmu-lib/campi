@@ -33,7 +33,7 @@
     <b-modal id="add-tag" title="Add tag(s) to photograph" @ok="register_selected_tags">
       <b-form-select v-model="selected_tags" :options="tag_choices" multiple />
     </b-modal>
-    <b-sidebar :id="`sidebar`" v-model="show_sidebar" v-if="show_sidebar" width="600px" right>
+    <b-sidebar :id="`sidebar`" v-model="show_sidebar" v-if="show_sidebar" width="800px" right>
       <b-container>
         <h3>{{ sidebar_title }}</h3>
         <p>Click on a photograph to tag it with "{{ task_tag.label }}".</p>
