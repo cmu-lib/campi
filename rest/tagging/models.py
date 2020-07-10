@@ -123,7 +123,7 @@ class PhotographTag(campi.models.dateModifiedModel, campi.models.userModifiedMod
         Any photos in a close match set with this one also get tagged
         """
         other_photos = self.photograph.get_close_matches()
-        if other_photos is not None:
+        if bool(other_photos):
             new_photo_tags = [
                 PhotographTag(
                     photograph=p,
@@ -141,7 +141,7 @@ class PhotographTag(campi.models.dateModifiedModel, campi.models.userModifiedMod
         Any photos in a close match set with this one also get untagged
         """
         other_photos = self.photograph.get_close_matches()
-        if other_photos is not None:
+        if bool(other_photos):
             PhotographTag.objects.filter(
                 photograph__in=other_photos, tag=self.tag
             ).delete()
