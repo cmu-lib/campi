@@ -7,6 +7,10 @@
         Add "{{ task.tag.label }}" to all photos on this page
         <b-spinner v-if="requests_processing" small class="mr-1" />
       </b-button>
+      <b-button @click="reject_remaining_grid">
+        Exclude all untagged photos on this page from future consideration for "{{ task.tag.label }}"
+        <b-spinner v-if="requests_processing" small class="mr-1" />
+      </b-button>
       <PhotoGrid
         v-if="sidebar_payload.class=='job'"
         :highlight_ids="higlighted_photos"
@@ -68,6 +72,7 @@ export default {
     set_images(payload) {
       console.log("Setting images");
       this.sidebar_grid_state = payload;
+      this.$emit("grid_state", this.sidebar_grid_state);
     },
     toggle_tag(photograph) {
       if (this.higlighted_photos.includes(photograph.id)) {
@@ -85,7 +90,15 @@ export default {
     register_whole_grid() {
       this.requests_processing = true;
       Promise.allSettled(
-        this.untagged_grid_photos.map(pid => this.toggle_tag(pid))
+        this.untagged_grid_photos.map(pid => this.add_tag(pid))
+      ).then(onfulfilled => {
+        this.requests_processing = false;
+        console.log(onfulfilled);
+      });
+    },
+    reject_remaining_grid() {
+      Promise.allSettled(
+        this.untagged_grid_photos.map(pid => this.remove_tag(pid))
       ).then(onfulfilled => {
         this.requests_processing = false;
         console.log(onfulfilled);

@@ -60,6 +60,7 @@
             :higlighted_photos="tagged_photos"
             @add_tag="add_tag"
             @remove_tag="remove_tag"
+            @grid_state="update_grid_state"
           />
         </b-col>
       </b-row>
@@ -99,12 +100,12 @@ export default {
   },
   computed: {
     decided_photo_ids() {
-      return this.photo_decisions.map(d => d.photograph);
+      return this.photo_decisions.map(d => d.photograph_id);
     },
     accepted_photo_ids() {
       return this.photo_decisions
         .filter(d => d.is_applicable == true)
-        .map(d => d.photograph);
+        .map(d => d.photograph_id);
     },
     displayed_photos() {
       return this.nearest_neighbor_set.slice(0, 9);
@@ -161,13 +162,44 @@ export default {
         this.nearest_neighbor_set.splice(photo_index, 1);
       }
     },
+    update_grid_state(photographs) {
+      console.log("Updating grid state");
+      // Add any applicable tag decisions from the photo grid drawer to the cache of photo decisions
+      photographs.map(p => {
+        if (this.decided_photo_ids.includes(p.id)) {
+          console.log(`Updating photo ${p.id} already in cache`);
+          // Remove the cached decision and update from the current state
+          const photo_index = _.findIndex(this.photo_decisions, {
+            photograph_id: p.id
+          });
+          this.photo_decisions.splice(photo_index, 1);
+          const decision = _.find(p.decisions, { task: this.task_id });
+          this.photo_decisions.push({
+            photograph_id: p.id,
+            decision_id: decision.id,
+            is_applicable: decision.is_applicable
+          });
+        }
+        p.decisions.map(d => {
+          console.log(`Decision ${d.id} for photo ${p.id}`);
+          if (d.task == this.task_id) {
+            console.log(`Adding decision data for ${p.id}`);
+            this.photo_decisions.push({
+              photograph_id: p.id,
+              decision_id: d.id,
+              is_applicable: d.is_applicable
+            });
+          }
+        });
+      });
+    },
     derive_photo_decisions(photographs) {
       // Create a list of photo ids, decision ids, and true/false values
       const photo_decisions = photographs
         .filter(p => p.decisions.length > 0)
         .map(p =>
           p.decisions
-            .filter(d => (d.task = this.task_id))
+            .filter(d => d.task == this.task_id)
             .map(d => {
               return {
                 photograph_id: p.id,
@@ -204,7 +236,7 @@ export default {
     },
     is_photo_decided(photograph_id) {
       return this.photo_decisions
-        .map(p => p.photograph_id)
+        .map(d => d.photograph_id)
         .includes(photograph_id);
     },
     toggle_photo(photograph_id) {
@@ -225,7 +257,7 @@ export default {
         const photo_decision = _.find(this.photo_decisions, {
           photograph_id: photograph_id
         });
-        this.update_decision(photo_decision.id, value);
+        this.update_decision(photo_decision.decision_id, value);
       } else {
         this.create_decision(photograph_id, value);
       }
@@ -247,6 +279,7 @@ export default {
           });
           this.photo_decisions.splice([decision_index], 1);
           this.photo_decisions.push(this.response_to_decision(response));
+          this.remove_photo_from_deck(response.data.photograph);
         },
         error => {
           console.log(error);
@@ -262,6 +295,7 @@ export default {
         response => {
           // Add the decision (whether True or False) to the local tracking array
           this.photo_decisions.push(this.response_to_decision(response));
+          this.remove_photo_from_deck(response.data.photograph);
         },
         error => {
           console.log(error);
@@ -276,6 +310,14 @@ export default {
           this.load_more_photos();
         }
       );
+    },
+    remove_photo_from_deck(photograph_id) {
+      const nn_index = _.findIndex(this.nearest_neighbor_set, {
+        id: photograph_id
+      });
+      if (nn_index > -1) {
+        this.nearest_neighbor_set.splice(nn_index, 1);
+      }
     },
     load_more_photos() {
       if (this.nearest_neighbor_set.length == 0) {
