@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 v-if="loading">Loading new results - this may take a few seconds...</h2>
+    <b-alert variant="info" :show="loading">Loading new results - this may take a few seconds...</b-alert>
     <b-overlay :show="loading">
       <b-row>
         <b-col cols="6">
@@ -25,6 +25,7 @@
                       width="230"
                       :key="photograph.id"
                       :src="photograph.image.square"
+                      class="pointer"
                       :class="{'approved': accepted_photo_ids.includes(photograph.id)}"
                       @click="get_info(photograph)"
                     />
@@ -36,17 +37,30 @@
         </b-col>
         <b-col v-if="!loading" cols="6">
           <PhotoDetail
-            :key="detail_photo_id + reset_counter"
-            v-if="!!detail_photo_id & !!task"
-            :photograph_id="detail_photo_id"
+            :key="detail_photo.id"
+            v-if="!!detail_photo & !!task"
+            :photograph="detail_photo"
             :available_tags="available_tags"
             :task_tag="task.tag"
             @new_tagged_photo="remove_photo"
             @new_seed_photo="new_seed_photo"
+            @close_photo_detail="detail_photo=null"
+            @activate_sidebar="activate_sidebar"
           />
-          <h3
+
+          <b-alert
             v-else
-          >Click a photo at right to inspect and tag it and the other photographs in its associated job / directory</h3>
+            show
+            variant="primary"
+          >Click a photo at right to inspect and tag it and the other photographs in its associated job / directory.</b-alert>
+          <TaggingDrawer
+            v-if="!!sidebar_payload.object"
+            :sidebar_payload="sidebar_payload"
+            :task="task"
+            :higlighted_photos="tagged_photos"
+            @add_tag="add_tag"
+            @remove_tag="remove_tag"
+          />
         </b-col>
       </b-row>
     </b-overlay>
@@ -57,9 +71,11 @@
 import { HTTP } from "@/main";
 import _ from "lodash";
 import PhotoDetail from "@/components/tagging/PhotoDetail.vue";
+import TaggingDrawer from "@/components/tagging/TaggingDrawer.vue";
+
 export default {
   name: "TaggingExecution",
-  components: { PhotoDetail },
+  components: { PhotoDetail, TaggingDrawer },
   props: {
     task_id: {
       type: Number,
@@ -76,9 +92,9 @@ export default {
       nearest_neighbor_set: [],
       photo_decisions: [],
       loading: false,
-      detail_photo_id: null,
-      reset_counter: 0,
-      available_tags: []
+      detail_photo: null,
+      available_tags: [],
+      sidebar_payload: {}
     };
   },
   computed: {
@@ -111,6 +127,12 @@ export default {
         this.displayed_photos.map(p => p.id),
         _.union(this.photo_decisions.map(d => d.photograph))
       );
+    },
+    tagged_photos() {
+      // List of photo ids that are actively tagged
+      return this.photo_decisions
+        .filter(d => d.is_applicable)
+        .map(d => d.photograph_id);
     }
   },
   methods: {
@@ -120,6 +142,9 @@ export default {
         params: { task_id: this.task_id, seed_photo_id: photograph.id }
       });
       this.get_nn_set();
+    },
+    activate_sidebar(payload) {
+      this.sidebar_payload = payload;
     },
     pop_neighbors() {
       // Remove those 9 from the nearest neighbor queue
@@ -136,6 +161,25 @@ export default {
         this.nearest_neighbor_set.splice(photo_index, 1);
       }
     },
+    derive_photo_decisions(photographs) {
+      // Create a list of photo ids, decision ids, and true/false values
+      const photo_decisions = photographs
+        .filter(p => p.decisions.length > 0)
+        .map(p =>
+          p.decisions
+            .filter(d => (d.task = this.task_id))
+            .map(d => {
+              return {
+                photograph_id: p.id,
+                decision_id: d.id,
+                is_applicable: d.is_applicable
+              };
+            })
+        )
+        .flat();
+      console.log(photo_decisions);
+      return photo_decisions;
+    },
     get_nn_set(func = null) {
       this.loading = true;
       HTTP.get(`tagging/task/${this.task_id}/get_nn/`, {
@@ -143,6 +187,9 @@ export default {
       }).then(
         response => {
           this.nearest_neighbor_set = response.data;
+          this.photo_decisions = this.derive_photo_decisions(
+            this.nearest_neighbor_set
+          );
           this.loading = false;
           if (!!func) {
             // An additional function to run once a new set of photos has been loaded
@@ -155,16 +202,40 @@ export default {
         }
       );
     },
-    toggle_photo(photograph) {
-      if (this.decided_photo_ids.includes(photograph.id)) {
-        // Get the associated photo decision and reverse it
-        const photo_decision = _.find(this.photo_decisions, {
-          photograph: photograph.id
-        });
-        this.update_decision(photo_decision.id, !photo_decision.is_applicable);
+    is_photo_decided(photograph_id) {
+      return this.photo_decisions
+        .map(p => p.photograph_id)
+        .includes(photograph_id);
+    },
+    toggle_photo(photograph_id) {
+      if (this.decided_photo_ids.includes(photograph_id)) {
+        this.add_tag(photograph_id);
       } else {
-        this.create_decision(photograph.id, true);
+        this.remove_tag(photograph_id);
       }
+    },
+    add_tag(photograph_id) {
+      this.set_tag(photograph_id, true);
+    },
+    remove_tag(photograph_id) {
+      this.set_tag(photograph_id, false);
+    },
+    set_tag(photograph_id, value) {
+      if (this.is_photo_decided(photograph_id)) {
+        const photo_decision = _.find(this.photo_decisions, {
+          photograph_id: photograph_id
+        });
+        this.update_decision(photo_decision.id, value);
+      } else {
+        this.create_decision(photograph_id, value);
+      }
+    },
+    response_to_decision(response) {
+      return {
+        photograph_id: response.data.photograph,
+        decision_id: response.data.id,
+        is_applicable: response.data.is_applicable
+      };
     },
     update_decision(decision_id, value) {
       HTTP.patch(`tagging/decision/${decision_id}/`, {
@@ -172,10 +243,10 @@ export default {
       }).then(
         response => {
           const decision_index = _.findIndex(this.photo_decisions, {
-            id: decision_id
+            decision_id: decision_id
           });
           this.photo_decisions.splice([decision_index], 1);
-          this.photo_decisions.push(response.data);
+          this.photo_decisions.push(this.response_to_decision(response));
         },
         error => {
           console.log(error);
@@ -190,7 +261,7 @@ export default {
       }).then(
         response => {
           // Add the decision (whether True or False) to the local tracking array
-          this.photo_decisions.push(response.data);
+          this.photo_decisions.push(this.response_to_decision(response));
         },
         error => {
           console.log(error);
@@ -198,19 +269,13 @@ export default {
       );
     },
     submit_choices() {
-      Promise.all(
-        this.undecided_photo_ids.map(id =>
-          HTTP.post("tagging/decision/", {
-            task: this.task_id,
-            photograph: id,
-            is_applicable: false
-          })
-        )
-      ).then(onfulfilled => {
-        console.log(onfulfilled);
-        this.photo_decisions = [];
-        this.load_more_photos();
-      });
+      Promise.all(this.undecided_photo_ids.map(id => this.remove_tag(id))).then(
+        onfulfilled => {
+          console.log(onfulfilled);
+          this.photo_decisions = [];
+          this.load_more_photos();
+        }
+      );
     },
     load_more_photos() {
       if (this.nearest_neighbor_set.length == 0) {
@@ -221,7 +286,7 @@ export default {
       this.detail_photo_id = null;
     },
     get_info(photograph) {
-      this.detail_photo_id = photograph.id;
+      this.detail_photo = photograph;
     },
     get_available_tags() {
       HTTP.get("tagging/tag/").then(
@@ -249,10 +314,9 @@ export default {
     this.get_task();
     this.get_nn_set();
   },
-  watch: {
-    photo_decisions() {
-      // this.reset_counter += 1;
-    }
+  detail_photo() {
+    // Reset the sidebar anytime a new photo detail is chosen.
+    this.sidebar_payload = {};
   }
 };
 </script>

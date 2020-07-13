@@ -1,5 +1,5 @@
 <template>
-  <b-row class="my-3" align-h="center">
+  <b-row class="my-3" align-h="center" align-v="center">
     <b-col cols="4"></b-col>
     <b-col cols="4">
       <b-nav pills>
@@ -18,16 +18,19 @@
           Tag:
           <b-badge>{{ task.tag.label }}</b-badge>
         </div>
-        <b-badge v-if="!!seed_photo" id="seed_photo_popover">Seed photo: {{ seed_photo.filename }}</b-badge>
-        <b-popover
-          v-if="!!seed_photo"
-          target="seed_photo_popover"
-          triggers="hover"
-          placement="left"
-        >
-          <template v-slot:title>{{ seed_photo.filename }}</template>
-          <b-img :src="seed_photo.image.square" width="230" />
-        </b-popover>
+        <div v-if="!!seed_photo">
+          Seed photo:
+          <b-badge id="seed_photo_popover">{{ seed_photo.filename }}</b-badge>
+          <b-popover
+            v-if="!!seed_photo"
+            target="seed_photo_popover"
+            triggers="hover"
+            placement="left"
+          >
+            <template v-slot:title>{{ seed_photo.filename }}</template>
+            <b-img :src="seed_photo.image.square" width="230" />
+          </b-popover>
+        </div>
       </b-row>
     </b-col>
   </b-row>

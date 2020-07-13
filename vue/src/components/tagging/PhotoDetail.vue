@@ -1,29 +1,61 @@
 <template>
-  <b-card v-if="!!photograph" header="Photo info">
-    <b-row>
-      <b-img :src="`${photograph.image.id}/full/!800,600/0/default.jpg`" />
+  <b-card v-if="!!photograph">
+    <template v-slot:header>
+      <b-row align-h="between" align-v="center" class="px-2">
+        <span>{{ photograph.filename }}</span>
+        <h3 class="my-0">
+          <BIconX @click="close_photo_detail" class="pointer" />
+        </h3>
+      </b-row>
+    </template>
+    <b-row align-h="center" class="my-1">
+      <b-button-toolbar justify>
+        <b-button-group class="mx-1">
+          <b-button size="sm" variant="secondary" :pressed="is_tagged">Tag as "{{ task_tag.label }}"</b-button>
+          <b-button size="sm" variant="secondary" v-b-modal.add-tag>View/edit other tags</b-button>
+        </b-button-group>
+        <b-button-group class="mx-1">
+          <b-button
+            size="sm"
+            v-if="!!photograph.job"
+            variant="info"
+            @click="activate_sidebar({class: 'job', object: photograph.job})"
+            v-b-tooltip:hover
+            title="Click to tag other photos in job"
+          >
+            <BIconCamera />
+            "{{ button_truncate(photograph.job.label) }}"
+          </b-button>
+          <b-button size="sm" v-else disabled variant="info">
+            <BIconCamera class="mr-1" />
+            <span>No associated job</span>
+          </b-button>
+          <b-button
+            size="sm"
+            variant="primary"
+            @click="activate_sidebar({class: 'directory', object: photograph.directory})"
+            v-b-tooltip:hover
+            title="Click to tag other photos in directory"
+          >
+            <BIconFolderFill />
+            "{{ button_truncate(photograph.directory.label) }}"
+          </b-button>
+        </b-button-group>
+
+        <b-button
+          size="sm"
+          variant="warning"
+          class="mx-1"
+          @click="$emit('new_seed_photo', photograph)"
+          title="Swap out the current seed photo in exchange for this photo. (Will reload the page.)"
+          v-b-tooltip:hover
+        >Use as seed photo</b-button>
+      </b-button-toolbar>
     </b-row>
-    <b-row align-v="center" align-h="between">
-      <span>{{ photograph.filename }}</span>
-      <b-badge
-        variant="primary"
-        @click="activate_sidebar({class: 'directory', object: photograph.directory})"
-      >
-        <BIconFolderFill />
-        {{ photograph.directory.label }}
-      </b-badge>
-      <b-badge
-        variant="info"
-        v-if="photograph.job"
-        @click="activate_sidebar({class: 'job', object: photograph.job})"
-      >
-        <BIconCamera />
-        {{ photograph.job.label }}
-      </b-badge>
+    <b-row class="my-2" align-h="center">
+      <b-img :src="`${photograph.image.id}/full/!750,525/0/default.jpg`" />
     </b-row>
     <b-row>
-      <b-button variant="warning" @click="$emit('new_seed_photo', photograph)">Use as seed photo</b-button>
-      <b-button variant="primary" v-b-modal.add-tag>Add tag</b-button>
       <b-badge
         variant="warning"
         v-for="tag in photograph.photograph_tags"
@@ -31,50 +63,26 @@
       >{{ tag.tag.label }}</b-badge>
     </b-row>
     <b-modal id="add-tag" title="Add tag(s) to photograph" @ok="register_selected_tags">
-      <b-form-select v-model="selected_tags" :options="tag_choices" multiple />
+      <b-form-select v-model="selected_tags" :options="tag_choices" multiple :select-size="20" />
     </b-modal>
-    <b-sidebar :id="`sidebar`" v-model="show_sidebar" v-if="show_sidebar" width="90%" right shadow>
-      <b-container fluid>
-        <h3>{{ sidebar_title }}</h3>
-        <p>Click on a photograph to tag it with "{{ task_tag.label }}".</p>
-        <b-button @click="register_whole_grid">
-          Add "{{ task_tag.label }}" to all photos on this page
-          <b-spinner v-if="requests_processing" small class="mr-1" />
-        </b-button>
-        <PhotoGrid
-          v-if="sidebar_payload.class=='job'"
-          :highlight_ids="tagged_grid_photos"
-          :job="sidebar_payload.object"
-          @photo_click="toggle_tag_from_grid"
-          @images="set_images"
-        />
-        <PhotoGrid
-          v-if="sidebar_payload.class=='directory'"
-          :highlight_ids="tagged_grid_photos"
-          :directory="sidebar_payload.object"
-          @photo_click="toggle_tag_from_grid"
-          @images="set_images"
-        />
-      </b-container>
-    </b-sidebar>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "@/main";
-import PhotoGrid from "@/components/browsing/PhotoGrid.vue";
 import _ from "lodash";
-import { BIconCamera, BIconFolderFill } from "bootstrap-vue";
+import { BIconCamera, BIconFolderFill, BIconX } from "bootstrap-vue";
+
 export default {
   name: "PhotoDetail",
   components: {
     BIconCamera,
     BIconFolderFill,
-    PhotoGrid
+    BIconX
   },
   props: {
-    photograph_id: {
-      type: Number,
+    photograph: {
+      type: Object,
       required: true
     },
     available_tags: {
@@ -87,20 +95,29 @@ export default {
   },
   data() {
     return {
-      photograph: null,
-      selected_tags: [],
-      show_sidebar: false,
-      sidebar_payload: {},
-      sidebar_grid_state: [],
-      requests_processing: false
+      selected_tags: []
     };
   },
   computed: {
+    is_tagged() {
+      return this.photograph.photograph_tags
+        .map(t => t.tag.id)
+        .includes(this.task_tag.id);
+    },
     tag_choices() {
+      // Disable the current tag
       return this.available_tags.map(t => {
+        const disabled = t.id == this.task_tag.id;
+        var tlabel = "";
+        if (disabled) {
+          tlabel = `${t.label} (to add this current task tag, click on the tag button photo detail)`;
+        } else {
+          tlabel = t.label;
+        }
         return {
-          text: t.label,
-          value: t.id
+          text: tlabel,
+          value: t.id,
+          disabled: disabled
         };
       });
     },
@@ -110,60 +127,17 @@ export default {
         this.selected_tags,
         this.photograph.photograph_tags.map(t => t.tag.id)
       );
-    },
-    sidebar_title() {
-      return `${this.sidebar_payload.class}: ${this.sidebar_payload.object.label}`;
-    },
-    tagged_grid_photos() {
-      if (!!this.task_tag) {
-        return this.sidebar_grid_state
-          .filter(p =>
-            p.photograph_tags
-              .map(t => t.tag.id)
-              .some(t => t == this.task_tag.id)
-          )
-          .map(p => p.id);
-      } else {
-        return [];
-      }
-    },
-    untagged_grid_photos() {
-      return _.difference(
-        this.sidebar_grid_state.map(p => p.id),
-        this.tagged_grid_photos
-      );
     }
   },
   methods: {
-    set_images(payload) {
-      console.log("Setting images");
-      this.sidebar_grid_state = payload;
+    button_truncate(str) {
+      return _.truncate(str, { length: 25 });
     },
     activate_sidebar(payload) {
-      this.sidebar_payload = payload;
-      this.show_sidebar = true;
-    },
-    get_photograph() {
-      HTTP.get(`photograph/${this.photograph_id}/`).then(
-        response => {
-          this.photograph = response.data;
-          this.selected_tags = this.photograph.photograph_tags.map(
-            t => t.tag.id
-          );
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    },
-    toggle_tag_from_grid(photograph) {
-      if (photograph.photograph_tags.some(t => t.tag.id == this.task_tag.id)) {
-        this.remove_tag(photograph.id, this.task_tag.id);
-      } else {
-        this.add_tag(photograph.id, this.task_tag.id);
-      }
+      this.$emit("activate_sidebar", payload);
     },
     add_tag(photograph_id, tag_id) {
+      // Adding an arbitrary, non-task tag
       HTTP.post("tagging/photograph_tag/", {
         tag: tag_id,
         photograph: photograph_id
@@ -184,6 +158,7 @@ export default {
       );
     },
     remove_tag(photograph_id, tag_id) {
+      // Removing an arbitrary, non-task tag
       const image_index = _.findIndex(this.sidebar_grid_state, {
         id: photograph_id
       });
@@ -216,21 +191,10 @@ export default {
         console.log(onfulfilled);
       });
     },
-    register_whole_grid() {
-      this.requests_processing = true;
-      Promise.allSettled(
-        this.untagged_grid_photos.map(pid =>
-          this.add_tag(pid, this.task_tag.id)
-        )
-      ).then(onfulfilled => {
-        this.requests_processing = false;
-        this.get_photograph();
-        console.log(onfulfilled);
-      });
+
+    close_photo_detail() {
+      this.$emit("close_photo_detail");
     }
-  },
-  mounted() {
-    this.get_photograph();
   }
 };
 </script>
