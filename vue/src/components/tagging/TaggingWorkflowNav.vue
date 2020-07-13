@@ -15,15 +15,19 @@
     <b-col cols="4">
       <b-row align-h="around">
         <div v-if="!!task">
-          <h5>Tag:</h5>
-          <h5>
-            <b-badge>{{ task.tag.label }}</b-badge>
-          </h5>
+          Tag:
+          <b-badge>{{ task.tag.label }}</b-badge>
         </div>
-        <div v-if="!!seed_photo">
-          <h5>Seed photo:</h5>
-          <b-img :src="seed_photo.image.square" width="100" />
-        </div>
+        <b-badge v-if="!!seed_photo" id="seed_photo_popover">Seed photo: {{ seed_photo.filename }}</b-badge>
+        <b-popover
+          v-if="!!seed_photo"
+          target="seed_photo_popover"
+          triggers="hover"
+          placement="left"
+        >
+          <template v-slot:title>{{ seed_photo.filename }}</template>
+          <b-img :src="seed_photo.image.square" width="230" />
+        </b-popover>
       </b-row>
     </b-col>
   </b-row>

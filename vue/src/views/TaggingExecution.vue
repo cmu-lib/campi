@@ -1,30 +1,40 @@
 <template>
   <div>
-    <p v-if="loading">Loading new results - this may take a few seconds...</p>
+    <h2 v-if="loading">Loading new results - this may take a few seconds...</h2>
     <b-overlay :show="loading">
       <b-row>
         <b-col cols="6">
           <div v-if="!!sorted_photos">
-            <b-card header="Photos for consideration" no-body>
+            <b-card no-body>
+              <template v-slot:header>
+                <b-row align-h="between" align-v="center" class="px-2">
+                  <span>Click photo to inspect and tag related photos in job/directory</span>
+                  <b-button
+                    size="sm"
+                    @click="submit_choices"
+                    title="Discard the rest of this grid and draw more photos from the similarity results"
+                  >Get more photos...</b-button>
+                </b-row>
+              </template>
               <b-list-group flush>
                 <b-list-group-item v-for="row in sorted_photos" :key="row.number">
                   <b-row align-h="between" align-v="center">
-                    <PhotoSquare
+                    <b-img
                       v-for="photograph in row.data"
+                      height="230"
+                      width="230"
                       :key="photograph.id"
-                      :photograph="photograph"
-                      :approved="accepted_photo_ids.includes(photograph.id)"
-                      @toggle_photo="toggle_photo"
-                      @get_info="get_info"
+                      :src="photograph.image.square"
+                      :class="{'approved': accepted_photo_ids.includes(photograph.id)}"
+                      @click="get_info(photograph)"
                     />
                   </b-row>
                 </b-list-group-item>
               </b-list-group>
             </b-card>
           </div>
-          <b-button @click="submit_choices">Get more photos...</b-button>
         </b-col>
-        <b-col cols="6">
+        <b-col v-if="!loading" cols="6">
           <PhotoDetail
             :key="detail_photo_id + reset_counter"
             v-if="!!detail_photo_id & !!task"
@@ -34,6 +44,9 @@
             @new_tagged_photo="remove_photo"
             @new_seed_photo="new_seed_photo"
           />
+          <h3
+            v-else
+          >Click a photo at right to inspect and tag it and the other photographs in its associated job / directory</h3>
         </b-col>
       </b-row>
     </b-overlay>
@@ -43,11 +56,10 @@
 <script>
 import { HTTP } from "@/main";
 import _ from "lodash";
-import PhotoSquare from "@/components/tagging/PhotoSquare.vue";
 import PhotoDetail from "@/components/tagging/PhotoDetail.vue";
 export default {
   name: "TaggingExecution",
-  components: { PhotoSquare, PhotoDetail },
+  components: { PhotoDetail },
   props: {
     task_id: {
       type: Number,
@@ -244,3 +256,9 @@ export default {
   }
 };
 </script>
+
+<style>
+img.approved {
+  outline: 3px solid red;
+}
+</style>
