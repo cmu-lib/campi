@@ -58,6 +58,7 @@
             :sidebar_payload="sidebar_payload"
             :task="task"
             :higlighted_photos="tagged_photos"
+            :rejected_photos="negative_tagged_photos"
             @add_tag="add_tag"
             @remove_tag="remove_tag"
             @grid_state="update_grid_state"
@@ -133,6 +134,12 @@ export default {
       // List of photo ids that are actively tagged
       return this.photo_decisions
         .filter(d => d.is_applicable)
+        .map(d => d.photograph_id);
+    },
+    negative_tagged_photos() {
+      // List of photo ids that are actively tagged as negative
+      return this.photo_decisions
+        .filter(d => !d.is_applicable)
         .map(d => d.photograph_id);
     }
   },

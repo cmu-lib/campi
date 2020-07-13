@@ -15,7 +15,7 @@
         lazy
         v-for="image in images.results"
         class="m-1"
-        :class="{'highlighted': highlight_ids.includes(image.id)}"
+        :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
         :key="image.id"
         :src="image.image.square"
         blank-width="150"
@@ -67,6 +67,12 @@ export default {
       default: 96
     },
     highlight_ids: {
+      type: Array,
+      default: function() {
+        return [];
+      }
+    },
+    dimmed_ids: {
       type: Array,
       default: function() {
         return [];
@@ -133,5 +139,8 @@ export default {
 <style scoped>
 .highlighted {
   outline: 3px red solid;
+}
+.dimmed {
+  opacity: 0.2;
 }
 </style>
