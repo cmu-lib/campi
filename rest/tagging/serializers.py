@@ -53,17 +53,39 @@ class TaggingDecisionSerializer(serializers.ModelSerializer):
     user_created = campi.serializers.UserSerializer(
         default=serializers.CurrentUserDefault()
     )
+    other_tagged_photos = serializers.SerializerMethodField()
+
+    def get_other_tagged_photos(self, obj):
+        return obj.photograph.get_close_matches().values_list("id", flat=True)
 
     class Meta:
         model = models.TaggingDecision
-        fields = ["id", "task", "photograph", "is_applicable", "user_created"]
+        fields = [
+            "id",
+            "task",
+            "photograph",
+            "is_applicable",
+            "user_created",
+            "other_tagged_photos",
+        ]
 
 
 class PhotographTagPostSerializer(serializers.ModelSerializer):
     user_last_modified = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+    other_tagged_photos = serializers.SerializerMethodField()
+
+    def get_other_tagged_photos(self, obj):
+        return obj.photograph.get_close_matches().values_list("id", flat=True)
 
     class Meta:
         model = models.PhotographTag
-        fields = ["id", "url", "tag", "photograph", "user_last_modified"]
+        fields = [
+            "id",
+            "url",
+            "tag",
+            "photograph",
+            "user_last_modified",
+            "other_tagged_photos",
+        ]

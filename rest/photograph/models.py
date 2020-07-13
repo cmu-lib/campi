@@ -71,14 +71,16 @@ class Photograph(
         return response
 
     def get_close_matches(self):
-        other_photo_ids = (
-            self.close_match_memberships.filter(state="a")
-            .first()
-            .close_match_set.memberships.exclude(photograph=self)
-            .all()
-            .values_list("photograph__id", flat=True)
+        match_membership = self.close_match_memberships.filter(state="a")
+
+        other_photos = (
+            Photograph.objects.filter(
+                close_match_memberships__close_match_set__memberships__in=match_membership,
+                close_match_memberships__state="a",
+            )
+            .exclude(id=self.id)
+            .distinct()
         )
-        other_photos = Photograph.objects.filter(id__in=other_photo_ids)
         return other_photos
 
 
