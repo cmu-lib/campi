@@ -35,10 +35,13 @@ def prepare_photograph_qs(qs):
     ordered_tags = tagging.models.PhotographTag.objects.select_related(
         "tag", "user_last_modified"
     ).order_by("-last_updated")
+    ordered_decisions = tagging.models.TaggingDecision.objects.order_by("-created_on")
     qs = (
         qs.select_related("directory", "job")
         .prefetch_related(
-            "job__tags", Prefetch("photograph_tags", queryset=ordered_tags)
+            "job__tags",
+            Prefetch("photograph_tags", queryset=ordered_tags),
+            Prefetch("decisions", queryset=ordered_decisions),
         )
         .all()
     )
@@ -50,11 +53,13 @@ def prepare_photograph_detail_qs(qs):
     ordered_tags = tagging.models.PhotographTag.objects.select_related(
         "tag", "user_last_modified"
     ).order_by("-last_updated")
+    ordered_decisions = tagging.models.TaggingDecision.objects.order_by("-created_on")
     qs = (
         qs.select_related("directory", "job")
         .prefetch_related(
             "job__tags",
             Prefetch("photograph_tags", queryset=ordered_tags),
+            Prefetch("decisions", queryset=ordered_decisions),
             Prefetch("objectannotation", queryset=object_annotations),
             "faceannotation",
         )

@@ -20,6 +20,12 @@ class PhotographTagSerializer(serializers.ModelSerializer):
         fields = ["id", "tag", "user_last_modified", "last_updated"]
 
 
+class TaggingDecisionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = tagging.models.TaggingDecision
+        fields = ["id", "task", "is_applicable", "created_on", "user_created"]
+
+
 class FaceAnnotationFlatSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FaceAnnotation
@@ -52,6 +58,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
     job = collection.serializers.JobDetailSerializer()
     photograph_tags = PhotographTagSerializer(many=True)
+    decisions = TaggingDecisionSerializer(many=True)
     faceannotation = FaceAnnotationFlatSerializer(many=True)
     objectannotation = ObjectAnnotationFlatSerializer(many=True)
 
@@ -72,6 +79,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
             "job",
             "job_sequence",
             "photograph_tags",
+            "decisions",
             "faceannotation",
             "objectannotation",
         ]
@@ -81,6 +89,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryListSerializer()
     job = collection.serializers.JobListSerializer()
     photograph_tags = PhotographTagSerializer(many=True)
+    decisions = TaggingDecisionSerializer(many=True)
 
     class Meta:
         model = models.Photograph
@@ -99,6 +108,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
             "job",
             "job_sequence",
             "photograph_tags",
+            "decisions",
         ]
 
 
@@ -122,6 +132,7 @@ class PhotographDistanceListSerializer(PhotographListSerializer):
             "job",
             "job_sequence",
             "photograph_tags",
+            "decisions",
             "distance",
         ]
 

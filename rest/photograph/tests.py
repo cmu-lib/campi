@@ -41,6 +41,7 @@ class PhotographListView(TestCase):
             "job",
             "job_sequence",
             "photograph_tags",
+            "decisions",
         ]:
             self.assertIn(k, res.data["results"][0])
         self.assertIn("full", res.data["results"][0]["image"])
@@ -66,6 +67,7 @@ class PhotographListView(TestCase):
             "job",
             "job_sequence",
             "photograph_tags",
+            "decisions",
         ]:
             self.assertIn(k, res.data)
         self.assertIn("full", res.data["image"])
