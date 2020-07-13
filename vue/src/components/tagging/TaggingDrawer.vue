@@ -15,6 +15,7 @@
         v-if="sidebar_payload.class=='job'"
         :highlight_ids="higlighted_photos"
         :job="sidebar_payload.object"
+        :per_page="50"
         @photo_click="toggle_tag"
         @images="set_images"
       />
@@ -22,6 +23,7 @@
         v-if="sidebar_payload.class=='directory'"
         :highlight_ids="higlighted_photos"
         :directory="sidebar_payload.object"
+        :per_page="50"
         @photo_click="toggle_tag"
         @images="set_images"
       />
