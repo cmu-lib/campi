@@ -16,7 +16,6 @@
       </b-navbar-nav>
       <b-navbar-nav v-if="user" class="ml-auto">
         <b-nav-item-dropdown :text="user.username" right>
-          <b-dropdown-item disabled>Tasks</b-dropdown-item>
           <b-dropdown-item :href="$APIConstants.API_LOGOUT">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
