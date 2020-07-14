@@ -45,7 +45,7 @@ export default {
       this.current_tag = current_tag;
     },
     check_in_current_tag() {
-      const task_id = this.current_tag.value.id;
+      const task_id = this.current_tag.value.tasks[0].id;
       HTTP.post(`tagging/task/${task_id}/check_in/`).then(
         response => {
           this.$bvToast.toast(response.data.success, { variant: "success" });
@@ -53,7 +53,11 @@ export default {
           this.tag_select_force += 1;
         },
         error => {
-          this.$bvToast.toast(error.data.error, { variant: "danger" });
+          console.log(error);
+          this.$bvToast.toast(
+            "You cannot check in a tag that doesn't belong to you",
+            { variant: "danger" }
+          );
         }
       );
     },
