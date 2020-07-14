@@ -17,11 +17,25 @@
         class="m-2"
         :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
         :key="image.id"
+        :id="`image-${image.id}`"
         :src="image.image.square"
         blank-width="150"
         blank-height="150"
         @click="$emit('photo_click', image)"
       />
+      <b-popover
+        v-for="image in popovers"
+        :key="`pop-${image.id}`"
+        triggers="hover"
+        :target="`image-${image.id}`"
+        :delay="{show: 1000}"
+        custom-class="photo-popover"
+        placement="top"
+      >
+        <template v-slot:title>{{ image.filename }}</template>
+        <b-img :src="image.image.thumbnail" fluid />
+        <b-button class="mt-2" @click="newtab(image)" variant="primary">Open in new tab</b-button>
+      </b-popover>
     </b-row>
     <b-row flex align-h="center" class="mt-3">
       <b-pagination
@@ -77,6 +91,10 @@ export default {
       default: function() {
         return [];
       }
+    },
+    popover: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -126,6 +144,22 @@ export default {
   computed: {
     rest_page() {
       return (this.current_page - 1) * this.per_page;
+    },
+    popovers() {
+      if (this.popover) {
+        return this.images.results;
+      } else {
+        return [];
+      }
+    }
+  },
+  methods: {
+    newtab(image) {
+      const routeData = this.$router.resolve({
+        name: "Photo",
+        params: { id: image.id }
+      });
+      window.open(routeData.href, "_blank");
     }
   },
   watch: {
@@ -143,5 +177,9 @@ export default {
 .dimmed {
   outline: 4px red solid;
   opacity: 0.2;
+}
+
+.photo-popover {
+  max-width: 600px;
 }
 </style>

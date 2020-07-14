@@ -3,6 +3,7 @@
     <b-container fluid>
       <h3>{{ sidebar_title }}</h3>
       <p>Click on a photograph to tag it with "{{ task.tag.label }}".</p>
+      <p>Hover over a photo to see the full image and get a link to open the detail page in a new tab</p>
       <b-button-group>
         <b-button @click="register_whole_grid" variant="success">
           Add "{{ task.tag.label }}" to all undecided photos on this page
@@ -15,21 +16,23 @@
       </b-button-group>
       <PhotoGrid
         v-if="sidebar_payload.class=='job'"
+        popover
         :highlight_ids="higlighted_photos"
         :dimmed_ids="rejected_photos"
         :job="sidebar_payload.object"
         :per_page="50"
-        :key="sidebar_payload"
+        :key="grid_id"
         @photo_click="toggle_tag"
         @images="set_images"
       />
       <PhotoGrid
         v-if="sidebar_payload.class=='directory'"
+        popover
         :highlight_ids="higlighted_photos"
         :dimmed_ids="rejected_photos"
         :directory="sidebar_payload.object"
         :per_page="50"
-        :key="sidebar_payload"
+        :key="grid_id"
         @photo_click="toggle_tag"
         @images="set_images"
       />
@@ -76,7 +79,8 @@ export default {
     return {
       show_sidebar: true,
       sidebar_grid_state: [],
-      requests_processing: false
+      requests_processing: false,
+      grid_id: 0
     };
   },
   computed: {
@@ -142,8 +146,10 @@ export default {
   watch: {
     sidebar_payload() {
       if (!!this.sidebar_payload.object) {
+        this.grid_id += 1;
         this.show_sidebar = true;
       } else {
+        this.grid_id += 1;
         this.show_sidebar = false;
       }
     }

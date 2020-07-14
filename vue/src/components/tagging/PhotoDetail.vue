@@ -50,7 +50,14 @@
         title="Swap out the current seed photo in exchange for this photo. (Will reload the page.)"
         v-b-tooltip:hover
       >Use as seed photo</b-button>
-      <b-button size="sm" class="mx-1" variant="light" @click="detail_tab_href">Open</b-button>
+      <b-button
+        size="sm"
+        class="mx-1"
+        variant="light"
+        @click="detail_tab_href"
+        title="Open photo in a new tab to inxpect all tags, look at annotations, and more."
+        v-b-tooltip:hover
+      >Open</b-button>
     </b-button-toolbar>
     <b-row class="my-2" align-h="center">
       <b-img :src="`${photograph.image.id}/full/!750,525/0/default.jpg`" />

@@ -2,7 +2,7 @@
   <div>
     <b-alert variant="info" :show="loading">Loading new results - this may take a few seconds...</b-alert>
     <b-overlay :show="loading">
-      <b-row>
+      <b-row v-if="!loading">
         <b-col cols="6">
           <div>
             <b-card no-body>
@@ -35,7 +35,7 @@
             </b-card>
           </div>
         </b-col>
-        <b-col v-if="!loading" cols="6">
+        <b-col cols="6">
           <PhotoDetail
             :key="detail_photo.id"
             v-if="!!detail_photo & !!task"
