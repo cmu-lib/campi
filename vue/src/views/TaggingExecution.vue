@@ -339,16 +339,6 @@ export default {
     get_info(photograph) {
       this.detail_photo = photograph;
     },
-    get_available_tags() {
-      HTTP.get("tagging/tag/").then(
-        response => {
-          this.available_tags = response.data.results;
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    },
     get_task() {
       HTTP.get(`tagging/task/${this.task_id}/`).then(
         response => {
@@ -361,7 +351,6 @@ export default {
     }
   },
   mounted() {
-    this.get_available_tags();
     this.get_task();
     this.get_nn_set();
   },
