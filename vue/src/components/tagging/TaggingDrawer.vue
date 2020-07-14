@@ -19,6 +19,7 @@
         :dimmed_ids="rejected_photos"
         :job="sidebar_payload.object"
         :per_page="50"
+        :key="sidebar_payload"
         @photo_click="toggle_tag"
         @images="set_images"
       />
@@ -28,6 +29,7 @@
         :dimmed_ids="rejected_photos"
         :directory="sidebar_payload.object"
         :per_page="50"
+        :key="sidebar_payload"
         @photo_click="toggle_tag"
         @images="set_images"
       />
