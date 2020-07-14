@@ -286,9 +286,10 @@ export default {
           const decision_index = _.findIndex(this.photo_decisions, {
             decision_id: decision_id
           });
-          this.photo_decisions.splice([decision_index], 1);
+          this.photo_decisions.splice(decision_index, 1);
           this.photo_decisions.push(this.response_to_decision(response));
           this.remove_photo_from_deck(response.data.photograph);
+          this.manage_related_photos(response.data.other_tagged_photos);
         },
         error => {
           console.log(error);
@@ -305,11 +306,32 @@ export default {
           // Add the decision (whether True or False) to the local tracking array
           this.photo_decisions.push(this.response_to_decision(response));
           this.remove_photo_from_deck(response.data.photograph);
+          this.manage_related_photos(response.data.other_tagged_photos);
         },
         error => {
           console.log(error);
         }
       );
+    },
+    manage_related_photos(other_tagged_photos) {
+      console.log("managing related pics");
+      console.log(other_tagged_photos);
+      other_tagged_photos
+        .filter(op => op.tagging_decision.task == this.task_id)
+        .map(op => {
+          if (this.is_photo_decided(op.photograph.id)) {
+            const related_decision_index = _.findIndex(this.photo_decisions, {
+              decision_id: op.tagging_decision.id
+            });
+            this.photo_decisions.splice(related_decision_index, 1);
+            this.remove_photo_from_deck(op.photograph.id);
+          }
+          this.photo_decisions.push({
+            photograph_id: op.photograph.id,
+            decision_id: op.tagging_decision.id,
+            is_applicable: op.tagging_decision.is_applicable
+          });
+        });
     },
     submit_choices() {
       Promise.all(this.undecided_photo_ids.map(id => this.remove_tag(id))).then(

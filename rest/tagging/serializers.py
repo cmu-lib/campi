@@ -56,7 +56,16 @@ class TaggingDecisionSerializer(serializers.ModelSerializer):
     other_tagged_photos = serializers.SerializerMethodField()
 
     def get_other_tagged_photos(self, obj):
-        return obj.photograph.get_close_matches().values_list("id", flat=True)
+        all_decisions = obj.photograph.get_close_matches().values_list(
+            "id", "decisions", "decisions__task", "decisions__is_applicable"
+        )
+        return [
+            {
+                "photograph": {"id": d[0]},
+                "tagging_decision": {"id": d[1], "task": d[2], "is_applicable": d[3]},
+            }
+            for d in all_decisions
+        ]
 
     class Meta:
         model = models.TaggingDecision

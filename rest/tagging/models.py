@@ -82,6 +82,32 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
 
     @transaction.atomic
     def save(self, *args, **kwargs):
+        # Create and update tagging decisions for related photos
+        other_photos = self.photograph.get_close_matches()
+        if bool(other_photos):
+            new_matches = other_photos.exclude(decisions__task=self.task)
+            related_decisions = [
+                TaggingDecision(
+                    photograph=p,
+                    task=self.task,
+                    is_applicable=self.is_applicable,
+                    user_created=self.user_created,
+                )
+                for p in new_matches
+            ]
+            TaggingDecision.objects.bulk_create(
+                related_decisions, ignore_conflicts=True
+            )
+            updated_matches = TaggingDecision.objects.filter(
+                task=self.task, photograph__in=other_photos
+            )
+            for m in updated_matches:
+                m.is_applicable = self.is_applicable
+                m.user_created = self.user_created
+            TaggingDecision.objects.bulk_update(
+                updated_matches, fields=["is_applicable", "user_created"]
+            )
+
         # Create or update PhotographTag relationship if the editor decided the tag was applicable
         if self.is_applicable:
             pt = PhotographTag.objects.get_or_create(
