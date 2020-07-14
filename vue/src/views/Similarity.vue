@@ -14,11 +14,7 @@
           <hr />
           <h4 class="ml-3">50 Nearest Neighbors</h4>
           <b-list-group>
-            <b-list-group-item
-              v-for="img in nearest_neighbors"
-              :key="img.id"
-              :variant="pic_variant(img)"
-            >
+            <b-list-group-item v-for="img in nearest_neighbors" :key="img.id">
               <PhotographListItem :photograph="img" />
             </b-list-group-item>
           </b-list-group>
