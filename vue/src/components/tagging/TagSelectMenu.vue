@@ -21,12 +21,14 @@ import { HTTP } from "@/main";
 export default {
   name: "TagSelectMenu",
   props: {
-    value: Object,
-    default: null
+    value: {
+      type: Object,
+      default: null
+    }
   },
   computed: {
     tag_menu_options() {
-      if (!!this.tags) {
+      if (!!this.tags & !!this.current_user) {
         const current_tag = {
           label: "Your checked-out tags",
           options: this.tags
@@ -54,15 +56,19 @@ export default {
         const taken_tags = {
           label: "Other users' tags",
           options: this.tags
-            .filter(task => !!task.assigned_user)
             .filter(
               tag =>
-                tag.tasks.every(
-                  task => task.assigned_user.id != this.current_user.id
-                ).length >= 1
+                tag.tasks
+                  .filter(task => !!task.assigned_user)
+                  .filter(task => task.assigned_user.id != this.current_user.id)
+                  .length >= 1
             )
             .map(tag => {
-              return { text: tag.label, value: tag, disabled: true };
+              return {
+                text: `${tag.label} (checked out by ${tag.tasks[0].assigned_user.username})`,
+                value: tag,
+                disabled: true
+              };
             })
         };
 
