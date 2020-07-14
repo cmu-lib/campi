@@ -16,7 +16,15 @@
       <b-row align-h="around">
         <div v-if="!!task">
           Tag:
-          <b-badge>{{ task.tag.label }}</b-badge>
+          <b-badge
+            title="Click to check this tag back in and return to the tag selection screen."
+            v-b-tooltip:hover
+            @click="check_in_tag"
+            class="pointer"
+          >
+            {{ task.tag.label }}
+            <BIconXCircleFill class="ml-1" />
+          </b-badge>
         </div>
         <div v-if="!!seed_photo">
           Seed photo:
@@ -38,8 +46,10 @@
 
 <script>
 import { HTTP } from "@/main";
+import { BIconXCircleFill } from "bootstrap-vue";
 export default {
   name: "TaggingWorkflowNav",
+  components: { BIconXCircleFill },
   computed: {
     task_id() {
       return this.$route.params.task_id;
@@ -120,6 +130,19 @@ export default {
       } else {
         return null;
       }
+    }
+  },
+  methods: {
+    check_in_tag() {
+      HTTP.post(`tagging/task/${this.task_id}/check_in/`).then(
+        response => {
+          console.log(response);
+          this.$router.push({ name: "TaggingTagSelect" });
+        },
+        error => {
+          console.log(error);
+        }
+      );
     }
   }
 };

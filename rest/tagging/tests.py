@@ -185,6 +185,13 @@ class TaggingTaskListView(TestCase):
         for photo in res.data:
             self.assertNotIn(photo["id"], already_tagged_photos)
 
+    @as_auth("bob")
+    def test_check_in(self):
+        res = self.client.post(f"{self.ENDPOINT}{self.OBJ1.id}/check_in/")
+        self.assertEquals(res.status_code, 200)
+        new_res = self.client.get(f"{self.ENDPOINT}{self.OBJ1.id}/")
+        self.assertIsNone(new_res.data["assigned_user"])
+
 
 class PhotographTagListView(TestCase):
     fixtures = ["campi/fixtures/test.json"]

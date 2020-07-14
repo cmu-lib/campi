@@ -95,6 +95,23 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
         "partial_update": serializers.TaggingTaskPostSerializer,
     }
 
+    @action(detail=True, methods=["post"], name="Check a tag back in")
+    def check_in(self, request, pk=None):
+        task = self.get_object()
+        if task.assigned_user == request.user:
+            task.assigned_user = None
+            task.save()
+            return Response(
+                {"success": "Tag checked back in"}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {
+                    "error": "Requesting user does not match the currently assigned user."
+                },
+                error=status.HTTP_403_FORBIDDEN,
+            )
+
     @action(detail=True, methods=["get"], name="Get the next set of nearest neighbors")
     def get_nn(self, request, pk=None):
         task = self.get_object()

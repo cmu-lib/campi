@@ -1,13 +1,22 @@
 <template>
   <b-container>
     <p>Select a tag to work on from the dropdown. If you select a tag different from your already-checked-out tag, that tag will be checked back in and made available to other users</p>
-    <TagSelectMenu v-model="selected_tag" />
+    <TagSelectMenu v-model="selected_tag" @current_tag="set_current_tag" :key="tag_select_force" />
     <PytorchModelMenu v-model="pytorch_model" />
-    <b-button
-      :disabled="waiting_for_selections"
-      variant="primary"
-      @click="submit"
-    >Select seed photo...</b-button>
+    <b-button-toolbar>
+      <b-button
+        :disabled="waiting_for_selections"
+        variant="primary"
+        @click="submit"
+        class="mr-1"
+      >Select seed photo...</b-button>
+      <b-button
+        v-if="!!current_tag"
+        variant="danger"
+        @click="check_in_current_tag"
+        class="mr-1"
+      >Check back in "{{ current_tag.text }}" tag</b-button>
+    </b-button-toolbar>
   </b-container>
 </template>
 
@@ -21,7 +30,9 @@ export default {
   data() {
     return {
       selected_tag: null,
-      pytorch_model: null
+      pytorch_model: null,
+      current_tag: null,
+      tag_select_force: 0
     };
   },
   computed: {
@@ -30,6 +41,22 @@ export default {
     }
   },
   methods: {
+    set_current_tag(current_tag) {
+      this.current_tag = current_tag;
+    },
+    check_in_current_tag() {
+      const task_id = this.current_tag.value.id;
+      HTTP.post(`tagging/task/${task_id}/check_in/`).then(
+        response => {
+          this.$bvToast.toast(response.data.success, { variant: "success" });
+          this.current_tag = null;
+          this.tag_select_force += 1;
+        },
+        error => {
+          this.$bvToast.toast(error.data.error, { variant: "danger" });
+        }
+      );
+    },
     submit() {
       // On input, register the tag task and then push the user to photo selection
       const existing_tasks = this.selected_tag.tasks.filter(

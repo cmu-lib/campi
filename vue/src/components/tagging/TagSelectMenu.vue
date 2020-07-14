@@ -92,6 +92,13 @@ export default {
         }
       );
     }
+  },
+  watch: {
+    tag_menu_options() {
+      if (this.tag_menu_options[0].options.length > 0) {
+        this.$emit("current_tag", this.tag_menu_options[0].options[0]);
+      }
+    }
   }
 };
 </script>
