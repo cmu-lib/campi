@@ -14,7 +14,7 @@
       <b-img
         lazy
         v-for="image in images.results"
-        class="m-1"
+        class="m-2"
         :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
         :key="image.id"
         :src="image.image.square"
@@ -138,9 +138,10 @@ export default {
 
 <style scoped>
 .highlighted {
-  outline: 3px red solid;
+  outline: 4px green solid;
 }
 .dimmed {
+  outline: 4px red solid;
   opacity: 0.2;
 }
 </style>

@@ -11,7 +11,12 @@
     <b-row align-h="center" class="my-1">
       <b-button-toolbar justify>
         <b-button-group class="mx-1">
-          <b-button size="sm" variant="secondary" :pressed="is_tagged">Tag as "{{ task_tag.label }}"</b-button>
+          <b-button
+            size="sm"
+            variant="secondary"
+            :pressed="is_tagged"
+            @click="toggle_photo"
+          >Tag as "{{ task_tag.label }}"</b-button>
           <b-button size="sm" variant="secondary" v-b-modal.add-tag>View/edit other tags</b-button>
         </b-button-group>
         <b-button-group class="mx-1">
@@ -135,6 +140,13 @@ export default {
     },
     activate_sidebar(payload) {
       this.$emit("activate_sidebar", payload);
+    },
+    toggle_photo() {
+      if (this.is_tagged) {
+        this.$emit("remove_tag", this.photograph.id);
+      } else {
+        this.$emit("add_tag", this.photograph.id);
+      }
     },
     add_tag(photograph_id, tag_id) {
       // Adding an arbitrary, non-task tag

@@ -3,14 +3,16 @@
     <b-container fluid>
       <h3>{{ sidebar_title }}</h3>
       <p>Click on a photograph to tag it with "{{ task.tag.label }}".</p>
-      <b-button @click="register_whole_grid">
-        Add "{{ task.tag.label }}" to all photos on this page
-        <b-spinner v-if="requests_processing" small class="mr-1" />
-      </b-button>
-      <b-button @click="reject_remaining_grid">
-        Exclude all untagged photos on this page from future consideration for "{{ task.tag.label }}"
-        <b-spinner v-if="requests_processing" small class="mr-1" />
-      </b-button>
+      <b-button-group>
+        <b-button @click="register_whole_grid" variant="success">
+          Add "{{ task.tag.label }}" to all undecided photos on this page
+          <b-spinner v-if="requests_processing" small class="mr-1" />
+        </b-button>
+        <b-button @click="reject_remaining_grid" variant="danger">
+          Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
+          <b-spinner v-if="requests_processing" small class="mr-1" />
+        </b-button>
+      </b-button-group>
       <PhotoGrid
         v-if="sidebar_payload.class=='job'"
         :highlight_ids="higlighted_photos"
@@ -29,6 +31,16 @@
         @photo_click="toggle_tag"
         @images="set_images"
       />
+      <b-button-group>
+        <b-button @click="register_whole_grid" variant="success">
+          Add "{{ task.tag.label }}" to all undecided on this page
+          <b-spinner v-if="requests_processing" small class="mr-1" />
+        </b-button>
+        <b-button @click="reject_remaining_grid" variant="danger">
+          Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
+          <b-spinner v-if="requests_processing" small class="mr-1" />
+        </b-button>
+      </b-button-group>
     </b-container>
   </b-sidebar>
 </template>
@@ -72,7 +84,19 @@ export default {
     untagged_grid_photos() {
       return _.difference(
         this.sidebar_grid_state.map(p => p.id),
+        _.union(this.higlighted_photos, this.rejected_photos)
+      );
+    },
+    unaccepted_grid_photos() {
+      return _.difference(
+        this.sidebar_grid_state.map(p => p.id),
         this.higlighted_photos
+      );
+    },
+    unrejected_grid_photos() {
+      return _.difference(
+        this.sidebar_grid_state.map(p => p.id),
+        this.rejected_photos
       );
     }
   },

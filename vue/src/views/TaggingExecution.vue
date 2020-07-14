@@ -4,7 +4,7 @@
     <b-overlay :show="loading">
       <b-row>
         <b-col cols="6">
-          <div v-if="!!sorted_photos">
+          <div>
             <b-card no-body>
               <template v-slot:header>
                 <b-row align-h="between" align-v="center" class="px-2">
@@ -16,7 +16,7 @@
                   >Get more photos...</b-button>
                 </b-row>
               </template>
-              <b-list-group flush>
+              <b-list-group flush v-if="!!sorted_photos">
                 <b-list-group-item v-for="row in sorted_photos" :key="row.number">
                   <b-row align-h="between" align-v="center">
                     <b-img
@@ -46,6 +46,8 @@
             @new_seed_photo="new_seed_photo"
             @close_photo_detail="detail_photo=null"
             @activate_sidebar="activate_sidebar"
+            @add_tag="add_tag"
+            @remove_tag="remove_tag"
           />
 
           <b-alert
