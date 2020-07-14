@@ -144,7 +144,7 @@ class IIIFModel(models.Model):
 
     @property
     def thumbnail_image(self):
-        return f"{self.iiif_base}/full/400,/0/default.jpg"
+        return f"{self.iiif_base}/full/600,/0/default.jpg"
 
     @property
     def square_thumbnail_image(self):
