@@ -9,13 +9,6 @@
           :job_tag="job_tag"
           :digitized_date_range="digitized_date_range"
         />
-        <JobTags
-          v-model="job_tag"
-          :directory="directory"
-          :job="job"
-          :tag="tag"
-          :digitized_date_range="digitized_date_range"
-        />
         <Jobs
           v-model="job"
           :job_tag="job_tag"
@@ -67,7 +60,6 @@ import PhotoGrid from "@/components/browsing/PhotoGrid.vue";
 import FacetPills from "@/components/browsing/FacetPills.vue";
 import Directories from "@/components/browsing/Directories.vue";
 import Jobs from "@/components/browsing/Jobs.vue";
-import JobTags from "@/components/browsing/JobTags.vue";
 import Tags from "@/components/browsing/Tags.vue";
 export default {
   name: "PhotoBrowse",
@@ -76,7 +68,6 @@ export default {
     FacetPills,
     Directories,
     Jobs,
-    JobTags,
     Tags
   },
   data() {
