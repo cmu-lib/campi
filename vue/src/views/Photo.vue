@@ -66,6 +66,35 @@
         />
       </b-modal>
     </b-row>
+    <p>Google Cloud Vision API tags</p>
+    <p>
+      Objects depicted:
+      <b-badge
+        v-for="gcv_object in distinct_object_annotations"
+        :key="gcv_object.id"
+        :to="{name: 'Browse', query: {gcv_object: gcv_object.id}}"
+        variant="danger"
+        class="mx-1"
+      >
+        <BIconColumnsGap />
+        {{ gcv_object.label }}
+      </b-badge>
+    </p>
+    <p>
+      General descriptions:
+      <b-badge
+        v-for="gcv_label in image_data.label_annotations"
+        :key="gcv_label.id"
+        :to="{name: 'Browse', query: {gcv_label: gcv_label.label.id}}"
+        variant="danger"
+        class="mx-1"
+        :title="`score: ${gcv_label.score.toFixed(4)}`"
+        v-b-tooltip:hover
+      >
+        <BIconCardList />
+        {{ gcv_label.label.label }}
+      </b-badge>
+    </p>
     <b-row>
       <IIIF :key="iiif_key" :info_url="image_data.image.info" :annotations="annotations" />
     </b-row>
@@ -76,14 +105,22 @@
 import IIIF from "@/components/IIIF";
 import _ from "lodash";
 import { HTTP } from "@/main";
-import { BIconTag, BIconCamera, BIconFolderFill } from "bootstrap-vue";
+import {
+  BIconTag,
+  BIconCamera,
+  BIconFolderFill,
+  BIconColumnsGap,
+  BIconCardList
+} from "bootstrap-vue";
 export default {
   name: "Photo",
   components: {
     IIIF,
     BIconTag,
     BIconCamera,
-    BIconFolderFill
+    BIconFolderFill,
+    BIconColumnsGap,
+    BIconCardList
   },
   props: {
     id: Number
@@ -98,6 +135,21 @@ export default {
     };
   },
   computed: {
+    distinct_object_annotations() {
+      if (!!this.image_data) {
+        return _.uniqBy(
+          this.image_data.objectannotation.map(oa => {
+            return {
+              id: oa.label.id,
+              label: oa.label.label
+            };
+          }),
+          "id"
+        );
+      } else {
+        return [];
+      }
+    },
     directory_tree() {
       // Pass the immediate parent directory along with an empty array to dtree renderer
       var recursed_tree = this.render_dtree(

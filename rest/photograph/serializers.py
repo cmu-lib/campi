@@ -46,16 +46,28 @@ class FaceAnnotationFlatSerializer(serializers.ModelSerializer):
         ]
 
 
+class ObjectAnnotationLabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ObjectAnnotationLabel
+        fields = ["id", "label"]
+
+
 class ObjectAnnotationFlatSerializer(serializers.ModelSerializer):
-    label = serializers.SlugRelatedField(slug_field="label", read_only=True)
+    label = ObjectAnnotationLabelSerializer()
 
     class Meta:
         model = models.ObjectAnnotation
         fields = ["id", "label", "score", "x", "y", "width", "height"]
 
 
-class PhotoLabelFlatSerializer(serializers.ModelSerializer):
-    label = serializers.SlugRelatedField(slug_field="label", read_only=True)
+class PhotoLabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PhotoLabel
+        fields = ["id", "label"]
+
+
+class PhotoLabelAnnotationSerializer(serializers.ModelSerializer):
+    label = PhotoLabelSerializer()
 
     class Meta:
         model = models.PhotoLabelAnnotation
@@ -69,7 +81,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
     decisions = TaggingDecisionSerializer(many=True)
     faceannotation = FaceAnnotationFlatSerializer(many=True)
     objectannotation = ObjectAnnotationFlatSerializer(many=True)
-    label_annotations = PhotoLabelFlatSerializer(many=True)
+    label_annotations = PhotoLabelAnnotationSerializer(many=True)
 
     class Meta:
         model = models.Photograph
@@ -100,7 +112,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
     job = collection.serializers.JobListSerializer()
     photograph_tags = PhotographTagSerializer(many=True)
     decisions = TaggingDecisionSerializer(many=True)
-    label_annotations = PhotoLabelFlatSerializer(many=True)
+    label_annotations = PhotoLabelAnnotationSerializer(many=True)
 
     class Meta:
         model = models.Photograph
