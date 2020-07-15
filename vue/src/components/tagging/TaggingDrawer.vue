@@ -1,13 +1,12 @@
 <template>
   <b-sidebar id="sidebar" v-model="show_sidebar" width="90%" right shadow>
     <b-container fluid>
-      <h3>
-        {{ sidebar_title }}
+      <b-row align-h="between" class="m-2">
+        <h3>{{ sidebar_title }}</h3>
         <b-button variant="info" v-b-toggle.tag-help>
           <BIconQuestionCircleFill class="mx-1" />Toggle instructions
         </b-button>
-      </h3>
-
+      </b-row>
       <b-collapse id="tag-help" class="my-2">
         <b-container>
           <ol>
@@ -15,11 +14,12 @@
             <li>You can reverse a decision by clicking on the photo again, which will turn it orange. This removes the tag, and will prevent that photo from showing up in future suggestions.</li>
             <li>Once you have tagged all the relevant photos on this page, hit the "Exclude all undecided photos" to exclude the rest. This will help your future tagging tasks.</li>
             <li>If this is a large job or directory, you may see pagination buttons. You will need to click through the other pages to make tagging decisions for those photos.</li>
+            <li>The archivists have grouped some photos as being "close matches" that are copies or extremely similar photogrpahs. These will update simultaneously when you click on one, so you may notice multiple photographs changing when you click on just one image.</li>
           </ol>
           <p>Click on the info button under any picture to get a full-sized preview, and a link to a full details page for the file.</p>
         </b-container>
       </b-collapse>
-      <b-row align-h="center">
+      <b-row align-h="center" class="mt-3">
         <b-button-group>
           <b-button @click="register_whole_grid" variant="success">
             Add "{{ task.tag.label }}" to all undecided photos on this page

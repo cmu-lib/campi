@@ -1,5 +1,6 @@
 <template>
   <b-container fluid>
+    <p>Select a "seed photo" that will serve as the starting point of tagging. The server will find visually-similar photos to this one to help prioritize the photos and jobs that you will look through.</p>
     <PhotoBrowse @photo_click="photo_click" />
   </b-container>
 </template>

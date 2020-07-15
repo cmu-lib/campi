@@ -321,11 +321,15 @@ export default {
       );
     },
     manage_related_photos(other_tagged_photos) {
-      console.log("managing related pics");
-      console.log(other_tagged_photos);
-      other_tagged_photos
-        .filter(op => op.tagging_decision.task == this.task_id)
-        .map(op => {
+      const task_photos = other_tagged_photos.filter(
+        op => op.tagging_decision.task == this.task_id
+      );
+      if (task_photos.length > 0) {
+        this.$bvToast.toast(
+          `Updating ${task_photos.length} other linked photos`,
+          { variant: "info" }
+        );
+        task_photos.map(op => {
           if (this.is_photo_decided(op.photograph.id)) {
             const related_decision_index = _.findIndex(this.photo_decisions, {
               decision_id: op.tagging_decision.id
@@ -339,6 +343,7 @@ export default {
             is_applicable: op.tagging_decision.is_applicable
           });
         });
+      }
     },
     submit_choices() {
       Promise.all(this.undecided_photo_ids.map(id => this.remove_tag(id))).then(
