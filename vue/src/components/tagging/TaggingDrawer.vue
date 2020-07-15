@@ -115,7 +115,6 @@ export default {
   },
   methods: {
     set_images(payload) {
-      console.log("Setting images");
       this.sidebar_grid_state = payload;
       this.$emit("grid_state", this.sidebar_grid_state);
     },

@@ -83,7 +83,6 @@ export default {
           this.tags = results.data.results;
         },
         error => {
-          console.log(error.response);
           this.$bvToast.toast({
             message: error.response,
             options: { variant: "danger" }

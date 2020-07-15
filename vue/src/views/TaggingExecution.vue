@@ -168,22 +168,17 @@ export default {
       this.nearest_neighbor_set.splice(0, 9);
     },
     remove_photo(photograph) {
-      console.log(photograph);
       const photo_index = _.findIndex(this.nearest_neighbor_set, {
         id: photograph.id
       });
       if (photo_index > -1) {
-        console.log(photo_index);
-        console.log(this.nearest_neighbor_set[photo_index]);
         this.nearest_neighbor_set.splice(photo_index, 1);
       }
     },
     update_grid_state(photographs) {
-      console.log("Updating grid state");
       // Add any applicable tag decisions from the photo grid drawer to the cache of photo decisions
       photographs.map(p => {
         if (this.decided_photo_ids.includes(p.id)) {
-          console.log(`Updating photo ${p.id} already in cache`);
           // Remove the cached decision and update from the current state
           const photo_index = _.findIndex(this.photo_decisions, {
             photograph_id: p.id
@@ -197,9 +192,7 @@ export default {
           });
         }
         p.decisions.map(d => {
-          console.log(`Decision ${d.id} for photo ${p.id}`);
           if (d.task == this.task_id) {
-            console.log(`Adding decision data for ${p.id}`);
             this.photo_decisions.push({
               photograph_id: p.id,
               decision_id: d.id,
@@ -225,7 +218,7 @@ export default {
             })
         )
         .flat();
-      console.log(photo_decisions);
+
       return photo_decisions;
     },
     get_nn_set(func = null) {
@@ -379,6 +372,7 @@ export default {
           this.task = response.data;
         },
         error => {
+          console.log(error);
           console.log(error);
         }
       );
