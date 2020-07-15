@@ -4,6 +4,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from photograph import serializers, models
 import collection
 from django_filters import rest_framework as filters
@@ -150,4 +151,13 @@ class ObjectAnnotationLabelViewset(viewsets.ModelViewSet):
     )
     serializer_class = serializers.ObjectAnnotationLabelSerializer
     pagination_class = None
+
+
+class ObjectAnnotationLabelFilter(filters.FilterSet):
+    label = filters.CharFilter(field_name="label", lookup_expr="icontains")
+
+
+class PaginatedObjectAnnotationLabelViewset(ObjectAnnotationLabelViewset):
+    filterset_class = ObjectAnnotationLabelFilter
+    pagination_class = LimitOffsetPagination
 

@@ -27,6 +27,10 @@ router.register(r"gcv/object_annotation", photograph.views.ObjectAnnotationViews
 router.register(
     r"gcv/object_annotation_labels", photograph.views.ObjectAnnotationLabelViewset
 )
+router.register(
+    r"gcv/object_annotation_labels_paginated",
+    photograph.views.PaginatedObjectAnnotationLabelViewset,
+)
 
 schema_view = get_schema_view(
     openapi.Info(
