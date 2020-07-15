@@ -109,7 +109,7 @@ class TaggingTaskViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
                 {
                     "error": "Requesting user does not match the currently assigned user."
                 },
-                error=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_403_FORBIDDEN,
             )
 
     @action(detail=True, methods=["get"], name="Get the next set of nearest neighbors")
