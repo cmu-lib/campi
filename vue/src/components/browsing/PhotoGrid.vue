@@ -172,11 +172,12 @@ export default {
 
 <style scoped>
 .highlighted {
-  outline: 4px green solid;
+  outline: 3px solid greenyellow;
+  filter: sepia(100%) saturate(200%) brightness(100%) hue-rotate(50deg);
 }
 .dimmed {
-  outline: 4px red solid;
-  opacity: 0.2;
+  outline: 3px solid orangered;
+  filter: sepia(100%) saturate(200%) brightness(100%) hue-rotate(320deg);
 }
 
 .photo-popover {

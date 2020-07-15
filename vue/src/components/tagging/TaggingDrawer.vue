@@ -9,7 +9,7 @@
           Add "{{ task.tag.label }}" to all undecided photos on this page
           <b-spinner v-if="requests_processing" small class="mr-1" />
         </b-button>
-        <b-button @click="reject_remaining_grid" variant="danger">
+        <b-button @click="reject_remaining_grid" variant="warning">
           Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
           <b-spinner v-if="requests_processing" small class="mr-1" />
         </b-button>
@@ -31,7 +31,7 @@
         :highlight_ids="higlighted_photos"
         :dimmed_ids="rejected_photos"
         :directory="sidebar_payload.object"
-        :per_page="50"
+        :per_page="30"
         :key="grid_id"
         @photo_click="toggle_tag"
         @images="set_images"
@@ -41,7 +41,7 @@
           Add "{{ task.tag.label }}" to all undecided on this page
           <b-spinner v-if="requests_processing" small class="mr-1" />
         </b-button>
-        <b-button @click="reject_remaining_grid" variant="danger">
+        <b-button @click="reject_remaining_grid" variant="warning">
           Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
           <b-spinner v-if="requests_processing" small class="mr-1" />
         </b-button>
