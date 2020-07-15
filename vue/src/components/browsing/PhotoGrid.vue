@@ -11,31 +11,46 @@
       />
     </b-row>
     <b-row flex align-h="center">
-      <b-img
-        lazy
-        v-for="image in images.results"
-        class="m-2"
-        :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
-        :key="image.id"
-        :id="`image-${image.id}`"
-        :src="image.image.square"
-        blank-width="150"
-        blank-height="150"
-        @click="$emit('photo_click', image)"
-      />
-      <b-popover
-        v-for="image in popovers"
-        :key="`pop-${image.id}`"
-        triggers="hover"
-        :target="`image-${image.id}`"
-        :delay="{show: 1000}"
-        custom-class="photo-popover"
-        placement="top"
-      >
-        <template v-slot:title>{{ image.filename }}</template>
-        <b-img :src="image.image.thumbnail" fluid />
-        <b-button class="mt-2" @click="newtab(image)" variant="primary">Open in new tab</b-button>
-      </b-popover>
+      <div v-for="image in images.results" :key="image.id" class="my-2 mx-4">
+        <b-row>
+          <b-img
+            lazy
+            :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
+            :src="image.image.square"
+            blank-width="150"
+            blank-height="150"
+            @click="$emit('photo_click', image)"
+          />
+        </b-row>
+        <b-row>
+          <b-button
+            v-if="info_button"
+            size="sm"
+            variant="light"
+            block
+            squared
+            v-b-modal="`modal-${image.id}`"
+          >
+            <BIconInfoCircle />
+          </b-button>
+        </b-row>
+        <b-modal
+          v-if="info_button"
+          :id="`modal-${image.id}`"
+          size="xl"
+          centered
+          :title="image.filename"
+          @ok="newtab(image)"
+          ok-only
+          ok-title="Open detail view in new tab"
+        >
+          <b-container fluid>
+            <b-row align-h="center">
+              <b-img :src="`${image.image.id}/full/!1000,800/0/default.jpg`" fluid />
+            </b-row>
+          </b-container>
+        </b-modal>
+      </div>
     </b-row>
     <b-row flex align-h="center" class="mt-3">
       <b-pagination
@@ -50,8 +65,10 @@
 
 <script>
 import { HTTP } from "@/main";
+import { BIconInfoCircle } from "bootstrap-vue";
 export default {
   name: "PhotoGrid",
+  components: { BIconInfoCircle },
   props: {
     directory: {
       type: Object,
@@ -92,7 +109,7 @@ export default {
         return [];
       }
     },
-    popover: {
+    info_button: {
       type: Boolean,
       default: false
     }
@@ -145,8 +162,8 @@ export default {
     rest_page() {
       return (this.current_page - 1) * this.per_page;
     },
-    popovers() {
-      if (this.popover) {
+    modals() {
+      if (this.info_button) {
         return this.images.results;
       } else {
         return [];

@@ -16,7 +16,7 @@
       </b-button-group>
       <PhotoGrid
         v-if="sidebar_payload.class=='job'"
-        popover
+        info_button
         :highlight_ids="higlighted_photos"
         :dimmed_ids="rejected_photos"
         :job="sidebar_payload.object"
@@ -27,7 +27,7 @@
       />
       <PhotoGrid
         v-if="sidebar_payload.class=='directory'"
-        popover
+        info_button
         :highlight_ids="higlighted_photos"
         :dimmed_ids="rejected_photos"
         :directory="sidebar_payload.object"
