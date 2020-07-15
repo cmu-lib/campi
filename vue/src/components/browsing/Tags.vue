@@ -2,7 +2,14 @@
   <b-card class="my-2" no-body>
     <template v-slot:header>
       <b-row align-h="between" align-v="center" class="mx-1">
-        <span>Tags</span>
+        <span>
+          Tags
+          <BIconQuestionCircle
+            title="Tags created by CMU Archives and applied by humans."
+            v-b-tooltip:hover
+            class="mx-1"
+          />
+        </span>
         <BIconCaretDownFill v-if="open" class="pointer" @click="open=!open" />
         <BIconCaretLeftFill v-else class="pointer" @click="open=!open" />
       </b-row>
@@ -41,14 +48,16 @@ import { HTTP } from "@/main";
 import {
   BIconXSquare,
   BIconCaretLeftFill,
-  BIconCaretDownFill
+  BIconCaretDownFill,
+  BIconQuestionCircle
 } from "bootstrap-vue";
 export default {
   name: "Tags",
   components: {
     BIconXSquare,
     BIconCaretLeftFill,
-    BIconCaretDownFill
+    BIconCaretDownFill,
+    BIconQuestionCircle
   },
   props: {
     digitized_date_before: {

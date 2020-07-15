@@ -2,7 +2,14 @@
   <b-card class="my-2" no-body>
     <template v-slot:header>
       <b-row align-h="between" align-v="center" class="mx-1">
-        <span>Jobs</span>
+        <span>
+          Jobs
+          <BIconQuestionCircle
+            title="Titles or codes of official CMU photographer 'jobs' during which these photos were taken."
+            v-b-tooltip:hover
+            class="mx-1"
+          />
+        </span>
         <BIconCaretDownFill v-if="open" class="pointer" @click="open=!open" />
         <BIconCaretLeftFill v-else class="pointer" @click="open=!open" />
       </b-row>
@@ -42,14 +49,16 @@ import { HTTP } from "@/main";
 import {
   BIconXSquare,
   BIconCaretDownFill,
-  BIconCaretLeftFill
+  BIconCaretLeftFill,
+  BIconQuestionCircle
 } from "bootstrap-vue";
 export default {
   name: "Jobs",
   components: {
     BIconXSquare,
     BIconCaretDownFill,
-    BIconCaretLeftFill
+    BIconCaretLeftFill,
+    BIconQuestionCircle
   },
   props: {
     digitized_date_before: {

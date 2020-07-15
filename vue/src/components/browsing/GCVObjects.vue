@@ -2,7 +2,14 @@
   <b-card class="my-2" no-body>
     <template v-slot:header>
       <b-row align-h="between" align-v="center" class="mx-1">
-        <span>GCV Objects</span>
+        <span>
+          GCV Objects
+          <BIconQuestionCircle
+            title="These are objects located in specific regions of a photograph by from Google's generic object detection API."
+            v-b-tooltip:hover
+            class="mx-1"
+          />
+        </span>
         <BIconCaretDownFill v-if="open" class="pointer" @click="open=!open" />
         <BIconCaretLeftFill v-else class="pointer" @click="open=!open" />
       </b-row>
@@ -48,14 +55,16 @@ import { HTTP } from "@/main";
 import {
   BIconXSquare,
   BIconCaretLeftFill,
-  BIconCaretDownFill
+  BIconCaretDownFill,
+  BIconQuestionCircle
 } from "bootstrap-vue";
 export default {
   name: "Gcvobjects",
   components: {
     BIconXSquare,
     BIconCaretLeftFill,
-    BIconCaretDownFill
+    BIconCaretDownFill,
+    BIconQuestionCircle
   },
   props: {
     digitized_date_before: {
