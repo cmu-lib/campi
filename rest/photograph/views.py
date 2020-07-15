@@ -34,6 +34,9 @@ class PhotographFilter(filters.FilterSet):
         queryset=models.ObjectAnnotationLabel.objects.all(),
         field_name="objectannotation__label",
     )
+    gcv_label = filters.ModelChoiceFilter(
+        queryset=models.PhotoLabel.objects.all(), field_name="label_annotations__label"
+    )
 
 
 def prepare_photograph_qs(qs):

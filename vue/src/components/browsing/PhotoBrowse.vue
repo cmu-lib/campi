@@ -19,6 +19,7 @@
           :digitized_date_after="dd_after"
         />
         <GCVObjects v-model="gcv_object" :job="job" :directory="directory" :tag="tag" />
+        <GCVLabels v-model="gcv_label" :job="job" :directory="directory" :tag="tag" />
         <Directories
           v-model="directory"
           :job_tag="job_tag"
@@ -36,11 +37,13 @@
           :job_tag="job_tag"
           :tag="tag"
           :gcv_object="gcv_object"
+          :gcv_label="gcv_label"
           @clear_directory="directory=null"
           @clear_job="job=null"
           @clear_job_tag="job_tag=null"
           @clear_tag="tag=null"
           @clear_gcv_object="gcv_object=null"
+          @clear_gcv_label="gcv_label=null"
           @clear_date_range="reset_date()"
         />
         <PhotoGrid
@@ -50,6 +53,7 @@
           :job_tag="job_tag"
           :tag="tag"
           :gcv_object="gcv_object"
+          :gcv_label="gcv_label"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
           @photo_click="photo_click"
@@ -67,6 +71,7 @@ import Directories from "@/components/browsing/Directories.vue";
 import Jobs from "@/components/browsing/Jobs.vue";
 import Tags from "@/components/browsing/Tags.vue";
 import GCVObjects from "@/components/browsing/GCVObjects.vue";
+import GCVLabels from "@/components/browsing/GCVLabels.vue";
 export default {
   name: "PhotoBrowse",
   components: {
@@ -75,7 +80,8 @@ export default {
     Directories,
     Jobs,
     Tags,
-    GCVObjects
+    GCVObjects,
+    GCVLabels
   },
   data() {
     return {
@@ -84,6 +90,7 @@ export default {
       job_tag: null,
       tag: null,
       gcv_object: null,
+      gcv_label: null,
       digitized_date_range: [2016, 2020]
     };
   },
@@ -100,6 +107,9 @@ export default {
       var ids = {};
       if (!!this.gcv_object) {
         ids["gcv_object"] = this.gcv_object.id;
+      }
+      if (!!this.gcv_label) {
+        ids["gcv_label"] = this.gcv_label.id;
       }
       if (!!this.directory) {
         ids["directory"] = this.directory.id;
