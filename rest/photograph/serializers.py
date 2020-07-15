@@ -184,8 +184,9 @@ class ObjectAnnotationSerializer(serializers.ModelSerializer):
 
 class ObjectAnnotationLabelSerializer(serializers.ModelSerializer):
     n_annotations = serializers.IntegerField(read_only=True)
+    n_images = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = models.ObjectAnnotationLabel
-        fields = ["id", "label", "n_annotations"]
+        fields = ["id", "label", "n_annotations", "n_images"]
 

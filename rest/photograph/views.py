@@ -151,9 +151,11 @@ class ObjectAnnotationViewset(viewsets.ModelViewSet):
 
 class ObjectAnnotationLabelViewset(viewsets.ModelViewSet):
     queryset = models.ObjectAnnotationLabel.objects.order_by("label").annotate(
-        n_annotations=Count("annotations", distinct=True)
+        n_annotations=Count("annotations", distinct=True),
+        n_images=Count("annotations__photograph", distinct=True),
     )
     serializer_class = serializers.ObjectAnnotationLabelSerializer
+    ordering_fields = ["label", "n_annotations", "n_images"]
     pagination_class = None
 
 
