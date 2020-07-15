@@ -165,5 +165,4 @@ class PhotoLabelAnnotation(models.Model):
         PhotoLabel, on_delete=models.CASCADE, related_name="annotations"
     )
     score = models.FloatField(db_index=True)
-    topicality = models.FloatField(db_index=True)
 

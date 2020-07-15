@@ -71,7 +71,7 @@ class PhotoLabelAnnotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.PhotoLabelAnnotation
-        fields = ["id", "label", "score", "topicality"]
+        fields = ["id", "label", "score"]
 
 
 class PhotographDetailSerializer(serializers.ModelSerializer):

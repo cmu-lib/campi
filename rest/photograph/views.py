@@ -46,7 +46,7 @@ def prepare_photograph_qs(qs):
     ordered_decisions = tagging.models.TaggingDecision.objects.order_by("-created_on")
     ordered_labels = models.PhotoLabelAnnotation.objects.select_related(
         "label"
-    ).order_by("-topicality")
+    ).order_by("-score")
     qs = (
         qs.select_related("directory", "job")
         .prefetch_related(
@@ -68,7 +68,7 @@ def prepare_photograph_detail_qs(qs):
     ordered_decisions = tagging.models.TaggingDecision.objects.order_by("-created_on")
     ordered_labels = models.PhotoLabelAnnotation.objects.select_related(
         "label"
-    ).order_by("-topicality")
+    ).order_by("-score")
     qs = (
         qs.select_related("directory", "job")
         .prefetch_related(

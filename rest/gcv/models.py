@@ -103,10 +103,7 @@ class GCVResponse(dateCreatedModel):
             )[0]
             labels.append(
                 photograph.models.PhotoLabelAnnotation(
-                    photograph=self.photograph,
-                    label=label_obj,
-                    score=label.score,
-                    topicality=label.topicality,
+                    photograph=self.photograph, label=label_obj, score=label.score
                 )
             )
         photograph.models.PhotoLabelAnnotation.objects.bulk_create(labels)
