@@ -1,6 +1,9 @@
 <template>
   <div>
-    <b-alert variant="info" :show="loading">Loading new results - this may take a few seconds...</b-alert>
+    <b-alert
+      variant="info"
+      :show="loading"
+    >Computing a set of visually-similar images - this may take a few seconds...</b-alert>
     <b-overlay :show="loading">
       <b-row v-if="!loading">
         <b-col cols="6">
@@ -8,11 +11,12 @@
             <b-card no-body>
               <template v-slot:header>
                 <b-row align-h="between" align-v="center" class="px-2">
-                  <span>Click photo to inspect and tag related photos in job/directory</span>
+                  <span>Click a photo to inspect and tag other photos in the same job/directory</span>
                   <b-button
                     size="sm"
                     @click="submit_choices"
                     title="Discard the rest of this grid and draw more photos from the similarity results"
+                    v-b-tooltip:hover
                   >Get more photos...</b-button>
                 </b-row>
               </template>
@@ -26,7 +30,6 @@
                       :key="photograph.id"
                       :src="photograph.image.square"
                       class="pointer"
-                      :class="{'approved': accepted_photo_ids.includes(photograph.id)}"
                       @click="get_info(photograph)"
                     />
                   </b-row>
@@ -51,11 +54,14 @@
             @remove_tag="remove_tag"
           />
 
-          <b-alert
-            v-else
-            show
-            variant="primary"
-          >Click a photo at right to inspect and tag it and the other photographs in its associated job / directory.</b-alert>
+          <b-alert v-else show variant="primary">
+            <p>Click a photo at left to inspect and tag it and the other photographs in its associated job / directory.</p>
+            <p>As you add tags to photographs within jobs, photos will get removed from the stack of similar photos at left. If none of the photos in the stack look relevant, click the "Get more photos..." button to pull up another set.</p>
+            <p>If you stop getting relevant photos, you may click on "Choose seed photo" above to backtrack and pick a new, different-looking seed photograph that may pull up other relevant photos.</p>
+            <p>
+              <strong>When you want to stop working on a tag, be sure to click on the tag button above with the X icon. This will check the tag back in and allow another user to check it out and continue work on it.</strong>
+            </p>
+          </b-alert>
           <TaggingDrawer
             v-if="!!sidebar_payload.object"
             :sidebar_payload="sidebar_payload"
@@ -376,16 +382,6 @@ export default {
   mounted() {
     this.get_task();
     this.get_nn_set();
-  },
-  detail_photo() {
-    // Reset the sidebar anytime a new photo detail is chosen.
-    this.sidebar_payload = {};
   }
 };
 </script>
-
-<style>
-img.approved {
-  outline: 3px solid red;
-}
-</style>

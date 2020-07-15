@@ -1,19 +1,36 @@
 <template>
   <b-sidebar id="sidebar" v-model="show_sidebar" width="90%" right shadow>
     <b-container fluid>
-      <h3>{{ sidebar_title }}</h3>
-      <p>Click on a photograph to tag it with "{{ task.tag.label }}".</p>
-      <p>Hover over a photo to see the full image and get a link to open the detail page in a new tab</p>
-      <b-button-group>
-        <b-button @click="register_whole_grid" variant="success">
-          Add "{{ task.tag.label }}" to all undecided photos on this page
-          <b-spinner v-if="requests_processing" small class="mr-1" />
+      <h3>
+        {{ sidebar_title }}
+        <b-button variant="info" v-b-toggle.tag-help>
+          <BIconQuestionCircleFill class="mx-1" />Toggle instructions
         </b-button>
-        <b-button @click="reject_remaining_grid" variant="warning">
-          Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
-          <b-spinner v-if="requests_processing" small class="mr-1" />
-        </b-button>
-      </b-button-group>
+      </h3>
+
+      <b-collapse id="tag-help" class="my-2">
+        <b-container>
+          <ol>
+            <li>Click on a photograph to tag it with "{{ task.tag.label }}". Photos tinted green are "accepted".</li>
+            <li>You can reverse a decision by clicking on the photo again, which will turn it orange. This removes the tag, and will prevent that photo from showing up in future suggestions.</li>
+            <li>Once you have tagged all the relevant photos on this page, hit the "Exclude all undecided photos" to exclude the rest. This will help your future tagging tasks.</li>
+            <li>If this is a large job or directory, you may see pagination buttons. You will need to click through the other pages to make tagging decisions for those photos.</li>
+          </ol>
+          <p>Click on the info button under any picture to get a full-sized preview, and a link to a full details page for the file.</p>
+        </b-container>
+      </b-collapse>
+      <b-row align-h="center">
+        <b-button-group>
+          <b-button @click="register_whole_grid" variant="success">
+            Add "{{ task.tag.label }}" to all undecided photos on this page
+            <b-spinner v-if="requests_processing" small class="mr-1" />
+          </b-button>
+          <b-button @click="reject_remaining_grid" variant="warning">
+            Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
+            <b-spinner v-if="requests_processing" small class="mr-1" />
+          </b-button>
+        </b-button-group>
+      </b-row>
       <PhotoGrid
         v-if="sidebar_payload.class=='job'"
         info_button
@@ -36,16 +53,6 @@
         @photo_click="toggle_tag"
         @images="set_images"
       />
-      <b-button-group>
-        <b-button @click="register_whole_grid" variant="success">
-          Add "{{ task.tag.label }}" to all undecided on this page
-          <b-spinner v-if="requests_processing" small class="mr-1" />
-        </b-button>
-        <b-button @click="reject_remaining_grid" variant="warning">
-          Exclude all undecided photos on this page from future consideration for "{{ task.tag.label }}"
-          <b-spinner v-if="requests_processing" small class="mr-1" />
-        </b-button>
-      </b-button-group>
     </b-container>
   </b-sidebar>
 </template>
@@ -53,10 +60,10 @@
 <script>
 import PhotoGrid from "@/components/browsing/PhotoGrid.vue";
 import _ from "lodash";
-
+import { BIconQuestionCircleFill } from "bootstrap-vue";
 export default {
   name: "TaggingDrawer",
-  components: { PhotoGrid },
+  components: { PhotoGrid, BIconQuestionCircleFill },
   props: {
     sidebar_payload: {
       type: Object,

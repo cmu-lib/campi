@@ -36,7 +36,7 @@
             placement="left"
           >
             <template v-slot:title>{{ seed_photo.filename }}</template>
-            <b-img :src="seed_photo.image.square" width="230" />
+            <b-img :src="seed_photo.image.thumbnail" width="230" />
           </b-popover>
         </div>
       </b-row>

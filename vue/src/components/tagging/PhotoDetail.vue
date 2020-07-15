@@ -11,7 +11,7 @@
     <b-button-toolbar>
       <b-button
         size="sm"
-        variant="secondary"
+        :variant="tag_button_variant"
         :pressed="is_tagged"
         @click="toggle_photo"
       >{{ tag_button_label }}</b-button>
@@ -104,6 +104,13 @@ export default {
         return `Remove tag "${this.button_truncate(this.task_tag.label)}"`;
       } else {
         return `Tag as "${this.button_truncate(this.task_tag.label)}"`;
+      }
+    },
+    tag_button_variant() {
+      if (this.is_tagged) {
+        return "danger";
+      } else {
+        return "success";
       }
     }
   },
