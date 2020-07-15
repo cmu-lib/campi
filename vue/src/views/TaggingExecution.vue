@@ -41,6 +41,7 @@
             v-if="!!detail_photo & !!task"
             :photograph="detail_photo"
             :available_tags="available_tags"
+            :highlighted_photos="tagged_photos"
             :task_tag="task.tag"
             @new_tagged_photo="remove_photo"
             @new_seed_photo="new_seed_photo"

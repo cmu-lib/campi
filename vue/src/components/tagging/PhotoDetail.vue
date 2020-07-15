@@ -14,7 +14,7 @@
         variant="secondary"
         :pressed="is_tagged"
         @click="toggle_photo"
-      >Tag as "{{ button_truncate(task_tag.label) }}"</b-button>
+      >{{ tag_button_label }}</b-button>
       <b-button-group class="mx-1">
         <b-button
           size="sm"
@@ -84,6 +84,10 @@ export default {
     task_tag: {
       type: Object,
       default: null
+    },
+    highlighted_photos: {
+      type: Array,
+      required: true
     }
   },
   data() {
@@ -93,9 +97,14 @@ export default {
   },
   computed: {
     is_tagged() {
-      return this.photograph.photograph_tags
-        .map(t => t.tag.id)
-        .includes(this.task_tag.id);
+      return this.highlighted_photos.includes(this.photograph.id);
+    },
+    tag_button_label() {
+      if (this.is_tagged) {
+        return `Remove tag "${this.button_truncate(this.task_tag.label)}"`;
+      } else {
+        return `Tag as "${this.button_truncate(this.task_tag.label)}"`;
+      }
     }
   },
   methods: {
