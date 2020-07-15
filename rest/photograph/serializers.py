@@ -54,6 +54,14 @@ class ObjectAnnotationFlatSerializer(serializers.ModelSerializer):
         fields = ["id", "label", "score", "x", "y", "width", "height"]
 
 
+class PhotoLabelFlatSerializer(serializers.ModelSerializer):
+    label = serializers.SlugRelatedField(slug_field="label", read_only=True)
+
+    class Meta:
+        model = models.PhotoLabelAnnotation
+        fields = ["id", "label", "score", "topicality"]
+
+
 class PhotographDetailSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
     job = collection.serializers.JobDetailSerializer()
@@ -61,6 +69,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
     decisions = TaggingDecisionSerializer(many=True)
     faceannotation = FaceAnnotationFlatSerializer(many=True)
     objectannotation = ObjectAnnotationFlatSerializer(many=True)
+    label_annotations = PhotoLabelFlatSerializer(many=True)
 
     class Meta:
         model = models.Photograph
@@ -82,6 +91,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
             "decisions",
             "faceannotation",
             "objectannotation",
+            "label_annotations",
         ]
 
 
@@ -90,6 +100,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
     job = collection.serializers.JobListSerializer()
     photograph_tags = PhotographTagSerializer(many=True)
     decisions = TaggingDecisionSerializer(many=True)
+    label_annotations = PhotoLabelFlatSerializer(many=True)
 
     class Meta:
         model = models.Photograph
@@ -109,6 +120,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
             "job_sequence",
             "photograph_tags",
             "decisions",
+            "label_annotations",
         ]
 
 
@@ -190,3 +202,10 @@ class ObjectAnnotationLabelSerializer(serializers.ModelSerializer):
         model = models.ObjectAnnotationLabel
         fields = ["id", "label", "n_annotations", "n_images"]
 
+
+class PhotoLabelSerializer(serializers.ModelSerializer):
+    n_images = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = models.PhotoLabel
+        fields = ["id", "label", "n_images"]

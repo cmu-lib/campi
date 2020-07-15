@@ -151,3 +151,19 @@ class ObjectAnnotation(Annotation):
         ObjectAnnotationLabel, on_delete=models.CASCADE, related_name="annotations"
     )
     score = models.FloatField()
+
+
+class PhotoLabel(campi.models.uniqueLabledModel):
+    pass
+
+
+class PhotoLabelAnnotation(models.Model):
+    photograph = models.ForeignKey(
+        Photograph, on_delete=models.CASCADE, related_name="label_annotations"
+    )
+    label = models.ForeignKey(
+        PhotoLabel, on_delete=models.CASCADE, related_name="annotations"
+    )
+    score = models.FloatField(db_index=True)
+    topicality = models.FloatField(db_index=True)
+

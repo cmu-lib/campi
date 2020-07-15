@@ -41,12 +41,16 @@ def prepare_photograph_qs(qs):
         "tag", "user_last_modified"
     ).order_by("-last_updated")
     ordered_decisions = tagging.models.TaggingDecision.objects.order_by("-created_on")
+    ordered_labels = models.PhotoLabelAnnotation.objects.select_related(
+        "label"
+    ).order_by("-topicality")
     qs = (
         qs.select_related("directory", "job")
         .prefetch_related(
             "job__tags",
             Prefetch("photograph_tags", queryset=ordered_tags),
             Prefetch("decisions", queryset=ordered_decisions),
+            Prefetch("label_annotations", queryset=ordered_labels),
         )
         .all()
     )
@@ -59,6 +63,9 @@ def prepare_photograph_detail_qs(qs):
         "tag", "user_last_modified"
     ).order_by("-last_updated")
     ordered_decisions = tagging.models.TaggingDecision.objects.order_by("-created_on")
+    ordered_labels = models.PhotoLabelAnnotation.objects.select_related(
+        "label"
+    ).order_by("-topicality")
     qs = (
         qs.select_related("directory", "job")
         .prefetch_related(
@@ -66,6 +73,7 @@ def prepare_photograph_detail_qs(qs):
             Prefetch("photograph_tags", queryset=ordered_tags),
             Prefetch("decisions", queryset=ordered_decisions),
             Prefetch("objectannotation", queryset=object_annotations),
+            Prefetch("label_annotations", queryset=ordered_labels),
             "faceannotation",
         )
         .all()
@@ -198,4 +206,17 @@ class ObjectAnnotationLabelFilter(filters.FilterSet):
 class PaginatedObjectAnnotationLabelViewset(ObjectAnnotationLabelViewset):
     filterset_class = ObjectAnnotationLabelFilter
     pagination_class = LimitOffsetPagination
+
+
+class PhotoLabelFilter(filters.FilterSet):
+    label = filters.CharFilter(field_name="label", lookup_expr="icontains")
+
+
+class PhotoLabelViewset(viewsets.ModelViewSet):
+    queryset = models.PhotoLabel.objects.annotate(
+        n_images=Count("annotations__photograph", distinct=True)
+    ).all()
+    filterset_class = PhotoLabelFilter
+    serializer_class = serializers.PhotoLabelSerializer
+    ordering_fields = ["label", "n_images"]
 

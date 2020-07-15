@@ -94,3 +94,19 @@ class GCVResponse(dateCreatedModel):
                 )
             )
         photograph.models.ObjectAnnotation.objects.bulk_create(located_objects)
+
+    def extract_labels(self):
+        labels = []
+        for label in self.annotations.label_annotations:
+            label_obj = photograph.models.PhotoLabel.objects.get_or_create(
+                label=label.description
+            )[0]
+            labels.append(
+                photograph.models.PhotoLabelAnnotation(
+                    photograph=self.photograph,
+                    label=label_obj,
+                    score=label.score,
+                    topicality=label.topicality,
+                )
+            )
+        photograph.models.PhotoLabelAnnotation.objects.bulk_create(labels)
