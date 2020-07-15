@@ -1,40 +1,54 @@
 <template>
-  <b-card class="my-2" header="Tags">
-    <b-input-group class="my-2">
-      <b-input v-model="tag_label_search" debounce="500" placeholder="Search tag names..." />
-      <b-input-group-append v-if="tag_label_search != ''">
-        <b-button variant="warning" size="sm" @click="tag_label_search=''">
-          <BIconXSquare />
-        </b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <b-list-group v-if="!!tags">
-      <b-list-group-item
-        v-for="tag in tags"
-        :key="tag.id"
-        class="d-flex justify-content-between align-items-center my-0 py-1 mr-0 pr-0"
-      >
-        <span class="text-truncate" @click="select_tag(tag)">{{ tag.label }}</span>
-        <b-badge variant="info" class="ml-auto mr-1">{{ tag.n_images }}</b-badge>
-      </b-list-group-item>
-      <b-list-group-item
-        v-if="additional_tags"
-        class="my-0 py-1 mr-0 pr-0"
-        @click="show_more"
-        variant="secondary"
-      >Show more...</b-list-group-item>
-    </b-list-group>
+  <b-card class="my-2" no-body>
+    <template v-slot:header>
+      <b-row align-h="between" align-v="center" class="mx-1">
+        <span>Tags</span>
+        <BIconCaretDownFill v-if="open" class="pointer" @click="open=!open" />
+        <BIconCaretLeftFill v-else class="pointer" @click="open=!open" />
+      </b-row>
+    </template>
+    <b-collapse v-model="open">
+      <b-input-group class="p-2">
+        <b-input v-model="tag_label_search" debounce="500" placeholder="Search tag names..." />
+        <b-input-group-append v-if="tag_label_search != ''">
+          <b-button variant="warning" size="sm" @click="tag_label_search=''">
+            <BIconXSquare />
+          </b-button>
+        </b-input-group-append>
+      </b-input-group>
+      <b-list-group v-if="!!tags" flush>
+        <b-list-group-item
+          v-for="tag in tags"
+          :key="tag.id"
+          class="d-flex justify-content-between align-items-center my-0 py-1 mr-0 pr-0"
+        >
+          <span class="text-truncate pointer" @click="select_tag(tag)">{{ tag.label }}</span>
+          <b-badge variant="info" class="ml-auto mr-1">{{ tag.n_images }}</b-badge>
+        </b-list-group-item>
+        <b-list-group-item
+          v-if="additional_tags"
+          class="my-0 py-1 mr-0 pr-0 pointer"
+          @click="show_more"
+          variant="secondary"
+        >Show more...</b-list-group-item>
+      </b-list-group>
+    </b-collapse>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "@/main";
-// import _ from "lodash";
-import { BIconXSquare } from "bootstrap-vue";
+import {
+  BIconXSquare,
+  BIconCaretLeftFill,
+  BIconCaretDownFill
+} from "bootstrap-vue";
 export default {
   name: "Tags",
   components: {
-    BIconXSquare
+    BIconXSquare,
+    BIconCaretLeftFill,
+    BIconCaretDownFill
   },
   props: {
     digitized_date_before: {
@@ -66,7 +80,8 @@ export default {
     return {
       show_total: 10,
       tag_label_search: "",
-      additional_tags: true
+      additional_tags: true,
+      open: false
     };
   },
   computed: {

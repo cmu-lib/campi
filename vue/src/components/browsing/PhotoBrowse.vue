@@ -1,7 +1,8 @@
 <template>
   <b-container fluid>
-    <b-row>
+    <b-row class="mt-2">
       <b-col cols="3">
+        <h3>Filters</h3>
         <Tags
           v-model="tag"
           :directory="directory"

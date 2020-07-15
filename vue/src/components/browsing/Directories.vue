@@ -1,33 +1,47 @@
 <template>
-  <b-card class="my-2" header="Directories">
-    <b-input-group class="my-2">
-      <b-input v-model="dir_label_search" debounce="500" placeholder="Search directory names..." />
-      <b-input-group-append v-if="dir_label_search != ''">
-        <b-button variant="warning" size="sm" @click="dir_label_search=''">
-          <BIconXSquare />
-        </b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <b-list-group v-if="!!directories">
-      <Directory
-        v-for="directory in directories"
-        :key="directory.id"
-        :directory="directory"
-        @selected="select_dir($event)"
-      />
-    </b-list-group>
+  <b-card class="my-2" no-body>
+    <template v-slot:header>
+      <b-row align-h="between" align-v="center" class="mx-1">
+        <span>Directories</span>
+        <BIconCaretDownFill v-if="open" class="pointer" @click="open=!open" />
+        <BIconCaretLeftFill v-else class="pointer" @click="open=!open" />
+      </b-row>
+    </template>
+    <b-collapse v-model="open">
+      <b-input-group class="p-2">
+        <b-input v-model="dir_label_search" debounce="500" placeholder="Search directory names..." />
+        <b-input-group-append v-if="dir_label_search != ''">
+          <b-button variant="warning" size="sm" @click="dir_label_search=''">
+            <BIconXSquare />
+          </b-button>
+        </b-input-group-append>
+      </b-input-group>
+      <b-list-group v-if="!!directories" flush>
+        <Directory
+          v-for="directory in directories"
+          :key="directory.id"
+          :directory="directory"
+          @selected="select_dir($event)"
+        />
+      </b-list-group>
+    </b-collapse>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "@/main";
-// import _ from "lodash";
-import { BIconXSquare } from "bootstrap-vue";
+import {
+  BIconXSquare,
+  BIconCaretLeftFill,
+  BIconCaretDownFill
+} from "bootstrap-vue";
 import Directory from "@/components/browsing/Directory.vue";
 export default {
   name: "Directories",
   components: {
     BIconXSquare,
+    BIconCaretLeftFill,
+    BIconCaretDownFill,
     Directory
   },
   props: {
@@ -55,7 +69,8 @@ export default {
   data() {
     return {
       dir_label_search: "",
-      show_all: false
+      show_all: false,
+      open: false
     };
   },
   computed: {

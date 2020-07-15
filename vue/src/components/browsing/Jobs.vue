@@ -1,40 +1,55 @@
 <template>
-  <b-card class="my-2" header="Jobs">
-    <b-input-group class="my-2">
-      <b-input v-model="job_label_search" debounce="500" placeholder="Search job names..." />
-      <b-input-group-append v-if="job_label_search != ''">
-        <b-button variant="warning" size="sm" @click="job_label_search=''">
-          <BIconXSquare />
-        </b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <b-list-group v-if="!!jobs">
-      <b-list-group-item
-        v-for="job in jobs"
-        :key="job.id"
-        class="d-flex justify-content-between align-items-center my-0 py-1 mr-0 pr-0"
-      >
-        <span class="text-truncate" @click="select_job(job)">{{ job_display(job) }}</span>
-        <b-badge variant="info" class="ml-auto mr-1">{{ job.n_images }}</b-badge>
-      </b-list-group-item>
-      <b-list-group-item
-        v-if="additional_jobs"
-        class="my-0 py-1 mr-0 pr-0"
-        @click="show_more"
-        variant="secondary"
-      >Show more...</b-list-group-item>
-    </b-list-group>
+  <b-card class="my-2" no-body>
+    <template v-slot:header>
+      <b-row align-h="between" align-v="center" class="mx-1">
+        <span>Jobs</span>
+        <BIconCaretDownFill v-if="open" class="pointer" @click="open=!open" />
+        <BIconCaretLeftFill v-else class="pointer" @click="open=!open" />
+      </b-row>
+    </template>
+    <b-collapse v-model="open">
+      <b-input-group class="p-2">
+        <b-input v-model="job_label_search" debounce="500" placeholder="Search job names..." />
+        <b-input-group-append v-if="job_label_search != ''">
+          <b-button variant="warning" size="sm" @click="job_label_search=''">
+            <BIconXSquare />
+          </b-button>
+        </b-input-group-append>
+      </b-input-group>
+      <b-list-group v-if="!!jobs" flush>
+        <b-list-group-item
+          v-for="job in jobs"
+          :key="job.id"
+          class="d-flex justify-content-between align-items-center my-0 py-1 mr-0 pr-0"
+        >
+          <span class="text-truncate pointer" @click="select_job(job)">{{ job_display(job) }}</span>
+          <b-badge variant="info" class="ml-auto mr-1">{{ job.n_images }}</b-badge>
+        </b-list-group-item>
+        <b-list-group-item
+          v-if="additional_jobs"
+          class="my-0 py-1 mr-0 pr-0 pointer"
+          @click="show_more"
+          variant="secondary"
+        >Show more...</b-list-group-item>
+      </b-list-group>
+    </b-collapse>
   </b-card>
 </template>
 
 <script>
 import { HTTP } from "@/main";
 // import _ from "lodash";
-import { BIconXSquare } from "bootstrap-vue";
+import {
+  BIconXSquare,
+  BIconCaretDownFill,
+  BIconCaretLeftFill
+} from "bootstrap-vue";
 export default {
   name: "Jobs",
   components: {
-    BIconXSquare
+    BIconXSquare,
+    BIconCaretDownFill,
+    BIconCaretLeftFill
   },
   props: {
     digitized_date_before: {
@@ -66,7 +81,8 @@ export default {
     return {
       show_total: 10,
       job_label_search: "",
-      additional_jobs: true
+      additional_jobs: true,
+      open: false
     };
   },
   computed: {
