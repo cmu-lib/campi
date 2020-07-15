@@ -177,7 +177,7 @@ export default {
           var oann = this.pixels(o);
           oann["className"] = "object-annotation";
           oann["id"] = `object-${o.id}`;
-          oann["title"] = `object-${o.label}`;
+          oann["title"] = `object-${o.label.label}`;
           anns.push(oann);
         });
       }
