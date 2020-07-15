@@ -2,7 +2,7 @@
   <b-row class="my-3" align-h="center" align-v="center">
     <b-col cols="4"></b-col>
     <b-col cols="4">
-      <b-nav pills>
+      <b-nav pills v-if="!!nav_items">
         <b-nav-item
           v-for="nav in nav_items"
           :key="nav.label"
@@ -93,6 +93,7 @@ export default {
       } else if (rt.name == "TaggingExecution") {
         tagging_nav.disabled = false;
         seed_nav.disabled = false;
+        seed_nav.to.params.task_id = this.task_id;
         execution_nav.disabled = false;
         execution_nav.active = true;
         execution_nav.to.params.task_id = this.task_id;
