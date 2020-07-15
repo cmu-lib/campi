@@ -357,7 +357,7 @@ export default {
       } else {
         this.pop_neighbors();
       }
-      this.detail_photo_id = null;
+      this.detail_photo = null;
     },
     get_info(photograph) {
       this.detail_photo = photograph;
