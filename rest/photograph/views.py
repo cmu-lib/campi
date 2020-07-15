@@ -30,6 +30,10 @@ class PhotographFilter(filters.FilterSet):
         queryset=tagging.models.Tag.objects.all(), field_name="photograph_tags__tag"
     )
     image_path = filters.CharFilter(lookup_expr="icontains")
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=models.ObjectAnnotationLabel.objects.all(),
+        field_name="objectannotation__label",
+    )
 
 
 def prepare_photograph_qs(qs):
@@ -155,6 +159,38 @@ class ObjectAnnotationLabelViewset(viewsets.ModelViewSet):
 
 class ObjectAnnotationLabelFilter(filters.FilterSet):
     label = filters.CharFilter(field_name="label", lookup_expr="icontains")
+    job = filters.ModelChoiceFilter(
+        queryset=collection.models.Job.objects.all(), method="by_job"
+    )
+
+    def by_job(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.Job.objects.filter(
+                        id=value.id, photographs__objectannotation__label=OuterRef("pk")
+                    )
+                )
+            )
+
+    directory = filters.ModelChoiceFilter(
+        queryset=collection.models.Directory.objects.all(), method="by_directory"
+    )
+
+    def by_directory(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.Directory.objects.filter(
+                        id=value.id,
+                        immediate_photographs__objectannotation__label=OuterRef("pk"),
+                    )
+                )
+            )
 
 
 class PaginatedObjectAnnotationLabelViewset(ObjectAnnotationLabelViewset):

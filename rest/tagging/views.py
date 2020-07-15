@@ -50,8 +50,7 @@ class TagFilter(filters.FilterSet):
             )
 
     directory = filters.ModelChoiceFilter(
-        queryset=collection.models.Directory.objects.all(),
-        field_name="photograph_tags__photograph__directory",
+        queryset=collection.models.Directory.objects.all(), method="by_directory"
     )
 
     def by_directory(self, queryset, name, value):

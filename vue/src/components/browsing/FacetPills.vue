@@ -5,6 +5,11 @@
       <span class="mx-2">{{ tag.label }}</span>
       <BIconXCircle @click="$emit('clear_tag')" />
     </b-button>
+    <b-button class="mx-1" v-if="!!gcv_object" pill variant="danger" size="sm">
+      <BIconColumnsGap />
+      <span class="mx-2">{{ gcv_object.label }}</span>
+      <BIconXCircle @click="$emit('clear_gcv_object')" />
+    </b-button>
     <b-button class="mx-1" v-if="!!directory" pill variant="primary" size="sm">
       <BIconFolderFill />
       <span class="mx-2">{{ directory.label }}</span>
@@ -34,7 +39,8 @@ import {
   BIconFolderFill,
   BIconCalendarFill,
   BIconCamera,
-  BIconTag
+  BIconTag,
+  BIconColumnsGap
 } from "bootstrap-vue";
 
 export default {
@@ -44,13 +50,15 @@ export default {
     BIconFolderFill,
     BIconCalendarFill,
     BIconCamera,
-    BIconTag
+    BIconTag,
+    BIconColumnsGap
   },
   props: {
     directory: Object,
     job: Object,
     job_tag: Object,
     tag: Object,
+    gcv_object: Object,
     digitized_date_range: Array
   },
   computed: {
