@@ -63,7 +63,7 @@
             </p>
           </b-alert>
           <TaggingDrawer
-            v-if="!!sidebar_payload.object"
+            v-if="!!detail_photo & !!sidebar_payload.object"
             :sidebar_payload="sidebar_payload"
             :task="task"
             :higlighted_photos="tagged_photos"
@@ -334,6 +334,7 @@ export default {
       }
     },
     submit_choices() {
+      this.detail_photo = null;
       Promise.all(this.undecided_photo_ids.map(id => this.remove_tag(id))).then(
         onfulfilled => {
           console.log(onfulfilled);
@@ -351,12 +352,13 @@ export default {
       }
     },
     load_more_photos() {
-      if (this.nearest_neighbor_set.length == 0) {
-        this.get_nn_set(); //this.pop_neighbors
+      this.detail_photo = null;
+      this.sidebar_payload = {};
+      if (this.nearest_neighbor_set.length <= 9) {
+        this.get_nn_set();
       } else {
         this.pop_neighbors();
       }
-      this.detail_photo = null;
     },
     get_info(photograph) {
       this.detail_photo = photograph;
