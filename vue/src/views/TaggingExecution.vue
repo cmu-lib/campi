@@ -328,13 +328,13 @@ export default {
               decision_id: op.tagging_decision.id
             });
             this.photo_decisions.splice(related_decision_index, 1);
-            this.remove_photo_from_deck(op.photograph.id);
           }
           this.photo_decisions.push({
             photograph_id: op.photograph.id,
             decision_id: op.tagging_decision.id,
             is_applicable: op.tagging_decision.is_applicable
           });
+          this.remove_photo_from_deck(op.photograph.id);
         });
       }
     },
