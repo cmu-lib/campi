@@ -83,6 +83,14 @@ export default {
     directory: {
       type: Object,
       default: null
+    },
+    gcv_object: {
+      type: Object,
+      default: null
+    },
+    gcv_label: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -104,6 +112,12 @@ export default {
       }
       if (!!this.job) {
         payload["job"] = this.job.id;
+      }
+      if (!!this.gcv_object) {
+        payload["gcv_object"] = this.gcv_object.id;
+      }
+      if (!!this.gcv_label) {
+        payload["gcv_label"] = this.gcv_label.id;
       }
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;

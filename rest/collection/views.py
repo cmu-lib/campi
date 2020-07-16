@@ -5,7 +5,8 @@ from rest_framework.decorators import action
 from collection import serializers, models
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
-import tagging
+import tagging.models
+import photograph.models
 
 
 class DirectoryFilter(filters.FilterSet):
@@ -56,6 +57,39 @@ class DirectoryFilter(filters.FilterSet):
                     tagging.models.Tag.objects.filter(
                         id=value.id,
                         photograph_tags__photograph__directory=OuterRef("pk"),
+                    )
+                )
+            )
+
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=photograph.models.ObjectAnnotationLabel.objects.all(),
+        method="by_gcv_object",
+    )
+
+    def by_gcv_object(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.ObjectAnnotationLabel.objects.filter(
+                        id=value.id, annotations__photograph__directory=OuterRef("pk")
+                    )
+                )
+            )
+
+    gcv_label = filters.ModelChoiceFilter(
+        queryset=photograph.models.PhotoLabel.objects.all(), method="by_gcv_label"
+    )
+
+    def by_gcv_label(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.PhotoLabel.objects.filter(
+                        id=value.id, annotations__photograph__directory=OuterRef("pk")
                     )
                 )
             )
@@ -163,6 +197,39 @@ class JobFilter(filters.FilterSet):
                 )
             )
 
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=photograph.models.ObjectAnnotationLabel.objects.all(),
+        method="by_gcv_object",
+    )
+
+    def by_gcv_object(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.ObjectAnnotationLabel.objects.filter(
+                        id=value.id, annotations__photograph__job=OuterRef("pk")
+                    )
+                )
+            )
+
+    gcv_label = filters.ModelChoiceFilter(
+        queryset=photograph.models.PhotoLabel.objects.all(), method="by_gcv_label"
+    )
+
+    def by_gcv_label(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.PhotoLabel.objects.filter(
+                        id=value.id, annotations__photograph__job=OuterRef("pk")
+                    )
+                )
+            )
+
 
 class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.Job.objects.annotate(n_images=Count("photographs", distinct=True))
@@ -216,6 +283,41 @@ class JobTagFilter(filters.FilterSet):
                     tagging.models.Tag.objects.filter(
                         id=value.id,
                         photograph_tags__photograph__job__tags=OuterRef("pk"),
+                    )
+                )
+            )
+
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=photograph.models.ObjectAnnotationLabel.objects.all(),
+        method="by_gcv_object",
+    )
+
+    def by_gcv_object(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.ObjectAnnotationLabel.objects.filter(
+                        id=value.id,
+                        annotations__photograph__job__job_tags=OuterRef("pk"),
+                    )
+                )
+            )
+
+    gcv_label = filters.ModelChoiceFilter(
+        queryset=photograph.models.PhotoLabel.objects.all(), method="by_gcv_label"
+    )
+
+    def by_gcv_label(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.PhotoLabel.objects.filter(
+                        id=value.id,
+                        annotations__photograph__job__job_tags=OuterRef("pk"),
                     )
                 )
             )

@@ -90,6 +90,10 @@ export default {
     directory: {
       type: Object,
       default: null
+    },
+    gcv_object: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -115,8 +119,14 @@ export default {
       if (!!this.job_tag) {
         payload["job_tag"] = this.job_tag.id;
       }
+      if (!!this.tag) {
+        payload["tag"] = this.tag.id;
+      }
       if (!!this.directory) {
         payload["directory"] = this.directory.id;
+      }
+      if (!!this.gcv_object) {
+        payload["gcv_object"] = this.gcv_object.id;
       }
       if (!!this.digitized_date_after) {
         payload["digitized_date_after"] = `${this.digitized_date_after}-01-01`;

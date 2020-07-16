@@ -66,6 +66,41 @@ class TagFilter(filters.FilterSet):
                 )
             )
 
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=photograph.models.ObjectAnnotationLabel.objects.all(),
+        method="by_gcv_object",
+    )
+
+    def by_gcv_object(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.ObjectAnnotationLabel.objects.filter(
+                        id=value.id,
+                        annotations__photograph__photograph_tags__tag=OuterRef("pk"),
+                    )
+                )
+            )
+
+    gcv_label = filters.ModelChoiceFilter(
+        queryset=photograph.models.PhotoLabel.objects.all(), method="by_gcv_label"
+    )
+
+    def by_gcv_label(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    photograph.models.PhotoLabel.objects.filter(
+                        id=value.id,
+                        annotations__photograph__photograph_tags__tag=OuterRef("pk"),
+                    )
+                )
+            )
+
 
 class TagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     tagging_tasks = models.TaggingTask.objects.prefetch_related(

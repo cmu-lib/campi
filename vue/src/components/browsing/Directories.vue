@@ -73,6 +73,14 @@ export default {
     tag: {
       type: Object,
       default: null
+    },
+    gcv_object: {
+      type: Object,
+      default: null
+    },
+    gcv_label: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -101,6 +109,12 @@ export default {
       }
       if (!!this.tag) {
         payload["tag"] = this.tag.id;
+      }
+      if (!!this.gcv_object) {
+        payload["gcv_object"] = this.gcv_object.id;
+      }
+      if (!!this.gcv_label) {
+        payload["gcv_label"] = this.gcv_label.id;
       }
       return payload;
     }

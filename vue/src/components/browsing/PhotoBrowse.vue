@@ -8,6 +8,8 @@
           :directory="directory"
           :job="job"
           :job_tag="job_tag"
+          :gcv_object="gcv_object"
+          :gcv_label="gcv_label"
           :digitized_date_range="digitized_date_range"
         />
         <Jobs
@@ -15,16 +17,32 @@
           :job_tag="job_tag"
           :directory="directory"
           :tag="tag"
+          :gcv_object="gcv_object"
+          :gcv_label="gcv_label"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />
-        <GCVObjects v-model="gcv_object" :job="job" :directory="directory" :tag="tag" />
-        <GCVLabels v-model="gcv_label" :job="job" :directory="directory" :tag="tag" />
+        <GCVObjects
+          v-model="gcv_object"
+          :job="job"
+          :directory="directory"
+          :tag="tag"
+          :gcv_label="gcv_label"
+        />
+        <GCVLabels
+          v-model="gcv_label"
+          :job="job"
+          :directory="directory"
+          :tag="tag"
+          :gcv_object="gcv_object"
+        />
         <Directories
           v-model="directory"
           :job_tag="job_tag"
           :job="job"
           :tag="tag"
+          :gcv_object="gcv_object"
+          :gcv_label="gcv_label"
           :digitized_date_before="dd_before"
           :digitized_date_after="dd_after"
         />
@@ -181,6 +199,34 @@ export default {
       return HTTP.get("/tagging/tag/" + this.$route.query.tag + "/").then(
         results => {
           this.tag = results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
+
+    if (!!this.$route.query.gcv_object) {
+      return HTTP.get(
+        "/gcv/object_annotation_labels_paginated/" +
+          this.$route.query.gcv_object +
+          "/"
+      ).then(
+        results => {
+          this.gcv_object = results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
+
+    if (!!this.$route.query.gcv_label) {
+      return HTTP.get(
+        "/gcv/photo_labels/" + this.$route.query.gcv_label + "/"
+      ).then(
+        results => {
+          this.gcv_label = results.data;
         },
         error => {
           console.log(error);

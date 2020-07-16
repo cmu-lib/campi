@@ -1,4 +1,4 @@
-from django.db.models import Count, Prefetch, OuterRef
+from django.db.models import Count, Prefetch, OuterRef, Exists
 from django.db.models.functions import Extract
 from django.contrib.postgres.aggregates import ArrayAgg
 from rest_framework import viewsets
@@ -205,6 +205,42 @@ class ObjectAnnotationLabelFilter(filters.FilterSet):
                 )
             )
 
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(), method="by_tag"
+    )
+
+    def by_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    tagging.models.Tag.objects.filter(
+                        id=value.id,
+                        photograph_tags__photograph__objectannotation__label=OuterRef(
+                            "pk"
+                        ),
+                    )
+                )
+            )
+
+    gcv_label = filters.ModelChoiceFilter(
+        queryset=models.PhotoLabel.objects.all(), method="by_gcv_label"
+    )
+
+    def by_gcv_label(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    models.PhotoLabel.objects.filter(
+                        id=value.id,
+                        annotations__photograph__objectannotation__label=OuterRef("pk"),
+                    )
+                )
+            )
+
 
 class PaginatedObjectAnnotationLabelViewset(ObjectAnnotationLabelViewset):
     filterset_class = ObjectAnnotationLabelFilter
@@ -213,6 +249,77 @@ class PaginatedObjectAnnotationLabelViewset(ObjectAnnotationLabelViewset):
 
 class PhotoLabelFilter(filters.FilterSet):
     label = filters.CharFilter(field_name="label", lookup_expr="icontains")
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=models.ObjectAnnotationLabel.objects.all(), method="by_gcv_object"
+    )
+
+    def by_job(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.Job.objects.filter(
+                        id=value.id,
+                        photographs__label_annotations__label=OuterRef("pk"),
+                    )
+                )
+            )
+
+    directory = filters.ModelChoiceFilter(
+        queryset=collection.models.Directory.objects.all(), method="by_directory"
+    )
+
+    def by_directory(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    collection.models.Directory.objects.filter(
+                        id=value.id,
+                        immediate_photographs__label_annotations__label=OuterRef("pk"),
+                    )
+                )
+            )
+
+    tag = filters.ModelChoiceFilter(
+        queryset=tagging.models.Tag.objects.all(), method="by_tag"
+    )
+
+    def by_tag(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    tagging.models.Tag.objects.filter(
+                        id=value.id,
+                        photograph_tags__photograph__label_annotations__label=OuterRef(
+                            "pk"
+                        ),
+                    )
+                )
+            )
+
+    gcv_object = filters.ModelChoiceFilter(
+        queryset=models.ObjectAnnotationLabel.objects.all(), method="by_gcv_object"
+    )
+
+    def by_gcv_object(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return queryset.filter(
+                Exists(
+                    models.ObjectAnnotationLabel.objects.filter(
+                        id=value.id,
+                        annotations__photograph__label_annotations__label=OuterRef(
+                            "pk"
+                        ),
+                    )
+                )
+            )
 
 
 class PhotoLabelViewset(viewsets.ModelViewSet):
