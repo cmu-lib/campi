@@ -55,7 +55,7 @@ def prepare_photograph_qs(qs):
             Prefetch("decisions", queryset=ordered_decisions),
             Prefetch("label_annotations", queryset=ordered_labels),
         )
-        .all()
+        .distinct()
     )
     return qs
 
@@ -79,7 +79,7 @@ def prepare_photograph_detail_qs(qs):
             Prefetch("label_annotations", queryset=ordered_labels),
             "faceannotation",
         )
-        .all()
+        .distinct()
     )
     return qs
 
