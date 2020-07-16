@@ -177,30 +177,25 @@ export default {
     },
     update_grid_state(photographs) {
       // Add any applicable tag decisions from the photo grid drawer to the cache of photo decisions
-      photographs.map(p => {
-        if (this.decided_photo_ids.includes(p.id)) {
-          // Remove the cached decision and update from the current state
-          const photo_index = _.findIndex(this.photo_decisions, {
-            photograph_id: p.id
-          });
-          this.photo_decisions.splice(photo_index, 1);
+      photographs
+        .filter(p => p.decisions.length > 0)
+        .map(p => {
+          // If the decision has already been cached, purge the cache
+          if (this.decided_photo_ids.includes(p.id)) {
+            const photo_index = _.findIndex(this.photo_decisions, {
+              photograph_id: p.id
+            });
+            this.photo_decisions.splice(photo_index, 1);
+          }
+
+          // Now push the fresh value from the sidebar drawer into the cache
           const decision = _.find(p.decisions, { task: this.task_id });
           this.photo_decisions.push({
             photograph_id: p.id,
             decision_id: decision.id,
             is_applicable: decision.is_applicable
           });
-        }
-        p.decisions.map(d => {
-          if (d.task == this.task_id) {
-            this.photo_decisions.push({
-              photograph_id: p.id,
-              decision_id: d.id,
-              is_applicable: d.is_applicable
-            });
-          }
         });
-      });
     },
     derive_photo_decisions(photographs) {
       // Create a list of photo ids, decision ids, and true/false values
