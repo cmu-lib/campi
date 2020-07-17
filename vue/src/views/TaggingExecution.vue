@@ -156,6 +156,7 @@ export default {
   },
   methods: {
     new_seed_photo(photograph) {
+      this.sidebar_payload = {};
       this.$router.push({
         name: "TaggingExecution",
         params: { task_id: this.task_id, seed_photo_id: photograph.id }
