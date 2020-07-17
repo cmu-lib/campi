@@ -1,4 +1,11 @@
-from django.db.models import Count, Prefetch, OuterRef, Exists
+from django.db.models import (
+    Count,
+    Prefetch,
+    OuterRef,
+    Exists,
+    ExpressionWrapper,
+    BooleanField,
+)
 from django.db.models.functions import Extract
 from django.contrib.postgres.aggregates import ArrayAgg
 from rest_framework import viewsets
@@ -10,6 +17,7 @@ import collection
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
 import tagging.models
+from cv.models import CloseMatchSetMembership
 
 
 class PhotographFilter(filters.FilterSet):
@@ -37,6 +45,7 @@ class PhotographFilter(filters.FilterSet):
     gcv_label = filters.ModelChoiceFilter(
         queryset=models.PhotoLabel.objects.all(), field_name="label_annotations__label"
     )
+    in_close_match_set = filters.BooleanFilter(field_name="in_close_match_set")
 
 
 def prepare_photograph_qs(qs):
@@ -49,6 +58,13 @@ def prepare_photograph_qs(qs):
     ).order_by("-score")
     qs = (
         qs.select_related("directory", "job")
+        .annotate(
+            in_close_match_set=Exists(
+                CloseMatchSetMembership.objects.filter(
+                    state=CloseMatchSetMembership.ACCEPTED, photograph=OuterRef("pk"),
+                )
+            )
+        )
         .prefetch_related(
             "job__tags",
             Prefetch("photograph_tags", queryset=ordered_tags),
@@ -71,6 +87,13 @@ def prepare_photograph_detail_qs(qs):
     ).order_by("-score")
     qs = (
         qs.select_related("directory", "job")
+        .annotate(
+            in_close_match_set=Exists(
+                CloseMatchSetMembership.objects.filter(
+                    state=CloseMatchSetMembership.ACCEPTED, photograph=OuterRef("pk")
+                )
+            )
+        )
         .prefetch_related(
             "job__tags",
             Prefetch("photograph_tags", queryset=ordered_tags),

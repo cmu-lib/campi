@@ -82,6 +82,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
     faceannotation = FaceAnnotationFlatSerializer(many=True)
     objectannotation = ObjectAnnotationFlatSerializer(many=True)
     label_annotations = PhotoLabelAnnotationSerializer(many=True)
+    in_close_match_set = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = models.Photograph
@@ -104,6 +105,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
             "faceannotation",
             "objectannotation",
             "label_annotations",
+            "in_close_match_set",
         ]
 
 
@@ -113,6 +115,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
     photograph_tags = PhotographTagSerializer(many=True)
     decisions = TaggingDecisionSerializer(many=True)
     label_annotations = PhotoLabelAnnotationSerializer(many=True)
+    in_close_match_set = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = models.Photograph
@@ -133,6 +136,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
             "photograph_tags",
             "decisions",
             "label_annotations",
+            "in_close_match_set",
         ]
 
 

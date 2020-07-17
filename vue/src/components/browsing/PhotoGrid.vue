@@ -31,7 +31,13 @@
             squared
             v-b-modal="`modal-${image.id}`"
           >
-            <BIconInfoCircle />
+            <BIconInfoCircle class="mx-1" title="Click to view full size" v-b-tooltip:hover />
+            <BIconFiles
+              class="mx-1"
+              v-if="image.in_close_match_set"
+              title="This image belongs to a set of near duplicate photos. Any tagging decision will be applied to multiple photos."
+              v-b-tooltip:hover
+            />
           </b-button>
         </b-row>
         <b-modal
@@ -65,10 +71,10 @@
 
 <script>
 import { HTTP } from "@/main";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle, BIconFiles } from "bootstrap-vue";
 export default {
   name: "PhotoGrid",
-  components: { BIconInfoCircle },
+  components: { BIconInfoCircle, BIconFiles },
   props: {
     directory: {
       type: Object,
