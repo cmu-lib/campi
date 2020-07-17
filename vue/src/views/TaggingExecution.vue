@@ -10,14 +10,16 @@
           <div>
             <b-card no-body>
               <template v-slot:header>
+                <p>Click a photo to inspect and tag other photos in the same job/directory</p>
                 <b-row align-h="between" align-v="center" class="px-2">
-                  <span>Click a photo to inspect and tag other photos in the same job/directory</span>
+                  <span>{{ nearest_neighbor_set.length }} photos left in this stack.</span>
                   <b-button
                     size="sm"
+                    variant="warning"
                     @click="submit_choices"
                     title="Discard the rest of this grid and draw more photos from the similarity results"
                     v-b-tooltip:hover
-                  >Get more photos...</b-button>
+                  >Reject all on this page and load more...</b-button>
                 </b-row>
               </template>
               <b-list-group flush v-if="!!sorted_photos">
