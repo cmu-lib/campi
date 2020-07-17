@@ -21,3 +21,4 @@ sklearn
 google-cloud-vision
 grpcio
 django-picklefield
+img2vec_pytorch

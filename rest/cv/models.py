@@ -23,6 +23,7 @@ from io import BytesIO
 from tqdm import tqdm
 import numpy as np
 from sklearn import cluster, metrics
+from img2vec_pytorch import Img2Vec
 
 
 class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
@@ -170,6 +171,46 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         vec_arr = np.array([composite_vector, weighted_seed_vector])
         summed_vector = np.sum(vec_arr, axis=0)
         return summed_vector
+
+
+class ResNet18(PyTorchModel):
+    class Meta:
+        proxy = True
+
+    def build_embeddings(self, photograph_queryset):
+        """
+        Build embeddings uses resnet18
+        """
+        print("loading Img2Vec / Resnet18")
+        img2vec = Img2Vec(cuda=False)
+
+        already_calculated_embeddings = self.embeddings.all()
+        # From the supplied photographs, find the ones that haven't had embeddings created yet for the current model
+        embeddings_to_be_calculated = photograph_queryset.exclude(
+            embeddings__in=already_calculated_embeddings
+        ).all()
+
+        for pic in tqdm(embeddings_to_be_calculated):
+            # try:
+            img_path = f"{pic.iiif_base}/full/600,600/0/default.jpg"
+            res = requests.get(img_path)
+            img = Image.open(BytesIO(res.content))
+
+            # If image is grayscale, convert it to a false RGB
+            if img.mode == "L":
+                img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
+                # Convert to a false rgb image
+                rgb_img = Image.fromarray(img_array)
+            else:
+                rgb_img = img
+
+            vec = np.array(img2vec.get_vec(rgb_img, tensor=True).flatten())
+            Embedding.objects.create(
+                pytorch_model=self, photograph=pic, array=vec.tolist()
+            )
+            # except:
+            #     print(f"Error processing {pic.full_image}")
+            #     continue
 
 
 class ColorInceptionV3(PyTorchModel):
@@ -441,7 +482,9 @@ class CloseMatchRun(dateModifiedModel):
                     metrics.pairwise.cosine_distances(
                         X=embedding_matrix[[photo_indices[0]],],
                         Y=embedding_matrix[photo_indices,],
-                    )[0,]
+                    )[
+                        0,
+                    ]
                 )
                 cms_members = [
                     CloseMatchSetMembership(
@@ -481,7 +524,9 @@ class CloseMatchRun(dateModifiedModel):
                                 metrics.pairwise.cosine_distances(
                                     X=embedding_matrix[[photo_indices[0]],],
                                     Y=embedding_matrix[additional_photo_indices,],
-                                )[0,]
+                                )[
+                                    0,
+                                ]
                             )
                             new_cms_members = [
                                 CloseMatchSetMembership(
