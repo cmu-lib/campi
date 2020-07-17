@@ -15,6 +15,7 @@
             <li>Once you have tagged all the relevant photos on this page, hit the "Exclude all undecided photos" to exclude the rest. This will help your future tagging tasks.</li>
             <li>If this is a large job or directory, you may see pagination buttons. You will need to click through the other pages to make tagging decisions for those photos.</li>
             <li>The archivists have grouped some photos as being "close matches" that are copies or extremely similar photogrpahs. These will update simultaneously when you click on one, so you may notice multiple photographs changing when you click on just one image.</li>
+            <li>Once you have gone through the whole job/directory, click the X at upper left to close the drawer and move on to a new photo.</li>
           </ol>
           <p>Click on the info button under any picture to get a full-sized preview, and a link to a full details page for the file.</p>
         </b-container>
