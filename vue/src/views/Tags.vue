@@ -1,19 +1,17 @@
 <template>
   <b-container>
+    <h2>Tags</h2>
     <b-card no-body>
       <template v-slot:header>
         <b-row align-h="between" class="mx-2">
-          <h2>Tags</h2>
-          <span>
-            <b-form-group label="Order" id="tag-order-menu-info">
-              <b-form-select
-                id="tag-order-menu"
-                v-model="tag_ordering"
-                :options="tag_ordering_options"
-              />
-            </b-form-group>
-            <b-button v-b-modal.new-tag-modal variant="primary">New tag</b-button>
-          </span>
+          <b-form-group label="Order" id="tag-order-menu-info">
+            <b-form-select
+              id="tag-order-menu"
+              v-model="tag_ordering"
+              :options="tag_ordering_options"
+            />
+          </b-form-group>
+          <b-button v-b-modal.new-tag-modal variant="primary">New tag</b-button>
         </b-row>
         <b-modal id="new-tag-modal" @ok="create_tag">
           <b-form-group label="New tag label" id="tag-label-input-info">
