@@ -8,59 +8,65 @@
         </h3>
       </b-row>
     </template>
-    <b-button-toolbar>
+    <b-button-toolbar class="my-2">
       <b-button
-        size="sm"
-        :variant="tag_button_variant"
-        :pressed="is_tagged"
-        @click="toggle_photo"
-      >{{ tag_button_label }}</b-button>
-      <b-button-group class="mx-1">
-        <b-button
-          size="sm"
-          v-if="!!photograph.job"
-          variant="info"
-          @click="activate_sidebar({class: 'job', object: photograph.job})"
-          v-b-tooltip:hover
-          title="Click to tag other photos in job"
-        >
-          <BIconCamera />
-          "{{ button_truncate(photograph.job.label) }}"
-        </b-button>
-        <b-button size="sm" v-else disabled variant="info">
-          <BIconCamera class="mr-1" />
-          <span>No associated job</span>
-        </b-button>
-        <b-button
-          size="sm"
-          variant="primary"
-          @click="activate_sidebar({class: 'directory', object: photograph.directory})"
-          v-b-tooltip:hover
-          title="Click to tag other photos in directory"
-        >
-          <BIconFolderFill />
-          "{{ button_truncate(photograph.directory.label) }}"
-        </b-button>
-      </b-button-group>
-      <b-button
-        size="sm"
-        variant="warning"
-        class="mx-1"
-        @click="$emit('new_seed_photo', photograph)"
-        title="Swap out the current seed photo in exchange for this photo. (Will reload the page.)"
+        class="flex-grow-1 mx-1"
+        size="lg"
+        v-if="!!photograph.job"
+        variant="info"
+        @click="activate_sidebar({class: 'job', object: photograph.job})"
         v-b-tooltip:hover
-      >Use as seed photo</b-button>
+        title="Click to tag other photos in job"
+      >
+        <BIconCamera />
+        {{ photograph.job.label }} ({{ photograph.job.job_code }})
+      </b-button>
+      <b-button class="flex-grow-1 mx-1" size="lg" v-else disabled variant="info">
+        <BIconCamera class="mr-1" />
+        <span>No associated job</span>
+      </b-button>
       <b-button
-        size="sm"
-        class="mx-1"
-        variant="light"
-        @click="detail_tab_href"
-        title="Open photo in a new tab to inxpect all tags, look at annotations, and more."
+        class="flex-grow-1 mx-1"
+        size="lg"
+        variant="primary"
+        @click="activate_sidebar({class: 'directory', object: photograph.directory})"
         v-b-tooltip:hover
-      >Open in new tab</b-button>
+        title="Click to tag other photos in directory"
+      >
+        <BIconFolderFill />
+        {{ photograph.directory.label }}
+      </b-button>
     </b-button-toolbar>
     <b-row class="my-2" align-h="center">
       <b-img :src="`${photograph.image.id}/full/!750,525/0/default.jpg`" />
+    </b-row>
+    <b-row align-h="center">
+      <b-button-toolbar>
+        <b-button
+          size="sm"
+          class="mx-1"
+          :variant="tag_button_variant"
+          :pressed="is_tagged"
+          @click="toggle_photo"
+        >{{ tag_button_label }}</b-button>
+
+        <b-button
+          size="sm"
+          variant="warning"
+          class="mx-1"
+          @click="$emit('new_seed_photo', photograph)"
+          title="Swap out the current seed photo in exchange for this photo. (Will reload the page.)"
+          v-b-tooltip:hover
+        >Use as seed photo</b-button>
+        <b-button
+          size="sm"
+          class="mx-1"
+          variant="light"
+          @click="detail_tab_href"
+          title="Open photo in a new tab to inxpect all tags, look at annotations, and more."
+          v-b-tooltip:hover
+        >Open in new tab</b-button>
+      </b-button-toolbar>
     </b-row>
   </b-card>
 </template>
