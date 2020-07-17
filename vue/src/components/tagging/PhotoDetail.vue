@@ -57,7 +57,7 @@
         @click="detail_tab_href"
         title="Open photo in a new tab to inxpect all tags, look at annotations, and more."
         v-b-tooltip:hover
-      >Open</b-button>
+      >Open in new tab</b-button>
     </b-button-toolbar>
     <b-row class="my-2" align-h="center">
       <b-img :src="`${photograph.image.id}/full/!750,525/0/default.jpg`" />
