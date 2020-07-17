@@ -191,26 +191,26 @@ class ResNet18(PyTorchModel):
         ).all()
 
         for pic in tqdm(embeddings_to_be_calculated):
-            # try:
-            img_path = f"{pic.iiif_base}/full/600,600/0/default.jpg"
-            res = requests.get(img_path)
-            img = Image.open(BytesIO(res.content))
+            try:
+                img_path = f"{pic.iiif_base}/full/600,600/0/default.jpg"
+                res = requests.get(img_path)
+                img = Image.open(BytesIO(res.content))
 
-            # If image is grayscale, convert it to a false RGB
-            if img.mode == "L":
-                img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
-                # Convert to a false rgb image
-                rgb_img = Image.fromarray(img_array)
-            else:
-                rgb_img = img
+                # If image is grayscale, convert it to a false RGB
+                if img.mode == "L":
+                    img_array = np.repeat(np.array(img)[..., np.newaxis], 3, -1)
+                    # Convert to a false rgb image
+                    rgb_img = Image.fromarray(img_array)
+                else:
+                    rgb_img = img
 
-            vec = np.array(img2vec.get_vec(rgb_img, tensor=True).flatten())
-            Embedding.objects.create(
-                pytorch_model=self, photograph=pic, array=vec.tolist()
-            )
-            # except:
-            #     print(f"Error processing {pic.full_image}")
-            #     continue
+                vec = np.array(img2vec.get_vec(rgb_img, tensor=True).flatten())
+                Embedding.objects.create(
+                    pytorch_model=self, photograph=pic, array=vec.tolist()
+                )
+            except:
+                print(f"Error processing {pic.full_image}")
+                continue
 
 
 class ColorInceptionV3(PyTorchModel):
