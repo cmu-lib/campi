@@ -78,7 +78,9 @@ export default {
   },
   methods: {
     get_tags() {
-      return HTTP.get("/tagging/tag/").then(
+      return HTTP.get("/tagging/tag/", {
+        params: { ordering: this.tag_ordering }
+      }).then(
         results => {
           this.tags = results.data.results;
         },
@@ -147,6 +149,11 @@ export default {
   },
   created() {
     this.get_tags();
+  },
+  watch: {
+    tag_ordering() {
+      this.get_tags();
+    }
   }
 };
 </script>
