@@ -153,9 +153,11 @@ export default {
   watch: {
     sidebar_payload() {
       if (!!this.sidebar_payload.object) {
+        this.$root.$emit("bv::toggle::collapse", "tag-help");
         this.grid_id += 1;
         this.show_sidebar = true;
       } else {
+        this.$root.$emit("bv::toggle::collapse", "tag-help");
         this.grid_id += 1;
         this.show_sidebar = false;
       }
