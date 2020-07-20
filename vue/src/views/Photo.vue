@@ -66,42 +66,49 @@
         />
       </b-modal>
     </b-row>
-    <p>Google Cloud Vision API tags</p>
-    <p>
-      Objects depicted:
-      <b-badge
-        v-for="gcv_object in distinct_object_annotations"
-        :key="gcv_object.id"
-        :to="{name: 'Browse', query: {gcv_object: gcv_object.id}}"
-        variant="danger"
-        class="mx-1"
-      >
-        <BIconColumnsGap />
-        {{ gcv_object.label }}
-      </b-badge>
-    </p>
-    <p>
-      General descriptions:
-      <b-badge
-        v-for="gcv_label in image_data.label_annotations"
-        :key="gcv_label.id"
-        :to="{name: 'Browse', query: {gcv_label: gcv_label.label.id}}"
-        variant="danger"
-        class="mx-1"
-        :title="`score: ${gcv_label.score.toFixed(4)}`"
-        v-b-tooltip:hover
-      >
-        <BIconCardList />
-        {{ gcv_label.label.label }}
-      </b-badge>
-    </p>
+    <hr />
+    <b-row>
+      <b-col cols="6">
+        <h6>Google Cloud Vision API tags</h6>
+        <p>
+          Objects depicted:
+          <b-badge
+            v-for="gcv_object in distinct_object_annotations"
+            :key="gcv_object.id"
+            :to="{name: 'Browse', query: {gcv_object: gcv_object.id}}"
+            variant="danger"
+            class="mx-1"
+          >
+            <BIconColumnsGap />
+            {{ gcv_object.label }}
+          </b-badge>
+        </p>
+        <p>
+          General descriptions:
+          <b-badge
+            v-for="gcv_label in image_data.label_annotations"
+            :key="gcv_label.id"
+            :to="{name: 'Browse', query: {gcv_label: gcv_label.label.id}}"
+            variant="danger"
+            class="mx-1"
+            :title="`score: ${gcv_label.score.toFixed(4)}`"
+            v-b-tooltip:hover
+          >
+            <BIconCardList />
+            {{ gcv_label.label.label }}
+          </b-badge>
+        </p>
+      </b-col>
+      <b-col cols="6">
+        <div v-if="image_data.image_text != ''">
+          <h6>Detected text</h6>
+          <p>{{ image_data.image_text }}</p>
+        </div>
+      </b-col>
+    </b-row>
     <b-row>
       <IIIF :key="iiif_key" :info_url="image_data.image.info" :annotations="annotations" />
     </b-row>
-    <b-container v-if="image_data.image_text != ''">
-      <h3>Detected text</h3>
-      <p>{{ image_data.image_text }}</p>
-    </b-container>
   </b-container>
 </template>
 
