@@ -17,8 +17,8 @@
             lazy
             :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
             :src="image.image.square"
-            blank-width="150"
-            blank-height="150"
+            width="230"
+            height="230"
             @click="$emit('photo_click', image)"
           />
         </b-row>
