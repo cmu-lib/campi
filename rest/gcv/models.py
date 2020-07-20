@@ -107,3 +107,46 @@ class GCVResponse(dateCreatedModel):
                 )
             )
         photograph.models.PhotoLabelAnnotation.objects.bulk_create(labels)
+
+    def extract_text(self):
+        if len(self.annotations.text_annotations) > 0:
+            p = self.photograph
+            full_text = self.annotations.text_annotations[0].description
+            p.image_text = full_text
+            p.save()
+
+            image_ratio = self.calc_transform_ratio()
+
+            individual_text_annotations = []
+            for i, ta in enumerate(self.annotations.text_annotations[1:]):
+                vertices = [v for v in ta.bounding_poly.vertices]
+                xs = [v.x for v in vertices]
+                ys = [v.y for v in vertices]
+                min_x = round(min(xs) * image_ratio) if min(xs) > 0 else 0
+                max_x = round(max(xs) * image_ratio) if max(xs) > 0 else 0
+                min_y = round(min(ys) * image_ratio) if min(ys) > 0 else 0
+                max_y = round(max(ys) * image_ratio) if max(ys) > 0 else 0
+                individual_text_annotations.append(
+                    photograph.models.TextAnnotation(
+                        photograph=p,
+                        label=ta.description,
+                        sequence=i,
+                        x=min_x,
+                        y=min_y,
+                        width=max_x - min_x,
+                        height=max_y - min_y,
+                    )
+                )
+            try:
+                photograph.models.TextAnnotation.objects.bulk_create(
+                    individual_text_annotations
+                )
+            except:
+                print(f"photo id {self.photograph.id}")
+                print(i)
+                print(ta.description)
+                print(xs)
+                print(ys)
+        else:
+            pass
+

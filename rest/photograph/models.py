@@ -3,6 +3,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 import campi.models
 import collection.models
+from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 
 
 class Photograph(
@@ -50,9 +52,17 @@ class Photograph(
         blank=True,
         help_text="Sequence in the series of photos taken during the job listing",
     )
+    image_text = models.TextField(
+        null=True,
+        blank=False,
+        default="",
+        help_text="Any text recognized in the image by Google Cloud Vision",
+    )
+    image_search_text = SearchVectorField(null=True, editable=False)
 
     class Meta:
         ordering = ["image_path"]
+        indexes = [GinIndex(fields=["image_search_text"])]
 
     def push_parent_directory(self, coll_instance):
         self.all_directories.add(coll_instance)
@@ -68,6 +78,9 @@ class Photograph(
     def save(self, *args, **kwargs):
         response = super().save(*args, **kwargs)
         self.add_all_parent_directories()
+        Photograph.objects.filter(id=self.id).update(
+            image_search_text=SearchVector("image_text")
+        )
         return response
 
     def get_close_matches(self):
@@ -166,3 +179,9 @@ class PhotoLabelAnnotation(models.Model):
     )
     score = models.FloatField(db_index=True)
 
+
+class TextAnnotation(
+    Annotation, campi.models.labeledModel, campi.models.sequentialModel
+):
+    class Meta:
+        unique_together = ("photograph", "sequence")
