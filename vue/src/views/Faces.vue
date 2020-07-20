@@ -30,7 +30,13 @@
         :key="face.id"
         :to="{name: 'Photo', params: {id: face.photograph.id}}"
       >
-        <b-img-lazy class="m-3" :src="face.thumbnail" v-b-popover.hover.top="face_info(face)" />
+        <b-img-lazy
+          class="m-3"
+          :src="face.thumbnail"
+          v-b-popover.hover.top="face_info(face)"
+          width="260"
+          height="300"
+        />
       </router-link>
     </b-row>
   </b-container>

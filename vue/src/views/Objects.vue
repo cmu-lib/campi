@@ -41,6 +41,8 @@
           :src="obj.thumbnail"
           v-b-tooltip.hover
           :title="`${obj.id} - ${obj.label} - ${obj.score.toFixed(3)}`"
+          :height="thumb_height(obj)"
+          :width="thumb_width(obj)"
         />
       </router-link>
     </b-row>
@@ -127,6 +129,19 @@ export default {
     }
   },
   methods: {
+    img_ratio(obj) {
+      if (obj.height >= obj.width) {
+        return 300 / obj.height;
+      } else {
+        return 300 / obj.width;
+      }
+    },
+    thumb_height(obj) {
+      return Math.round(obj.height * this.img_ratio(obj));
+    },
+    thumb_width(obj) {
+      return Math.round(obj.width * this.img_ratio(obj));
+    },
     reset_page() {
       this.current_page = 1;
     }
