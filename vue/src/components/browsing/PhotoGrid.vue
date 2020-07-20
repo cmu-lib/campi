@@ -13,8 +13,7 @@
     <b-row flex align-h="center">
       <div v-for="image in images.results" :key="image.id" class="my-2 mx-4">
         <b-row>
-          <b-img
-            lazy
+          <b-img-lazy
             :class="{'highlighted': highlight_ids.includes(image.id), 'dimmed': dimmed_ids.includes(image.id)}"
             :src="image.image.square"
             width="230"
