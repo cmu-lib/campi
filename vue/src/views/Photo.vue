@@ -98,6 +98,10 @@
     <b-row>
       <IIIF :key="iiif_key" :info_url="image_data.image.info" :annotations="annotations" />
     </b-row>
+    <b-container v-if="image_data.image_text != ''">
+      <h3>Detected text</h3>
+      <p>{{ image_data.image_text }}</p>
+    </b-container>
   </b-container>
 </template>
 
@@ -179,6 +183,13 @@ export default {
           oann["id"] = `object-${o.id}`;
           oann["title"] = `object-${o.label.label}`;
           anns.push(oann);
+        });
+        this.image_data.textannotation.map(o => {
+          var tann = this.pixels(o);
+          tann["className"] = "text-annotation";
+          tann["id"] = `text-${o.id}`;
+          tann["title"] = `text-${o.label}`;
+          anns.push(tann);
         });
       }
       return anns;

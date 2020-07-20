@@ -3,6 +3,11 @@
     <b-row class="mt-2">
       <b-col cols="3">
         <h3>Filters</h3>
+        <b-card class="my-2">
+          <b-form-group label="Image text" description="Search for text detected within the image">
+            <b-form-input v-model="freetext" debounce="1000" />
+          </b-form-group>
+        </b-card>
         <Tags
           v-model="tag"
           :directory="directory"
@@ -49,6 +54,7 @@
       </b-col>
       <b-col cols="9">
         <FacetPills
+          :freetext="freetext"
           :directory="directory"
           :digitized_date_range="digitized_date_range"
           :job="job"
@@ -62,10 +68,12 @@
           @clear_tag="tag=null"
           @clear_gcv_object="gcv_object=null"
           @clear_gcv_label="gcv_label=null"
+          @clear_freetext="freetext=''"
           @clear_date_range="reset_date()"
         />
         <PhotoGrid
           :per_page="42"
+          :freetext="freetext"
           :directory="directory"
           :job="job"
           :job_tag="job_tag"
@@ -103,6 +111,7 @@ export default {
   },
   data() {
     return {
+      freetext: "",
       directory: null,
       job: null,
       job_tag: null,

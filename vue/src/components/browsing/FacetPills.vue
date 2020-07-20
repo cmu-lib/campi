@@ -1,5 +1,10 @@
 <template>
   <b-card class="my-2">
+    <b-button class="mx-1" v-if="freetext!=''" pill variant="light" size="sm">
+      <BIconTag />
+      <span class="mx-2">{{ freetext }}</span>
+      <BIconXCircle @click="$emit('clear_freetext')" />
+    </b-button>
     <b-button class="mx-1" v-if="!!tag" pill variant="warning" size="sm">
       <BIconTag />
       <span class="mx-2">{{ tag.label }}</span>
@@ -61,6 +66,7 @@ export default {
     BIconCardList
   },
   props: {
+    freetext: String,
     directory: Object,
     job: Object,
     job_tag: Object,

@@ -76,6 +76,10 @@ export default {
   name: "PhotoGrid",
   components: { BIconInfoCircle, BIconFiles },
   props: {
+    freetext: {
+      type: String,
+      default: ""
+    },
     directory: {
       type: Object,
       default: null
@@ -140,6 +144,10 @@ export default {
         ordering: "-digitized_date",
         limit: this.per_page
       };
+      if (this.freetext != "") {
+        payload["image_text"] = this.freetext;
+        payload["ordering"] = "-rank";
+      }
       if (!!this.directory) {
         payload["directory"] = this.directory.id;
       }

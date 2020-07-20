@@ -89,4 +89,12 @@ export default {
     background-color: seashell;
   }
 }
+
+.text-annotation {
+  border: 2px solid greenyellow;
+  color: greenyellow;
+  span {
+    background-color: seashell;
+  }
+}
 </style>
