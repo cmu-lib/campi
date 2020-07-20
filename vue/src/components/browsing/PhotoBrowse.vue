@@ -4,8 +4,12 @@
       <b-col cols="3">
         <h3>Filters</h3>
         <b-card class="my-2">
-          <b-form-group label="Image text" description="Search for text detected within the image">
-            <b-form-input v-model="freetext" debounce="1000" />
+          <b-form-group
+            label="Image text"
+            description="Search for text detected within the image."
+            label-size="sm"
+          >
+            <b-form-input size="sm" v-model="freetext" placeholder="e.g. mellon" debounce="1000" />
           </b-form-group>
         </b-card>
         <Tags
