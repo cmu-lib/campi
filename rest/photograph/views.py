@@ -5,9 +5,10 @@ from django.db.models import (
     Exists,
     ExpressionWrapper,
     BooleanField,
+    F,
 )
 from django.db.models.functions import Extract
-from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.search import SearchRank, SearchQuery
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -46,6 +47,19 @@ class PhotographFilter(filters.FilterSet):
         queryset=models.PhotoLabel.objects.all(), field_name="label_annotations__label"
     )
     in_close_match_set = filters.BooleanFilter(field_name="in_close_match_set")
+    image_text = filters.CharFilter(method="get_text")
+
+    def get_text(self, queryset, name, value):
+        if value is None:
+            return queryset
+        else:
+            return (
+                queryset.annotate(
+                    rank=SearchRank(F("image_search_text"), SearchQuery(value))
+                )
+                .filter(rank__gt=0)
+                .order_by("-rank")
+            )
 
 
 def prepare_photograph_qs(qs):
@@ -85,6 +99,7 @@ def prepare_photograph_detail_qs(qs):
     ordered_labels = models.PhotoLabelAnnotation.objects.select_related(
         "label"
     ).order_by("-score")
+    ordered_text_annotations = models.TextAnnotation.objects.order_by("sequence")
     qs = (
         qs.select_related("directory", "job")
         .annotate(
@@ -101,6 +116,7 @@ def prepare_photograph_detail_qs(qs):
             Prefetch("objectannotation", queryset=object_annotations),
             Prefetch("label_annotations", queryset=ordered_labels),
             "faceannotation",
+            Prefetch("textannotation", queryset=ordered_text_annotations),
         )
         .distinct()
     )

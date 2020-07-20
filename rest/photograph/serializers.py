@@ -74,6 +74,12 @@ class PhotoLabelAnnotationSerializer(serializers.ModelSerializer):
         fields = ["id", "label", "score"]
 
 
+class TextAnnotationFlatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ObjectAnnotation
+        fields = ["id", "label", "x", "y", "width", "height"]
+
+
 class PhotographDetailSerializer(serializers.ModelSerializer):
     directory = collection.serializers.DirectoryDetailSerializer()
     job = collection.serializers.JobDetailSerializer()
@@ -83,6 +89,7 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
     objectannotation = ObjectAnnotationFlatSerializer(many=True)
     label_annotations = PhotoLabelAnnotationSerializer(many=True)
     in_close_match_set = serializers.BooleanField(read_only=True)
+    textannotation = TextAnnotationFlatSerializer(many=True)
 
     class Meta:
         model = models.Photograph
@@ -104,8 +111,10 @@ class PhotographDetailSerializer(serializers.ModelSerializer):
             "decisions",
             "faceannotation",
             "objectannotation",
+            "textannotation",
             "label_annotations",
             "in_close_match_set",
+            "image_text",
         ]
 
 
@@ -137,6 +146,7 @@ class PhotographListSerializer(serializers.ModelSerializer):
             "decisions",
             "label_annotations",
             "in_close_match_set",
+            "image_text",
         ]
 
 
