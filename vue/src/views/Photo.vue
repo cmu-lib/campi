@@ -188,7 +188,7 @@ export default {
           var tann = this.pixels(o);
           tann["className"] = "text-annotation";
           tann["id"] = `text-${o.id}`;
-          tann["title"] = `text-${o.label}`;
+          tann["title"] = o.label;
           anns.push(tann);
         });
       }
