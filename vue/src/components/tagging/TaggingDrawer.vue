@@ -3,11 +3,11 @@
     <b-container fluid>
       <b-row align-h="between" class="m-2">
         <h3>{{ sidebar_title }}</h3>
-        <b-button variant="info" v-b-toggle.tag-help>
+        <b-button variant="info" @click="show_help = !show_help">
           <BIconQuestionCircleFill class="mx-1" />Toggle instructions
         </b-button>
       </b-row>
-      <b-collapse id="tag-help" class="my-2">
+      <b-collapse class="my-2" v-model="show_help">
         <b-container>
           <ol>
             <li>Click on a photograph to tag it with "{{ task.tag.label }}". Photos tinted green are "accepted".</li>
@@ -88,7 +88,8 @@ export default {
       show_sidebar: true,
       sidebar_grid_state: [],
       requests_processing: false,
-      grid_id: 0
+      grid_id: 0,
+      show_help: false
     };
   },
   computed: {
@@ -153,11 +154,11 @@ export default {
   watch: {
     sidebar_payload() {
       if (!!this.sidebar_payload.object) {
-        this.$root.$emit("bv::toggle::collapse", "tag-help");
+        this.show_help = false;
         this.grid_id += 1;
         this.show_sidebar = true;
       } else {
-        this.$root.$emit("bv::toggle::collapse", "tag-help");
+        this.show_help = false;
         this.grid_id += 1;
         this.show_sidebar = false;
       }
