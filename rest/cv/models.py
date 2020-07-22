@@ -156,22 +156,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
         summed_vector = np.sum(embedding_matrix, axis=0)
         return summed_vector
 
-    def vector_diff(self, vector1, vector2):
-        """
-        Returns vector1 - vector2
-        """
-        vec_arr = np.array([vector1, vector2])
-        diffed_vector = np.diff(vec_arr, axis=0)
-        return diffed_vector
-
-    def get_weighted_vector(self, photo_queryset, photo_id, weight=10):
-        composite_vector = self.get_summed_vector(photo_queryset)
-        seed_vector = self.get_photo_embeddings(photo_id)
-        weighted_seed_vector = [e * weight for e in seed_vector]
-        vec_arr = np.array([composite_vector, weighted_seed_vector])
-        summed_vector = np.sum(vec_arr, axis=0)
-        return summed_vector
-
 
 class ResNet18(PyTorchModel):
     class Meta:
