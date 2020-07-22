@@ -139,11 +139,35 @@ export default {
   },
   asyncComputed: {
     images() {
-      var payload = {
-        offset: this.rest_page,
-        ordering: "-digitized_date",
-        limit: this.per_page
-      };
+      var payload = this.facets;
+      payload.offset = this.rest_page;
+      payload.ordering = "-digitized_date";
+      payload.limit = this.per_page;
+      return HTTP.get("/photograph/", {
+        params: payload
+      }).then(
+        results => {
+          return results.data;
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
+  },
+  computed: {
+    rest_page() {
+      return (this.current_page - 1) * this.per_page;
+    },
+    modals() {
+      if (this.info_button) {
+        return this.images.results;
+      } else {
+        return [];
+      }
+    },
+    facets() {
+      var payload = {};
       if (this.freetext != "") {
         payload["image_text"] = this.freetext;
         payload["ordering"] = "-rank";
@@ -174,28 +198,7 @@ export default {
           "digitized_date_before"
         ] = `${this.digitized_date_before}-01-01`;
       }
-      return HTTP.get("/photograph/", {
-        params: payload
-      }).then(
-        results => {
-          return results.data;
-        },
-        error => {
-          console.log(error);
-        }
-      );
-    }
-  },
-  computed: {
-    rest_page() {
-      return (this.current_page - 1) * this.per_page;
-    },
-    modals() {
-      if (this.info_button) {
-        return this.images.results;
-      } else {
-        return [];
-      }
+      return payload;
     }
   },
   methods: {
@@ -210,6 +213,10 @@ export default {
   watch: {
     images() {
       this.$emit("images", this.images.results);
+    },
+    facets() {
+      // When any of the search facets change, update the current page to 1
+      this.current_page = 1;
     }
   }
 };
