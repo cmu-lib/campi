@@ -193,11 +193,13 @@ export default {
 
           // Now push the fresh value from the sidebar drawer into the cache
           const decision = _.find(p.decisions, { task: this.task_id });
-          this.photo_decisions.push({
-            photograph_id: p.id,
-            decision_id: decision.id,
-            is_applicable: decision.is_applicable
-          });
+          if (!!decision) {
+            this.photo_decisions.push({
+              photograph_id: p.id,
+              decision_id: decision.id,
+              is_applicable: decision.is_applicable
+            });
+          }
         });
     },
     derive_photo_decisions(photographs) {
