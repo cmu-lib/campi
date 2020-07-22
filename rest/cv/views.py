@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from cv import models, serializers
 from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
+from photograph.views import prepare_photograph_qs
 from sklearn import metrics
 import numpy
 import photograph
@@ -176,37 +177,24 @@ class CloseMatchSetFilter(filters.FilterSet):
 
 
 class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
-    representative_photograph_tags = Prefetch(
-        "representative_photograph__photograph_tags",
-        queryset=tagging.models.PhotographTag.objects.select_related("tag").order_by(
-            "-created_on"
-        ),
-    )
-    membership_photograph_tags = Prefetch(
-        "photograph__photograph_tags",
-        queryset=tagging.models.PhotographTag.objects.select_related("tag").order_by(
-            "-created_on"
-        ),
+    prefetched_photographs = prepare_photograph_qs(
+        photograph.models.Photograph.objects.all()
     )
     memberships = Prefetch(
         "memberships",
-        queryset=models.CloseMatchSetMembership.objects.select_related(
-            "photograph", "photograph__directory", "photograph__job"
-        )
-        .order_by("-core", "distance")
-        .prefetch_related(membership_photograph_tags),
+        queryset=models.CloseMatchSetMembership.objects.prefetch_related(
+            Prefetch("photograph", queryset=prefetched_photographs)
+        ).order_by("-core", "distance"),
+    )
+    representative_photograph = Prefetch(
+        "representative_photograph", queryset=prefetched_photographs
     )
     secondary_memberships = models.CloseMatchSetMembership.objects.filter(
         close_match_set=OuterRef("pk"), core=False
     )
     queryset = (
         models.CloseMatchSet.objects.select_related(
-            "close_match_run",
-            "close_match_run__pytorch_model",
-            "representative_photograph",
-            "representative_photograph__directory",
-            "representative_photograph__job",
-            "user_last_modified",
+            "close_match_run", "close_match_run__pytorch_model", "user_last_modified",
         )
         .annotate(
             n_images=Count("memberships"),
@@ -227,7 +215,7 @@ class CloseMatchSetViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
             ),
             overlapping=Exists(secondary_memberships),
         )
-        .prefetch_related(memberships, representative_photograph_tags)
+        .prefetch_related(memberships, representative_photograph)
     )
     serializer_class = serializers.CloseMatchSetSerializer
     filterset_class = CloseMatchSetFilter
@@ -293,7 +281,9 @@ class CloseMatchSetMembershipViewset(GetSerializerClassMixin, viewsets.ModelView
             cosine_distance = list(
                 metrics.pairwise.cosine_distances(
                     numpy.array([first_embeddings]), numpy.array([target_embeddings])
-                )[0,]
+                )[
+                    0,
+                ]
             )[0]
 
             obj.distance = cosine_distance
