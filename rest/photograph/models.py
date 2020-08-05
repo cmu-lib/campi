@@ -10,6 +10,10 @@ from django.contrib.postgres.indexes import GinIndex
 class Photograph(
     campi.models.labeledModel, campi.models.descriptionModel, campi.models.IIIFModel
 ):
+    """
+    A single photograph
+    """
+
     original_server_path = models.CharField(
         max_length=2000,
         unique=True,
@@ -58,13 +62,20 @@ class Photograph(
         default="",
         help_text="Any text recognized in the image by Google Cloud Vision",
     )
-    image_search_text = SearchVectorField(null=True, editable=False)
+    image_search_text = SearchVectorField(
+        null=True,
+        editable=False,
+        help_text="The GIN index field in postgres for the image_text field, allowing for simplistic full text search of recognized text in photographs.",
+    )
 
     class Meta:
         ordering = ["image_path"]
         indexes = [GinIndex(fields=["image_search_text"])]
 
     def push_parent_directory(self, coll_instance):
+        """
+        Recursively add all the ancestor directories of this photograph to the all_directories m2m field
+        """
         self.all_directories.add(coll_instance)
         instance_parent = coll_instance.parent_directory
         if instance_parent is not None:
@@ -76,6 +87,9 @@ class Photograph(
         self.push_parent_directory(self.directory)
 
     def save(self, *args, **kwargs):
+        """
+        On save, update parent directories and update the text index on the image_text field
+        """
         response = super().save(*args, **kwargs)
         self.add_all_parent_directories()
         Photograph.objects.filter(id=self.id).update(
@@ -84,6 +98,9 @@ class Photograph(
         return response
 
     def get_close_matches(self):
+        """
+        A helper function used in some views that returns the other photographs belonging to the same close match set as this photograph.
+        """
         match_membership = self.close_match_memberships.filter(state="a")
 
         other_photos = (
@@ -98,6 +115,10 @@ class Photograph(
 
 
 class Annotation(models.Model):
+    """
+    Abstract class for any annotation on a photograph that is connected to a specific bounding box. Provides fields and functions to calculate a IIIF request URL for the annotated image region.
+    """
+
     photograph = models.ForeignKey(
         Photograph, on_delete=models.CASCADE, related_name="%(class)s"
     )
@@ -145,6 +166,10 @@ class Annotation(models.Model):
 
 
 class FaceAnnotation(Annotation):
+    """
+    Google Cloud VisionAPI face recognition annotation metadata (https://cloud.google.com/vision/docs/reference/rest/v1/AnnotateImageResponse#faceannotation)
+    """
+
     detection_confidence = models.FloatField(null=True, db_index=True)
     joy_likelihood = models.PositiveIntegerField(null=True, db_index=True)
     sorrow_likelihood = models.PositiveIntegerField(null=True, db_index=True)
@@ -156,10 +181,18 @@ class FaceAnnotation(Annotation):
 
 
 class ObjectAnnotationLabel(campi.models.uniqueLabledModel):
+    """
+    A unique dictionary of object labels found in the Google Cloud Vision API object localization responses
+    """
+
     pass
 
 
 class ObjectAnnotation(Annotation):
+    """
+    Google Cloud Vision API object localization (https://cloud.google.com/vision/docs/reference/rest/v1/AnnotateImageResponse#localizedobjectannotation)
+    """
+
     label = models.ForeignKey(
         ObjectAnnotationLabel, on_delete=models.CASCADE, related_name="annotations"
     )
@@ -167,10 +200,18 @@ class ObjectAnnotation(Annotation):
 
 
 class PhotoLabel(campi.models.uniqueLabledModel):
+    """
+    A unique dictionary of labels found in the Google Cloud Vision API label annotations
+    """
+
     pass
 
 
 class PhotoLabelAnnotation(models.Model):
+    """
+    Google Cloud Vision API label annotations
+    """
+
     photograph = models.ForeignKey(
         Photograph, on_delete=models.CASCADE, related_name="label_annotations"
     )
@@ -183,5 +224,9 @@ class PhotoLabelAnnotation(models.Model):
 class TextAnnotation(
     Annotation, campi.models.labeledModel, campi.models.sequentialModel
 ):
+    """
+    Google Cloud Vision API's text recognition response isolates multiple bounding boxes with text strings per image. We store those in this model. The concatenated text used for full text indexing is stored in the Photograph's image_text field.
+    """
+
     class Meta:
         unique_together = ("photograph", "sequence")
