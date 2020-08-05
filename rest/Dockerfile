@@ -1,4 +1,4 @@
-FROM python:3.8.3
+FROM python:3.8.5
 RUN mkdir -p /vol/app
 WORKDIR /vol/app
 ADD requirements.txt .
