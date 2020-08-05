@@ -30,6 +30,10 @@ As this is the most alpha of alpha software, some of these modules could well be
 5. `gcv` - Models and management commands for making image annotation requests to Google Cloud Vision API, storing the raw responses, and parsing raw responses into structured annotations on photographs.
 6. `campi` - Helpful abstract models and DRF ViewSet mixin classes used by all the other modules
 
+### Configuration
+
+The docker-compose file expects a .env file specifying certain paths and credentials. .env-template describes these.
+
 ---
 Code written by Matthew Lincoln
 Copyright 2020 Carnegie Mellon University Libraries
