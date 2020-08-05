@@ -8,25 +8,18 @@ import campi
 
 
 class Tag(campi.models.uniqueLabledModel):
-    def merge(self, child_tag):
-        affected_tasks = (
-            tagging.models.TaggingTask.objects.filter(tag=child_tag)
-            .exclude(applied_term=self)
-            .all()
-        )
-
-        for t in affected_tasks:
-            t.applied_term = self
-
-        res = tagging.models.TaggingTask.objects.bulk_update(affected_tasks, ["tag"])
-
-        return res
+    """
+    Dictionary of content tags devised by editors
+    """
 
     class Meta:
         ordering = ["label"]
 
 
 class TaggingTask(campi.models.dateCreatedModel):
+    """
+    Tasks are defined as a combination of tag and CV model, and may have an assiged user
+    """
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
@@ -51,7 +44,9 @@ class TaggingTask(campi.models.dateCreatedModel):
         unique_together = ("tag", "pytorch_model")
 
     def save(self, *args, **kwargs):
-        # If this task has a user, null out assigned users on other tasks
+        """
+        If this task has a user, null out assigned users on other tasks
+        """
         if self.assigned_user is not None:
             TaggingTask.objects.exclude(id=self.id).filter(
                 assigned_user=self.assigned_user
@@ -61,6 +56,9 @@ class TaggingTask(campi.models.dateCreatedModel):
 
 
 class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedModel):
+    """
+    Log whether an editor has explicitly approved or explicitly rejected a given tag for a photograph. This model keeps a log of decisions, while the PhotographTag model tracks the most recent state of tags for a photograph.
+    """
     photograph = models.ForeignKey(
         photograph.models.Photograph,
         on_delete=models.CASCADE,
@@ -82,7 +80,7 @@ class TaggingDecision(campi.models.dateCreatedModel, campi.models.userCreatedMod
 
     @transaction.atomic
     def save(self, *args, **kwargs):
-        # Create and update tagging decisions for related photos
+        # Create and update tagging decisions for all photographs related
         other_photos = self.photograph.get_close_matches()
         if bool(other_photos):
             new_matches = other_photos.exclude(decisions__task=self.task)
