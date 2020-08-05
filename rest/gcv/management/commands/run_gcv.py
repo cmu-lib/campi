@@ -11,8 +11,10 @@ class Command(BaseCommand):
     help = "Run photographs through the Google Cloud Vision API"
 
     def handle(self, *args, **options):
+        # The ImageAnnotatorClient by default looks for the location of the Google Application Credentials in the envvar GOOGLE_APPLICATION_CREDENTIALS
         client = vision.ImageAnnotatorClient()
 
+        # Run on all photos that have not yet been annotated
         photos_for_annotation = Photograph.objects.filter(
             gcv_response__isnull=True
         ).order_by("id")

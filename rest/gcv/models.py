@@ -3,7 +3,6 @@ from django.conf import settings
 from picklefield.fields import PickledObjectField
 import photograph.models
 from campi.models import dateCreatedModel
-from collections import namedtuple
 
 
 class GCVResponse(dateCreatedModel):

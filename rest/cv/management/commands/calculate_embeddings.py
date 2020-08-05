@@ -4,7 +4,7 @@ import cv
 
 
 class Command(BaseCommand):
-    help = "Create a set of embeddings"
+    help = "Calculate embeddings for all available photographs from the specified model"
 
     def add_arguments(self, parser):
         parser.add_argument(
