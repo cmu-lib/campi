@@ -147,15 +147,6 @@ class PyTorchModel(uniqueLabledModel, descriptionModel, dateModifiedModel):
     def get_photo_embeddings(self, photo_id):
         return self.embeddings.get(photograph__id=photo_id).array
 
-    def get_summed_vector(self, photo_queryset):
-        """
-        Sums the embedding vectors from a photo queryset for use in an vector-based ANN search
-        """
-        embeddings = self.embeddings.filter(photograph__in=photo_queryset)
-        embedding_matrix = np.array(embeddings.values_list("array", flat=True))
-        summed_vector = np.sum(embedding_matrix, axis=0)
-        return summed_vector
-
 
 class ResNet18(PyTorchModel):
     class Meta:
