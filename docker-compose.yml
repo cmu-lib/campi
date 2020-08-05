@@ -3,7 +3,7 @@ services:
   rest:
     build: rest
     restart: always
-    command: "bash -c ${SERVE_COMMAND}"
+    command: ${SERVE_COMMAND}
     volumes:
       - ./rest:/vol/app:z
       - ./data/cv/indices:${DIST_INDICES_PATH}:z
