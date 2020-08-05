@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from os.path import basename
 
 """
-Abstract models
+Abstract models used across the rest of the application
 """
 
 
@@ -38,6 +38,9 @@ class uniqueLabledModel(labeledModel):
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return self.label
 
 
 class descriptionModel(models.Model):
@@ -113,7 +116,7 @@ class userModifiedModel(models.Model):
 
 class IIIFModel(models.Model):
     """
-    Provides a field for storing a root IIIF image path, as well as several useful calculated properties such as thumbnail image, square, etc.
+    Provides a fields for storing a root IIIF image path, the full height and width in pixels, as well as several useful calculated properties such as thumbnail image, square, etc.
     """
 
     image_path = models.CharField(
@@ -123,8 +126,12 @@ class IIIFModel(models.Model):
         help_text="Base path for the image on the IIIF server",
         db_index=True,
     )
-    height = models.PositiveIntegerField(default=0)
-    width = models.PositiveIntegerField(default=0)
+    height = models.PositiveIntegerField(
+        default=0, help_text="The height of the original image in pixels"
+    )
+    width = models.PositiveIntegerField(
+        default=0, help_text="The width of the original image in pixels"
+    )
 
     @property
     def filename(self):
@@ -132,7 +139,11 @@ class IIIFModel(models.Model):
 
     @property
     def iiif_base(self):
+        """
+        settings.IMAGE_BASURL can be configured to match the specific location of the outside IIIF server.
+        """
         return f"{settings.IMAGE_BASEURL}{self.image_path}".replace("&", "%26")
+        # We used IIPImage server as our IIIF source, and due to an oversight when loading original images, we failed ot remove a few special characters. To manage the difference btween what IIPImage Server expected and what we had already stored in our data, we added this hacky replace() to URLencode ampersands.
 
     @property
     def iiif_info(self):
