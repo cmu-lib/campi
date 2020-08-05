@@ -1,4 +1,4 @@
-# campi
+Single-page Vue app that calls the API served by the Django REST application.
 
 ## Project setup
 ```
