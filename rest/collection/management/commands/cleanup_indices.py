@@ -9,7 +9,6 @@ class Command(BaseCommand):
     help = "Delete any index files that don't have a corresponding database entry."
 
     def handle(self, *args, **options):
-        # wipe existing jobtags
         matched_files = PyTorchModel.objects.all().values_list(
             "annoy_idx_file", flat=True
         )

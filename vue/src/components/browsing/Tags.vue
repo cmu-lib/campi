@@ -49,7 +49,7 @@ import {
   BIconXSquare,
   BIconCaretLeftFill,
   BIconCaretDownFill,
-  BIconQuestionCircle
+  BIconQuestionCircle,
 } from "bootstrap-vue";
 export default {
   name: "Tags",
@@ -57,55 +57,51 @@ export default {
     BIconXSquare,
     BIconCaretLeftFill,
     BIconCaretDownFill,
-    BIconQuestionCircle
+    BIconQuestionCircle,
   },
   props: {
     digitized_date_before: {
       type: Number,
-      default: null
+      default: null,
     },
     digitized_date_after: {
       type: Number,
-      default: null
+      default: null,
     },
     page_size: {
       type: Number,
-      default: 10
+      default: 10,
     },
     job: {
       type: Object,
-      default: null
-    },
-    job_tag: {
-      type: Object,
-      default: null
+      default: null,
     },
     directory: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_object: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_label: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       show_total: 10,
       tag_label_search: "",
       additional_tags: true,
-      open: false
+      open: false,
     };
   },
   computed: {
     query_payload() {
       var payload = {
         ordering: "-n_images,label",
-        limit: this.show_total
+        limit: this.show_total,
       };
       if (this.tag_label_search != "") {
         payload["text"] = this.tag_label_search;
@@ -119,9 +115,6 @@ export default {
       if (!!this.gcv_label) {
         payload["gcv_label"] = this.gcv_label.id;
       }
-      if (!!this.job_tag) {
-        payload["job_tag"] = this.job_tag.id;
-      }
       if (!!this.directory) {
         payload["directory"] = this.directory.id;
       }
@@ -134,14 +127,14 @@ export default {
         ] = `${this.digitized_date_before}-01-01`;
       }
       return payload;
-    }
+    },
   },
   asyncComputed: {
     tags() {
       return HTTP.get("/tagging/tag/", {
-        params: this.query_payload
+        params: this.query_payload,
       }).then(
-        results => {
+        (results) => {
           if (!!results.data.next) {
             this.additional_tags = true;
           } else {
@@ -149,11 +142,11 @@ export default {
           }
           return results.data.results;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
-    }
+    },
   },
   methods: {
     show_more() {
@@ -162,7 +155,7 @@ export default {
     select_tag(tag) {
       this.$emit("input", tag);
       window.scrollTo(0, 0);
-    }
-  }
+    },
+  },
 };
 </script>

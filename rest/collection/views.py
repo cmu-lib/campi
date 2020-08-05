@@ -28,22 +28,6 @@ class DirectoryFilter(filters.FilterSet):
                 )
             )
 
-    job_tag = filters.ModelChoiceFilter(
-        queryset=models.JobTag.objects.all(), method="by_job_tag"
-    )
-
-    def by_job_tag(self, queryset, name, value):
-        if value is None:
-            return queryset
-        else:
-            return queryset.filter(
-                Exists(
-                    models.JobTag.objects.filter(
-                        id=value.id, jobs__photographs__directory=OuterRef("pk")
-                    )
-                )
-            )
-
     tag = filters.ModelChoiceFilter(
         queryset=tagging.models.Tag.objects.all(), method="by_tag"
     )
@@ -161,9 +145,6 @@ class JobFilter(filters.FilterSet):
         else:
             return queryset
 
-    job_tag = filters.ModelChoiceFilter(
-        queryset=models.JobTag.objects.all(), field_name="tags"
-    )
     directory = filters.ModelChoiceFilter(
         queryset=models.Directory.objects.all(), method="by_directory"
     )
@@ -244,109 +225,3 @@ class JobViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         "list": queryset,
         "detail": queryset.prefetch_related("tags"),
     }
-
-
-class JobTagFilter(filters.FilterSet):
-    label = filters.CharFilter(
-        help_text="Job tags contianing this text in their label",
-        lookup_expr="icontains",
-    )
-    directory = filters.ModelChoiceFilter(
-        queryset=models.Directory.objects.all(), method="by_directory"
-    )
-
-    def by_directory(self, queryset, name, value):
-        if value is None:
-            return queryset
-        else:
-            return queryset.filter(
-                Exists(
-                    models.Directory.objects.filter(
-                        id=value.id, immediate_photographs__job__tags=OuterRef("pk")
-                    )
-                )
-            )
-
-    job = filters.ModelChoiceFilter(
-        queryset=models.Job.objects.all(), field_name="jobs"
-    )
-    tag = filters.ModelChoiceFilter(
-        queryset=tagging.models.Tag.objects.all(), method="by_tag"
-    )
-
-    def by_tag(self, queryset, name, value):
-        if value is None:
-            return queryset
-        else:
-            return queryset.filter(
-                Exists(
-                    tagging.models.Tag.objects.filter(
-                        id=value.id,
-                        photograph_tags__photograph__job__tags=OuterRef("pk"),
-                    )
-                )
-            )
-
-    gcv_object = filters.ModelChoiceFilter(
-        queryset=photograph.models.ObjectAnnotationLabel.objects.all(),
-        method="by_gcv_object",
-    )
-
-    def by_gcv_object(self, queryset, name, value):
-        if value is None:
-            return queryset
-        else:
-            return queryset.filter(
-                Exists(
-                    photograph.models.ObjectAnnotationLabel.objects.filter(
-                        id=value.id,
-                        annotations__photograph__job__job_tags=OuterRef("pk"),
-                    )
-                )
-            )
-
-    gcv_label = filters.ModelChoiceFilter(
-        queryset=photograph.models.PhotoLabel.objects.all(), method="by_gcv_label"
-    )
-
-    def by_gcv_label(self, queryset, name, value):
-        if value is None:
-            return queryset
-        else:
-            return queryset.filter(
-                Exists(
-                    photograph.models.PhotoLabel.objects.filter(
-                        id=value.id,
-                        annotations__photograph__job__job_tags=OuterRef("pk"),
-                    )
-                )
-            )
-
-
-class JobTagViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
-    queryset = models.JobTag.objects.annotate(
-        n_jobs=Count("jobs", distinct=True),
-        n_images=Count("jobs__photographs", distinct=True),
-    )
-    serializer_class = serializers.JobTagSerializer
-    serializer_action_classes = {"list": serializers.JobTagSerializer}
-    filterset_class = JobTagFilter
-    ordering_fields = ["label", "n_jobs", "n_images"]
-    queryset_action_classes = {"list": queryset, "detail": queryset}
-
-    @transaction.atomic
-    @action(detail=True, methods=["post"], name="Merge target tags into this one")
-    def merge(self, request):
-        obj = self.get_object()
-        raw_id_list = serializers.JobTagIdList(request.GET)
-        if raw_id_list.is_valid():
-            response_result = []
-            validated_data = raw_id_list.validated_data
-            for job_tag in validated_data["job_tags"]:
-                res = obj.merge(job_tag)
-                response_result.append(
-                    {"deleted_job_tag": job_tag.label, "affected_records": res}
-                )
-            return Response(response_result, status=status.HTTP_200_OK)
-        else:
-            return Response(raw_id_list.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -41,7 +41,7 @@ import {
   BIconXSquare,
   BIconCaretLeftFill,
   BIconCaretDownFill,
-  BIconQuestionCircle
+  BIconQuestionCircle,
 } from "bootstrap-vue";
 import Directory from "@/components/browsing/Directory.vue";
 export default {
@@ -51,43 +51,39 @@ export default {
     BIconCaretLeftFill,
     BIconCaretDownFill,
     Directory,
-    BIconQuestionCircle
+    BIconQuestionCircle,
   },
   props: {
     digitized_date_before: {
       type: Number,
-      default: null
+      default: null,
     },
     digitized_date_after: {
       type: Number,
-      default: null
+      default: null,
     },
     job: {
       type: Object,
-      default: null
-    },
-    job_tag: {
-      type: Object,
-      default: null
+      default: null,
     },
     tag: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_object: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_label: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       dir_label_search: "",
       show_all: false,
-      open: false
+      open: false,
     };
   },
   computed: {
@@ -104,9 +100,6 @@ export default {
           "digitized_date_before"
         ] = `${this.digitized_date_before}-01-01`;
       }
-      if (!!this.job_tag) {
-        payload["job_tag"] = this.job_tag.id;
-      }
       if (!!this.tag) {
         payload["tag"] = this.tag.id;
       }
@@ -117,36 +110,36 @@ export default {
         payload["gcv_label"] = this.gcv_label.id;
       }
       return payload;
-    }
+    },
   },
   asyncComputed: {
     directories() {
       return HTTP.get("/directory/", {
-        params: this.query_payload
+        params: this.query_payload,
       }).then(
-        results => {
+        (results) => {
           if (this.dir_label_search != "") {
-            results.data.forEach(x => {
+            results.data.forEach((x) => {
               x["search_match"] = x.label.includes(this.dir_label_search);
             });
           }
           return this.nest_directories(results.data);
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
-    }
+    },
   },
   methods: {
     nest_directories(dirlist) {
-      const createDataTree = dataset => {
+      const createDataTree = (dataset) => {
         let hashTable = Object.create(null);
         dataset.forEach(
-          aData => (hashTable[aData.id] = { ...aData, children: [] })
+          (aData) => (hashTable[aData.id] = { ...aData, children: [] })
         );
         let dataTree = [];
-        dataset.forEach(aData => {
+        dataset.forEach((aData) => {
           if (aData.parent_directory) {
             if (aData.parent_directory in hashTable) {
               hashTable[aData.parent_directory].children.push(
@@ -168,14 +161,14 @@ export default {
     select_dir(dir) {
       this.$emit("input", dir);
       window.scrollTo(0, 0);
-    }
+    },
   },
   watch: {
     dir_label_search() {
       if (this.dir_label_search != "") {
         this.show_all = true;
       }
-    }
-  }
+    },
+  },
 };
 </script>

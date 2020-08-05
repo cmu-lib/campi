@@ -90,16 +90,6 @@ class PhotographListView(TestCase):
             self.assertTrue(p["job"]["id"] == job_id)
 
     @as_auth()
-    def test_filter_job_tag(self):
-        job_tag = (
-            models.Photograph.objects.filter(job__isnull=False).first().job.tags.first()
-        )
-        res = self.client.get(self.ENDPOINT, data={"job_tag": job_tag.id})
-        self.assertEqual(res.status_code, 200)
-        for p in res.data["results"]:
-            self.assertEqual(job_tag.jobs.first().id, p["job"]["id"])
-
-    @as_auth()
     def test_filter_image_path(self):
         pathstring = models.Photograph.objects.first().image_path
         res = self.client.get(self.ENDPOINT, data={"image_path": pathstring})

@@ -78,63 +78,60 @@ export default {
   props: {
     freetext: {
       type: String,
-      default: ""
+      default: "",
     },
     directory: {
       type: Object,
-      default: null
+      default: null,
     },
     job: {
       type: Object,
-      default: null
-    },
-    job_tag: {
-      default: null
+      default: null,
     },
     tag: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_object: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_label: {
       type: Object,
-      default: null
+      default: null,
     },
     digitized_date_before: {
       type: Number,
-      default: null
+      default: null,
     },
     digitized_date_after: {
       type: Number,
-      default: null
+      default: null,
     },
     per_page: {
       type: Number,
-      default: 96
+      default: 96,
     },
     highlight_ids: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
-      }
+      },
     },
     dimmed_ids: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
-      }
+      },
     },
     info_button: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      current_page: 1
+      current_page: 1,
     };
   },
   asyncComputed: {
@@ -144,16 +141,16 @@ export default {
       payload.ordering = "-digitized_date";
       payload.limit = this.per_page;
       return HTTP.get("/photograph/", {
-        params: payload
+        params: payload,
       }).then(
-        results => {
+        (results) => {
           return results.data;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
-    }
+    },
   },
   computed: {
     rest_page() {
@@ -178,9 +175,6 @@ export default {
       if (!!this.job) {
         payload["job"] = this.job.id;
       }
-      if (!!this.job_tag) {
-        payload["job_tag"] = this.job_tag.id;
-      }
       if (!!this.tag) {
         payload["tag"] = this.tag.id;
       }
@@ -199,16 +193,16 @@ export default {
         ] = `${this.digitized_date_before}-01-01`;
       }
       return payload;
-    }
+    },
   },
   methods: {
     newtab(image) {
       const routeData = this.$router.resolve({
         name: "Photo",
-        params: { id: image.id }
+        params: { id: image.id },
       });
       window.open(routeData.href, "_blank");
-    }
+    },
   },
   watch: {
     images() {
@@ -217,8 +211,8 @@ export default {
     facets() {
       // When any of the search facets change, update the current page to 1
       this.current_page = 1;
-    }
-  }
+    },
+  },
 };
 </script>
 

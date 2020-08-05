@@ -50,7 +50,7 @@ import {
   BIconXSquare,
   BIconCaretDownFill,
   BIconCaretLeftFill,
-  BIconQuestionCircle
+  BIconQuestionCircle,
 } from "bootstrap-vue";
 export default {
   name: "Jobs",
@@ -58,61 +58,54 @@ export default {
     BIconXSquare,
     BIconCaretDownFill,
     BIconCaretLeftFill,
-    BIconQuestionCircle
+    BIconQuestionCircle,
   },
   props: {
     digitized_date_before: {
       type: Number,
-      default: null
+      default: null,
     },
     digitized_date_after: {
       type: Number,
-      default: null
+      default: null,
     },
     page_size: {
       type: Number,
-      default: 10
-    },
-    job_tag: {
-      type: Object,
-      default: null
+      default: 10,
     },
     directory: {
       type: Object,
-      default: null
+      default: null,
     },
     tag: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_object: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_label: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       show_total: 10,
       job_label_search: "",
       additional_jobs: true,
-      open: false
+      open: false,
     };
   },
   computed: {
     query_payload() {
       var payload = {
         ordering: "-n_images,label",
-        limit: this.show_total
+        limit: this.show_total,
       };
       if (this.job_label_search != "") {
         payload["text"] = this.job_label_search;
-      }
-      if (!!this.job_tag) {
-        payload["job_tag"] = this.job_tag.id;
       }
       if (!!this.gcv_object) {
         payload["gcv_object"] = this.gcv_object.id;
@@ -135,14 +128,14 @@ export default {
         ] = `${this.digitized_date_before}-01-01`;
       }
       return payload;
-    }
+    },
   },
   asyncComputed: {
     jobs() {
       return HTTP.get("/job/", {
-        params: this.query_payload
+        params: this.query_payload,
       }).then(
-        results => {
+        (results) => {
           if (!!results.data.next) {
             this.additional_jobs = true;
           } else {
@@ -150,11 +143,11 @@ export default {
           }
           return results.data.results;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
-    }
+    },
   },
   methods: {
     job_display(job) {
@@ -170,7 +163,7 @@ export default {
     select_job(job) {
       this.$emit("input", job);
       window.scrollTo(0, 0);
-    }
-  }
+    },
+  },
 };
 </script>

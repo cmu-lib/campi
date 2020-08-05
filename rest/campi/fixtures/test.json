@@ -15,6 +15,8 @@
     "directory": 107,
     "job": null,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       76,
@@ -38,6 +40,8 @@
     "directory": 114,
     "job": 10,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -61,6 +65,8 @@
     "directory": 115,
     "job": 56,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -84,6 +90,8 @@
     "directory": 118,
     "job": 92,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -107,6 +115,8 @@
     "directory": 118,
     "job": 90,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -130,6 +140,8 @@
     "directory": 120,
     "job": 146,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -153,6 +165,8 @@
     "directory": 126,
     "job": 248,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -176,6 +190,8 @@
     "directory": 126,
     "job": 241,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -199,6 +215,8 @@
     "directory": 126,
     "job": 184,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -222,6 +240,8 @@
     "directory": 129,
     "job": 298,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -245,6 +265,8 @@
     "directory": 136,
     "job": 390,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -268,6 +290,8 @@
     "directory": 140,
     "job": 495,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -291,6 +315,8 @@
     "directory": 154,
     "job": 576,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -314,6 +340,8 @@
     "directory": 156,
     "job": 616,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -337,6 +365,8 @@
     "directory": 158,
     "job": 650,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -360,6 +390,8 @@
     "directory": 161,
     "job": 705,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -383,6 +415,8 @@
     "directory": 162,
     "job": 715,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -406,6 +440,8 @@
     "directory": 162,
     "job": 716,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
@@ -429,307 +465,13 @@
     "directory": 163,
     "job": 272,
     "job_sequence": null,
+    "image_text": "",
+    "image_search_text": null,
     "all_directories": [
       1,
       113,
       163
     ]
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 144,
-  "fields": {
-    "job": 90,
-    "job_tag": 115
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 145,
-  "fields": {
-    "job": 90,
-    "job_tag": 116
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 146,
-  "fields": {
-    "job": 90,
-    "job_tag": 117
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 195,
-  "fields": {
-    "job": 184,
-    "job_tag": 160
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 196,
-  "fields": {
-    "job": 184,
-    "job_tag": 161
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 225,
-  "fields": {
-    "job": 248,
-    "job_tag": 183
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 226,
-  "fields": {
-    "job": 248,
-    "job_tag": 184
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 259,
-  "fields": {
-    "job": 241,
-    "job_tag": 144
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 260,
-  "fields": {
-    "job": 241,
-    "job_tag": 200
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 289,
-  "fields": {
-    "job": 146,
-    "job_tag": 27
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 332,
-  "fields": {
-    "job": 272,
-    "job_tag": 253
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 488,
-  "fields": {
-    "job": 495,
-    "job_tag": 362
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 613,
-  "fields": {
-    "job": 576,
-    "job_tag": 442
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 614,
-  "fields": {
-    "job": 576,
-    "job_tag": 443
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 697,
-  "fields": {
-    "job": 705,
-    "job_tag": 499
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 750,
-  "fields": {
-    "job": 716,
-    "job_tag": 535
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 764,
-  "fields": {
-    "job": 56,
-    "job_tag": 548
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 765,
-  "fields": {
-    "job": 56,
-    "job_tag": 549
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 766,
-  "fields": {
-    "job": 56,
-    "job_tag": 550
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 767,
-  "fields": {
-    "job": 56,
-    "job_tag": 551
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 768,
-  "fields": {
-    "job": 56,
-    "job_tag": 31
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 769,
-  "fields": {
-    "job": 56,
-    "job_tag": 552
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 770,
-  "fields": {
-    "job": 56,
-    "job_tag": 553
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 794,
-  "fields": {
-    "job": 298,
-    "job_tag": 572
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 892,
-  "fields": {
-    "job": 616,
-    "job_tag": 628
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 893,
-  "fields": {
-    "job": 616,
-    "job_tag": 629
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 894,
-  "fields": {
-    "job": 616,
-    "job_tag": 630
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 895,
-  "fields": {
-    "job": 616,
-    "job_tag": 631
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 896,
-  "fields": {
-    "job": 616,
-    "job_tag": 632
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 897,
-  "fields": {
-    "job": 616,
-    "job_tag": 633
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 898,
-  "fields": {
-    "job": 616,
-    "job_tag": 634
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 1014,
-  "fields": {
-    "job": 10,
-    "job_tag": 75
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 1015,
-  "fields": {
-    "job": 10,
-    "job_tag": 76
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 1016,
-  "fields": {
-    "job": 10,
-    "job_tag": 77
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 1052,
-  "fields": {
-    "job": 650,
-    "job_tag": 516
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 1106,
-  "fields": {
-    "job": 92,
-    "job_tag": 115
-  }
-},
-{
-  "model": "collection.jobstags",
-  "pk": 1107,
-  "fields": {
-    "job": 92,
-    "job_tag": 761
   }
 },
 {
@@ -1964,330 +1706,6 @@
     "close_match_run": 28,
     "representative_photograph": null,
     "has_duplicates": false
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 27,
-  "fields": {
-    "label": "gsia",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 31,
-  "fields": {
-    "label": "students in class",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 75,
-  "fields": {
-    "label": "senior banquet",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 76,
-  "fields": {
-    "label": "rock show",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 77,
-  "fields": {
-    "label": "slide show",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 115,
-  "fields": {
-    "label": "sleeping bag weekend",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 116,
-  "fields": {
-    "label": "dorms",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 117,
-  "fields": {
-    "label": "campus",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 144,
-  "fields": {
-    "label": "library",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 160,
-  "fields": {
-    "label": "mmcc tea room",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 161,
-  "fields": {
-    "label": "campus views",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 183,
-  "fields": {
-    "label": "men in meeting",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 184,
-  "fields": {
-    "label": "woman in classroom",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 200,
-  "fields": {
-    "label": "group of men talking",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 253,
-  "fields": {
-    "label": "carnegie activities fair",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 362,
-  "fields": {
-    "label": "chernobyl robot at redzone robotics",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 442,
-  "fields": {
-    "label": "opera",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 443,
-  "fields": {
-    "label": "\"rape of lucretia\"",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 499,
-  "fields": {
-    "label": "cit freshman camp",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 516,
-  "fields": {
-    "label": "gsia interest lounge",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 535,
-  "fields": {
-    "label": "commencement general shots",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 548,
-  "fields": {
-    "label": "students working",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 549,
-  "fields": {
-    "label": "art",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 550,
-  "fields": {
-    "label": "in lab",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 551,
-  "fields": {
-    "label": "home ec",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 552,
-  "fields": {
-    "label": "architecture students at work",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 553,
-  "fields": {
-    "label": "construction of theatre sets",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 572,
-  "fields": {
-    "label": "students punching holes for computer cards",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 628,
-  "fields": {
-    "label": "president stever & mr",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 629,
-  "fields": {
-    "label": "parchall signing mellon & cit merger papers",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 630,
-  "fields": {
-    "label": "carnegie university",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 631,
-  "fields": {
-    "label": "stever's office & mr",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 632,
-  "fields": {
-    "label": "kross w",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 633,
-  "fields": {
-    "label": "stever check presentatio",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 634,
-  "fields": {
-    "label": "babcox & wilcox",
-    "description": "",
-    "user_last_modified": null
-  }
-},
-{
-  "model": "collection.jobtag",
-  "pk": 761,
-  "fields": {
-    "label": "map office reception",
-    "description": "",
-    "user_last_modified": null
   }
 },
 {

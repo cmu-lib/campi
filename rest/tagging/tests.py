@@ -72,18 +72,6 @@ class TagListView(TestCase):
                 ).exists()
             )
 
-    @as_auth()
-    def test_job_tag_filter(self):
-        target_job_tag = self.OBJ1.photograph_tags.first().photograph.job.tags.first()
-        res = self.client.get(self.ENDPOINT, data={"job_tag": target_job_tag.id})
-        self.assertEqual(res.status_code, 200)
-        for tag in res.data["results"]:
-            self.assertTrue(
-                photograph.models.Photograph.objects.filter(
-                    photograph_tags__tag=tag["id"], job__tags=target_job_tag
-                ).exists()
-            )
-
 
 class TaggingTaskListView(TestCase):
     fixtures = ["campi/fixtures/test.json"]

@@ -16,14 +16,12 @@
           v-model="tag"
           :directory="directory"
           :job="job"
-          :job_tag="job_tag"
           :gcv_object="gcv_object"
           :gcv_label="gcv_label"
           :digitized_date_range="digitized_date_range"
         />
         <Jobs
           v-model="job"
-          :job_tag="job_tag"
           :directory="directory"
           :tag="tag"
           :gcv_object="gcv_object"
@@ -47,7 +45,6 @@
         />
         <Directories
           v-model="directory"
-          :job_tag="job_tag"
           :job="job"
           :tag="tag"
           :gcv_object="gcv_object"
@@ -62,13 +59,11 @@
           :directory="directory"
           :digitized_date_range="digitized_date_range"
           :job="job"
-          :job_tag="job_tag"
           :tag="tag"
           :gcv_object="gcv_object"
           :gcv_label="gcv_label"
           @clear_directory="directory=null"
           @clear_job="job=null"
-          @clear_job_tag="job_tag=null"
           @clear_tag="tag=null"
           @clear_gcv_object="gcv_object=null"
           @clear_gcv_label="gcv_label=null"
@@ -80,7 +75,6 @@
           :freetext="freetext"
           :directory="directory"
           :job="job"
-          :job_tag="job_tag"
           :tag="tag"
           :gcv_object="gcv_object"
           :gcv_label="gcv_label"
@@ -111,18 +105,17 @@ export default {
     Jobs,
     Tags,
     GCVObjects,
-    GCVLabels
+    GCVLabels,
   },
   data() {
     return {
       freetext: "",
       directory: null,
       job: null,
-      job_tag: null,
       tag: null,
       gcv_object: null,
       gcv_label: null,
-      digitized_date_range: [2016, 2020]
+      digitized_date_range: [2016, 2020],
     };
   },
   methods: {
@@ -131,7 +124,7 @@ export default {
     },
     photo_click(photograph) {
       this.$emit("photo_click", photograph);
-    }
+    },
   },
   computed: {
     state_ids() {
@@ -147,9 +140,6 @@ export default {
       }
       if (!!this.job) {
         ids["job"] = this.job.id;
-      }
-      if (!!this.job_tag) {
-        ids["job_tag"] = this.job_tag.id;
       }
       if (!!this.tag) {
         ids["tag"] = this.tag.id;
@@ -167,20 +157,20 @@ export default {
         return this.digitized_date_range[1];
       }
       return null;
-    }
+    },
   },
   watch: {
     state_ids() {
       this.$router.push({ query: this.state_ids });
-    }
+    },
   },
   mounted() {
     if (!!this.$route.query.directory) {
       return HTTP.get("/directory/" + this.$route.query.directory + "/").then(
-        results => {
+        (results) => {
           this.directory = results.data;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
@@ -188,21 +178,10 @@ export default {
 
     if (!!this.$route.query.job) {
       return HTTP.get("/job/" + this.$route.query.job + "/").then(
-        results => {
+        (results) => {
           this.job = results.data;
         },
-        error => {
-          console.log(error);
-        }
-      );
-    }
-
-    if (!!this.$route.query.job_tag) {
-      return HTTP.get("/job_tag/" + this.$route.query.job_tag + "/").then(
-        results => {
-          this.job_tag = results.data;
-        },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
@@ -210,10 +189,10 @@ export default {
 
     if (!!this.$route.query.tag) {
       return HTTP.get("/tagging/tag/" + this.$route.query.tag + "/").then(
-        results => {
+        (results) => {
           this.tag = results.data;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
@@ -225,10 +204,10 @@ export default {
           this.$route.query.gcv_object +
           "/"
       ).then(
-        results => {
+        (results) => {
           this.gcv_object = results.data;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
@@ -238,14 +217,14 @@ export default {
       return HTTP.get(
         "/gcv/photo_labels/" + this.$route.query.gcv_label + "/"
       ).then(
-        results => {
+        (results) => {
           this.gcv_label = results.data;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
     }
-  }
+  },
 };
 </script>

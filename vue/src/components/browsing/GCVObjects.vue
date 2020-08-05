@@ -56,7 +56,7 @@ import {
   BIconXSquare,
   BIconCaretLeftFill,
   BIconCaretDownFill,
-  BIconQuestionCircle
+  BIconQuestionCircle,
 } from "bootstrap-vue";
 export default {
   name: "Gcvobjects",
@@ -64,60 +64,57 @@ export default {
     BIconXSquare,
     BIconCaretLeftFill,
     BIconCaretDownFill,
-    BIconQuestionCircle
+    BIconQuestionCircle,
   },
   props: {
     digitized_date_before: {
       type: Number,
-      default: null
+      default: null,
     },
     digitized_date_after: {
       type: Number,
-      default: null
+      default: null,
     },
     page_size: {
       type: Number,
-      default: 10
+      default: 10,
     },
     job: {
       type: Object,
-      default: null
+      default: null,
     },
     tag: {
       type: Object,
-      default: null
+      default: null,
     },
     directory: {
       type: Object,
-      default: null
+      default: null,
     },
     gcv_label: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       show_total: 10,
       gcvobject_label_search: "",
       additional_gcvobjects: true,
-      open: false
+      open: false,
     };
   },
   computed: {
     query_payload() {
       var payload = {
         ordering: "-n_images,label",
-        limit: this.show_total
+        limit: this.show_total,
       };
       if (this.gcvobject_label_search != "") {
         payload["label"] = this.gcvobject_label_search;
       }
       if (!!this.job) {
         payload["job"] = this.job.id;
-      }
-      if (!!this.job_tag) {
-        payload["job_tag"] = this.job_tag.id;
       }
       if (!!this.tag) {
         payload["tag"] = this.tag.id;
@@ -137,14 +134,14 @@ export default {
         ] = `${this.digitized_date_before}-01-01`;
       }
       return payload;
-    }
+    },
   },
   asyncComputed: {
     gcvobjects() {
       return HTTP.get("/gcv/object_annotation_labels_paginated/", {
-        params: this.query_payload
+        params: this.query_payload,
       }).then(
-        results => {
+        (results) => {
           if (!!results.data.next) {
             this.additional_gcvobjects = true;
           } else {
@@ -152,11 +149,11 @@ export default {
           }
           return results.data.results;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
-    }
+    },
   },
   methods: {
     show_more() {
@@ -165,7 +162,7 @@ export default {
     select_gcvobject(gcvobject) {
       this.$emit("input", gcvobject);
       window.scrollTo(0, 0);
-    }
-  }
+    },
+  },
 };
 </script>

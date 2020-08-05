@@ -32,9 +32,6 @@ class PhotographFilter(filters.FilterSet):
     date_taken_late = filters.DateFromToRangeFilter()
     digitized_date = filters.DateFromToRangeFilter()
     job = filters.ModelChoiceFilter(queryset=collection.models.Job.objects.all())
-    job_tag = filters.ModelChoiceFilter(
-        queryset=collection.models.JobTag.objects.all(), field_name="job__tags"
-    )
     tag = filters.ModelChoiceFilter(
         queryset=tagging.models.Tag.objects.all(), field_name="photograph_tags__tag"
     )
@@ -80,7 +77,6 @@ def prepare_photograph_qs(qs):
             )
         )
         .prefetch_related(
-            "job__tags",
             Prefetch("photograph_tags", queryset=ordered_tags),
             Prefetch("decisions", queryset=ordered_decisions),
             Prefetch("label_annotations", queryset=ordered_labels),
@@ -110,7 +106,6 @@ def prepare_photograph_detail_qs(qs):
             )
         )
         .prefetch_related(
-            "job__tags",
             Prefetch("photograph_tags", queryset=ordered_tags),
             Prefetch("decisions", queryset=ordered_decisions),
             Prefetch("objectannotation", queryset=object_annotations),

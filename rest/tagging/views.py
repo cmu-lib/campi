@@ -32,22 +32,6 @@ class TagFilter(filters.FilterSet):
                 )
             )
 
-    job_tag = filters.ModelChoiceFilter(
-        queryset=collection.models.JobTag.objects.all(), method="by_job_tag"
-    )
-
-    def by_job_tag(self, queryset, name, value):
-        if value is None:
-            return queryset
-        else:
-            return queryset.filter(
-                Exists(
-                    collection.models.JobTag.objects.filter(
-                        id=value.id,
-                        jobs__photographs__photograph_tags__tag=OuterRef("pk"),
-                    )
-                )
-            )
 
     directory = filters.ModelChoiceFilter(
         queryset=collection.models.Directory.objects.all(), method="by_directory"
