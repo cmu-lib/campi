@@ -1,3 +1,5 @@
+# This isn't a traditional Makefile for compiling an application, it just serves as a shortcut for some commonly-needed development commands like dumping and reloading the database, running tests, etc.
+
 all:
 	docker-compose up
 detached:
