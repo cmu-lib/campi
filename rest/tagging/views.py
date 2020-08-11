@@ -1,4 +1,4 @@
-from django import forms
+from django.http import HttpResponse
 from django.db.models import Count, Q, Prefetch, Exists, OuterRef
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -10,6 +10,7 @@ from django_filters import rest_framework as filters
 from campi.views import GetSerializerClassMixin
 import photograph
 import collection
+import csv
 
 
 class TagFilter(filters.FilterSet):
@@ -31,7 +32,6 @@ class TagFilter(filters.FilterSet):
                     )
                 )
             )
-
 
     directory = filters.ModelChoiceFilter(
         queryset=collection.models.Directory.objects.all(), method="by_directory"
@@ -187,3 +187,46 @@ class TaggingDecisionViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
 class PhotographTagViewset(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = models.PhotographTag.objects.all()
     serializer_class = serializers.PhotographTagPostSerializer
+
+    @action(detail=False, methods=["get"])
+    def download_all_tags(
+        self, request, name="Download a CSV with all photo-tag combinations",
+    ):
+
+        all_photo_tags = (
+            self.queryset.select_related("photograph", "tag", "user_last_modified")
+            .order_by("photograph_id")
+            .values(
+                "photograph_id",
+                "photograph__original_server_path",
+                "tag_id",
+                "tag__label",
+                "user_last_modified__username",
+                "last_updated",
+            )
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename=photograph_tags.csv"
+        writer = csv.writer(response)
+        headers = [
+            "photograph_id",
+            "photograph_file_name",
+            "tag_id",
+            "tag_label",
+            "tagging_user",
+            "date_tagged",
+        ]
+        writer.writerow(headers)
+        for pt in all_photo_tags:
+            writer.writerow(
+                [
+                    pt["photograph_id"],
+                    pt["photograph__original_server_path"],
+                    pt["tag_id"],
+                    pt["tag__label"],
+                    pt["user_last_modified__username"],
+                    pt["last_updated"],
+                ]
+            )
+
+        return response

@@ -8,6 +8,7 @@
         <b-nav-item-dropdown text="Tagging">
           <b-dropdown-item :to="{name: 'Tags'}">Tag list</b-dropdown-item>
           <b-dropdown-item :to="{name: 'TaggingTagSelect'}">Start tagging</b-dropdown-item>
+          <b-dropdown-item href="/api/tagging/photograph_tag/download_all_tags/">Download as CSV</b-dropdown-item>
         </b-nav-item-dropdown>
         <b-nav-item-dropdown text="GCV">
           <b-dropdown-item :to="{name: 'Faces'}">Face detection</b-dropdown-item>
@@ -33,15 +34,15 @@ export default {
   name: "app",
   data() {
     return {
-      logged_in: false
+      logged_in: false,
     };
   },
   mounted() {
     return HTTP.get("/").then(
-      response => {
+      (response) => {
         this.logged_in = !!response;
       },
-      error => {
+      (error) => {
         console.log(error);
         this.logged_in = false;
       }
@@ -50,17 +51,17 @@ export default {
   asyncComputed: {
     user() {
       return HTTP.get("/current_user/").then(
-        response => {
+        (response) => {
           // Store the user to the root so other components can access it if needed (this is naughty, but it's the only global state we need in the app so far, so I'm doing it anyway.)
           this.$root.user = response.data;
           return response.data;
         },
-        error => {
+        (error) => {
           console.log(error);
         }
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
