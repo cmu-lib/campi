@@ -8,9 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@babel/compat-data": "^7.10.5",
+    "@babel/compat-data": "^7.11.0",
     "axios": "^0.19.2",
-    "bootstrap-vue": "^2.15.0",
+    "bootstrap-vue": "^2.16.0",
     "core-js": "^3.6.5",
     "lodash": "^4.17.19",
     "minimist": "^1.2.5",
@@ -20,7 +20,7 @@
     "sass-loader": "^8.0.2",
     "vue": "^2.6.11",
     "vue-async-computed": "^3.8.2",
-    "vue-router": "^3.3.4"
+    "vue-router": "^3.4.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.2.0",
