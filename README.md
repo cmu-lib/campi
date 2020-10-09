@@ -4,7 +4,7 @@
 
 Prototype application for document similarity browsing with photoarchive collections written Summer 2020 by Matthew Lincoln (@mdlincoln) in conjunction with a pilot project with CMU Archives' General Photograph Collection (GPC) with Julia Corrin and Emily Davis, and project management by Scott Weingart.
 
-**PROJECT WHITEPAPER LINK**
+**Project whitepaper**: <https://doi.org/10.1184/R1/12791807>
 
 This is a prototype implementation of a few computer-vision-aided metadata generation workflows for this specific collection. **_It is not yet meant to be a general-purpose piece of reusable software to be deployed in other contexts._** While the general concepts and workflows could be adaptable to other digital photo collections, the specific data models for photographs and hierarchical organization are tailored specifically to the GPC. Our goal in this short development cycle was to prototype, test, and report out on these workflows, with recommendations for later system work that could integrate concepts from this application with in-production collection management services. We are publishing the code of this prototype system only to illustrate how we went about implementing these workflows and technologies. As we discuss in the project whitepaper, we would need to do significant changes and re-implementations to create a system that would 1) work at scale and 2) interact with production systems such as ArchivesSpace or Islandora.
 
